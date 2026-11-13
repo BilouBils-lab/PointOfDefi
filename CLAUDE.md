@@ -39,6 +39,13 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - Pour ajouter un défi : un objet dans `D` avec un `id` unique.
 - Typographie française : apostrophes typographiques (’), guillemets « ».
 
+## Workflow Git
+
+- Ne jamais pousser directement sur `main` : `main` est publiée telle quelle sur GitHub Pages (https://biloubils-lab.github.io/PointOfDefi/).
+- Travailler sur une branche, la pousser, puis ouvrir une pull request vers `main`, avec une description en français (quoi, pourquoi, comment c'est testé).
+- Une fois le changement testé, Claude fusionne lui-même la PR (le propriétaire l'a demandé) et donne le lien au propriétaire. Le site se met à jour automatiquement après la fusion.
+- Un changement par PR, petit et facile à relire.
+
 ## Tester
 
 Ouvrir `index.html` dans un navigateur ; vérifier en largeur mobile et en mode sombre. Pour tester une météo, simuler la réponse d'Open-Meteo (par exemple avec Playwright, `page.route`).
