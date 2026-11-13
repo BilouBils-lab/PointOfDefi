@@ -43,7 +43,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 - Ne jamais pousser directement sur `main` : `main` est publiée telle quelle sur GitHub Pages (https://biloubils-lab.github.io/PointOfDefi/).
 - Travailler sur une branche, la pousser, puis ouvrir une pull request vers `main`, avec une description en français (quoi, pourquoi, comment c'est testé).
-- C'est le propriétaire du dépôt qui relit et fusionne la PR. Le site se met à jour automatiquement après la fusion.
+- Une fois le changement testé, Claude fusionne lui-même la PR (le propriétaire l'a demandé) et donne le lien au propriétaire. Le site se met à jour automatiquement après la fusion.
 - Un changement par PR, petit et facile à relire.
 
 ## Tester
