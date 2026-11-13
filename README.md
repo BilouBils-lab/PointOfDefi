@@ -22,16 +22,26 @@ En haut de l'app, une ligne résume le contexte : lieu, température, temps qu'i
 
 Tout est gratuit, sans compte ni clé : la position vient du navigateur (avec ta permission, via « Utiliser ma position ») et la météo du service Open-Meteo. Sans permission, l'app prend Nancy comme position par défaut. Seules des coordonnées arrondies (à environ 1 km) quittent ton appareil.
 
-## Mon rythme
+## Mon planning
 
-Dans **Mon rythme**, indique tes jours travaillés, tes horaires, ta pause déjeuner et les jours où ton fils est avec toi. L'app sait alors où tu en es (« Au travail », « Pause déjeuner », « Après le travail », « Jour de repos ») et ne propose que des défis faisables à ce moment-là :
+Dans **Mon planning**, remplis ta semaine jour par jour avec des créneaux :
 
-- **au travail** : les défis « Boulot » (nature morte de bureau, lignes de fuite…) ;
-- **pendant la pause** : des défis courts à faire près du travail ;
-- **avant ou après le travail** : les défis à la maison, avec ton fils ou pour tes passions ;
-- **les jours de repos** : tout, y compris les sorties dans Nancy comme la place Stanislas.
+| Créneau | Ce que l'app propose |
+|---|---|
+| Travail | Les défis « Boulot » (nature morte de bureau, lignes de fuite…) |
+| Télétravail | Des défis faisables à la maison pendant une pause (tasse de café, gouttes sur la vitre…) |
+| Pause déjeuner | Des défis courts à faire près du travail |
+| CrossFit | « Craie et sueur » |
+| Avec mon fils | Les défis avec ton fils, et ceux à faire chez toi |
+| Sortie possible | Tout, y compris les sorties dans Nancy (place Stanislas…) |
 
-Le « Défi du jour » suit la même logique : en semaine, il est faisable pendant la pause ou après le travail.
+- En dehors des créneaux, l'app considère que tu es chez toi, sans sortie prévue.
+- « Sortie possible » et « Avec mon fils » peuvent se chevaucher : sortie photo avec ton fils.
+- Une activité (travail, télétravail, pause, CrossFit) passe avant les autres créneaux.
+- Une vue de la semaine en couleurs résume le planning ; « Copier cette journée vers » recopie une journée sur un autre jour.
+- La ligne du haut indique le créneau en cours (« Au travail jusqu'à 12:00 », « CrossFit jusqu'à 19:30 ») ; la toucher ouvre le planning.
+
+Le « Défi du jour » est choisi parmi les défis faisables à un moment de ta journée.
 
 ## Réglages
 
