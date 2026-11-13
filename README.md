@@ -58,6 +58,17 @@ Avec une clé API Gemini (gratuite sur [aistudio.google.com/apikey](https://aist
 - L'app n'envoie ni la position précise ni le nom : seulement le contexte du défi. Avec l'offre gratuite, Google peut utiliser les échanges pour améliorer ses services.
 - Ne jamais mettre une clé API dans le code ou dans le dépôt : il est public.
 
+## Coach photo
+
+Avec la clé Gemini, le bouton **📷 Faire analyser ma photo** (sous la carte du défi) envoie ta photo à un coach IA, pour progresser :
+
+- un verdict (« Défi réussi », « Presque », « Pas encore ») et une note sur 10 ;
+- ce qui marche, ce qui peut progresser, un prochain exercice ;
+- un commentaire sur ta retouche, ou une piste de retouche Lightroom si la photo est brute ;
+- **tes réglages réels** (lus sur le téléphone dans les données de la photo) comparés à ceux du défi.
+
+C'est un avis, pas un juge : tu valides le défi toi-même, et la note est gardée dans ton historique. Photos acceptées : JPEG (sorti de l'appareil ou exporté de Lightroom, la case « Photo retouchée » se coche alors toute seule), PNG ; pas de fichiers RAW. La photo est réduite et ses métadonnées (dont le GPS) sont retirées avant l'envoi. Avec l'offre gratuite, Google peut utiliser les photos envoyées : évite celles où ton fils ou d'autres personnes sont reconnaissables.
+
 ## Réglages
 
 - **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Mes passions, Technique pure.
