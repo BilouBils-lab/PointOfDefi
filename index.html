@@ -153,6 +153,8 @@ dialog.sheet::backdrop{background:rgba(0,0,0,.4)}
 .rh-name,.rh-meta{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .rh-name{font-weight:600}
 .rh-meta{font-size:.8125rem; color:var(--soft)}
+.ico{width:28px; flex:none; font-size:1.25rem; text-align:center}
+.coche{flex:none; color:var(--accent-ink); font-weight:700}
 .chev{width:18px; height:18px; flex:none; color:var(--soft); transition:transform .2s}
 .item.open .chev{transform:rotate(90deg)}
 .row-edit{display:grid; gap:.8rem; padding:0 1rem 1rem}
@@ -355,6 +357,15 @@ a{color:var(--accent-ink); text-underline-offset:2px}
   </div>
 </dialog>
 
+<dialog id="iciDlg" class="sheet" aria-labelledby="iciTitle">
+  <div class="sheet-head"><div class="sheet-title"><h2 id="iciTitle">Là, maintenant, je suis…</h2><button class="x-btn" data-close aria-label="Fermer">×</button></div></div>
+  <div class="sheet-body">
+    <div class="list" id="iciList"></div>
+    <p class="hint" id="iciHint"></p>
+    <button class="add" id="iciPlan">Modifier mon planning</button>
+  </div>
+</dialog>
+
 <dialog id="setDlg" class="sheet" aria-labelledby="setTitle">
   <div class="sheet-head"><div class="sheet-title"><h2 id="setTitle">Réglages</h2><button class="x-btn" data-close aria-label="Fermer">×</button></div></div>
   <div class="sheet-body">
@@ -397,7 +408,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "17"; // à augmenter à chaque PR fusionnée (numéro seul)
+const VERSION = "18"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -845,7 +856,7 @@ function renderCtx(){
   el.innerHTML = mom + pills.map(p=>`<span class="pill">${p}</span>`).join("") + loc;
   bindLocate();
 }
-function bindLocate(){ const b=document.getElementById("locate"); if(b) b.onclick = locate; const m=document.getElementById("momentBtn"); if(m) m.onclick = openPlan; }
+function bindLocate(){ const b=document.getElementById("locate"); if(b) b.onclick = locate; const m=document.getElementById("momentBtn"); if(m) m.onclick = openIci; }
 
 /* ---------- Mon planning : créneaux de la semaine ---------- */
 const JOURS = [["1","Lun"],["2","Mar"],["3","Mer"],["4","Jeu"],["5","Ven"],["6","Sam"],["0","Dim"]];
@@ -870,7 +881,23 @@ function typeEffectif(x, d){
 }
 // Créneaux en cours. Une activité (travail, télétravail, pause, CrossFit) l'emporte sur le reste ;
 // « Sortie possible » et « Avec mon fils » peuvent se cumuler.
-function maintenant(d=new Date()){
+// « Là, maintenant, je suis… » : remplace le planning pour un moment (state.ici = {cle, jusqua})
+const ICI = {
+  maison:{emoji:"🏠", label:"À la maison", court:"À la maison", types:["perso"], desc:"Défis à faire chez toi"},
+  fils:{emoji:"👦", label:"À la maison avec mon fils", court:"Avec ton fils", types:["fils"], desc:"Défis avec lui, ou à faire chez toi"},
+  sortie:{emoji:"📷", label:"Dispo pour sortir", court:"Dispo pour sortir", types:["libre"], desc:"Sorties photo, Nancy comprise"},
+  sortiefils:{emoji:"🚶", label:"Dispo pour sortir avec mon fils", court:"Sortie avec ton fils", types:["libre","fils"], desc:"Sorties photo, avec ou sans lui"},
+  tele:{emoji:"💻", label:"En télétravail", court:"En télétravail", types:["tele"], desc:"Défis rapides à ton poste, chez toi"},
+  travail:{emoji:"🏢", label:"Au travail", court:"Au travail", types:["travail"], desc:"Défis discrets, sans quitter le travail"},
+  crossfit:{emoji:"🏋️", label:"Au CrossFit", court:"Au CrossFit", types:["crossfit"], desc:"Craie et sueur"}
+};
+const iciActif = () => state.ici && ICI[state.ici.cle] && Date.now() < state.ici.jusqua ? state.ici : null;
+function maintenant(d){
+  const ici = d ? null : iciActif();
+  if(ici) return {types:new Set(ICI[ici.cle].types), principal:null, ici};
+  return maintenantPlanning(d || new Date());
+}
+function maintenantPlanning(d=new Date()){
   const t = d.getHours()*60 + d.getMinutes();
   const en = slotsDu(d).filter(x=>t >= minutes(x.debut) && t < minutes(x.fin)).sort((a,b)=>TYPES[b.type].prio - TYPES[a.type].prio);
   if(!en.length) return {types:new Set(["perso"]), principal:null};
@@ -879,7 +906,12 @@ function maintenant(d=new Date()){
 }
 const moment = () => maintenant().principal?.type || "perso";
 function momentLabel(){
-  const {principal, types} = maintenant();
+  const ici = iciActif();
+  if(ici) return `${ICI[ici.cle].court} · jusqu’à ${hhmm(new Date(ici.jusqua))}`;
+  return planningLabel();
+}
+function planningLabel(){
+  const {principal, types} = maintenantPlanning();
   if(principal) return `${TYPES[principal.type].court}${types.has("pausemaison") ? " à la maison" : ""}${principal.type!=="fils" && types.has("fils") ? " avec ton fils" : ""} jusqu’à ${principal.fin}`;
   const now = new Date(), t = now.getHours()*60 + now.getMinutes();
   const suite = slotsDu(now).filter(x=>minutes(x.debut) > t).sort((a,b)=>minutes(a.debut)-minutes(b.debut))[0];
@@ -1547,6 +1579,35 @@ async function verifierMaj(){
 document.getElementById("majGo").onclick = ()=>location.reload();
 setTimeout(verifierMaj, 4000);
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "visible") verifierMaj(); });
+
+/* ---------- Tiroir « Là, maintenant, je suis… » ---------- */
+// Le choix vaut 2 h, ou jusqu'au prochain créneau du planning s'il commence avant (et dans plus de 15 min)
+function finIci(){
+  const now = new Date(), t = now.getHours()*60 + now.getMinutes(), deuxH = Date.now() + 2*3600000;
+  const suite = slotsDu(now).map(x=>minutes(x.debut)).filter(m=>m > t + 15).sort((a,b)=>a-b)[0];
+  if(suite === undefined) return deuxH;
+  const d = new Date(now); d.setHours(Math.floor(suite/60), suite%60, 0, 0);
+  return Math.min(deuxH, d.getTime());
+}
+function renderIci(){
+  const ici = iciActif(), fin = hhmm(new Date(ici ? ici.jusqua : finIci()));
+  const ligne = (cle, emoji, nom, meta, actif) => `<div class="item"><button class="row-head" data-ici="${cle}" aria-pressed="${actif}"><span class="ico" aria-hidden="true">${emoji}</span><span class="rh-text"><span class="rh-name">${nom}</span><span class="rh-meta">${meta}</span></span>${actif ? `<span class="coche" aria-hidden="true">✓</span>` : ""}</button></div>`;
+  document.getElementById("iciList").innerHTML = Object.entries(ICI).map(([k,v])=>ligne(k, v.emoji, v.label, v.desc, ici?.cle===k)).join("")
+    + ligne("planning", "📅", "Suivre mon planning", planningLabel(), !ici);
+  document.getElementById("iciHint").textContent = ici
+    ? `Ton choix vaut jusqu’à ${fin}, puis l’app reprend ton planning.`
+    : `Ton choix vaudra jusqu’à ${fin}, puis l’app reprendra ton planning tout seule.`;
+}
+function openIci(){ renderIci(); openSheet(document.getElementById("iciDlg")); }
+document.getElementById("iciList").addEventListener("click", e=>{
+  const b = e.target.closest("[data-ici]"); if(!b) return;
+  const cle = b.dataset.ici;
+  state.ici = cle==="planning" ? null : {cle, jusqua:finIci()};
+  save(); document.getElementById("iciDlg").close();
+  renderCtx(); pickRandom(); // nouveau défi adapté au moment choisi
+});
+document.getElementById("iciPlan").onclick = ()=>{ document.getElementById("iciDlg").close(); openPlan(); };
+setInterval(()=>{ renderCtx(); }, 60000); // la pastille suit l'heure (fin du choix, créneaux)
 
 document.getElementById("version").textContent = `Version ${VERSION}`;
 renderChips(); renderMeta(); renderTodayPlan(); pickToday();

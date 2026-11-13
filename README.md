@@ -49,6 +49,8 @@ Dans l'onglet **Planning**, remplis ta semaine jour par jour avec des créneaux 
 
 Le « Défi du jour » est choisi parmi les défis faisables à un moment de ta journée.
 
+**Imprévu ?** Touche la pastille dorée du moment, en haut de l'écran : « Là, maintenant, je suis… » À la maison, avec ton fils, dispo pour sortir (seul ou avec lui), en télétravail, au travail ou au CrossFit. Ton choix remplace le planning pendant 2 heures, ou jusqu'à ton prochain créneau, puis l'app reprend ton planning toute seule. « Suivre mon planning » annule le choix.
+
 ## Défis inventés par l'IA
 
 Avec une clé API Gemini (gratuite sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey)), le bouton **✨ Défi IA** fait inventer un défi neuf, adapté au moment présent : créneau du planning, météo, lumière, lieu, appareil et objectifs, thèmes et difficulté choisis. L'IA évite aussi tes derniers défis.
