@@ -44,6 +44,14 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `loadContext()` construit `ctx` : `{temp, cat, vent, light, nancy, sr, ss}`. Météo en cache 30 min (clé `defis-photo-meteo`).
 - `score(c)` : 0 si `req` non rempli ou défi Nancy hors de Nancy, bonus selon `POIDS` pour chaque `pref` remplie, pénalité pour l'extérieur sous la pluie ou la nuit, bonus pour l'intérieur. `reasons(c)` alimente le bloc « Pourquoi maintenant ».
 
+## Défis IA (Gemini)
+
+- Clé API saisie par le propriétaire dans l'app, stockée uniquement dans `localStorage` (clé `defis-photo-gemini` : `{cle, modele}`). Jamais de clé dans le dépôt ni dans le code.
+- Appels directs depuis le navigateur à `generativelanguage.googleapis.com/v1beta/` (en-tête `x-goog-api-key`) via `geminiFetch()` (messages d'erreur en français : clé refusée, quota, modèle indisponible, réseau).
+- `iaTester()` liste les modèles et `classeModeles()` choisit un « flash » stable récent (pas de nom de modèle figé) ; modifiable dans `#iaModel`.
+- `defiIA()` : consigne + `iaContexte()` (date, créneau, lieu sans coordonnées, météo, lumière, appareil, objectifs, thèmes, difficultés, 15 derniers défis), réponse JSON imposée par `IA_SCHEMA`, validée et tronquée, puis affichée comme un défi (`ia:true`, champ `pourquoi`).
+- Le texte venant de l'IA est **toujours échappé** au rendu (`E = esc` dans `render()`), comme les titres de l'historique.
+
 ## Conventions
 
 - Couleurs en variables CSS sur `:root`, avec un thème sombre (`prefers-color-scheme` et `data-theme`).

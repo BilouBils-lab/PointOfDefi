@@ -43,6 +43,15 @@ Dans **Mon planning**, remplis ta semaine jour par jour avec des créneaux :
 
 Le « Défi du jour » est choisi parmi les défis faisables à un moment de ta journée.
 
+## Défis inventés par l'IA
+
+Avec une clé API Gemini (gratuite sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey)), le bouton **✨ Défi IA** fait inventer un défi neuf, adapté au moment présent : créneau du planning, météo, lumière, lieu, appareil et objectifs, thèmes et difficulté choisis. L'IA évite aussi tes derniers défis.
+
+- La clé se saisit dans **Défis inventés par l'IA** puis « Enregistrer et tester ». Elle reste **dans le navigateur de l'appareil** : elle n'est jamais publiée dans le dépôt.
+- L'app choisit automatiquement un modèle Gemini « Flash » récent, modifiable dans la liste.
+- L'app n'envoie ni la position précise ni le nom : seulement le contexte du défi. Avec l'offre gratuite, Google peut utiliser les échanges pour améliorer ses services.
+- Ne jamais mettre une clé API dans le code ou dans le dépôt : il est public.
+
 ## Réglages
 
 - **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Mes passions, Technique pure.
