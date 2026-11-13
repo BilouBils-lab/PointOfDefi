@@ -26,7 +26,16 @@ Tout est gratuit, sans compte ni clé : la position vient du navigateur (avec ta
 
 - **Thèmes** : Nancy, Boulot, Avec mon fils, Mes passions, Technique pure.
 - **Difficulté** : Facile, Moyen, Costaud.
-- **Appareil du jour** : Canon EOS M50 ou R6 Mark II.
+- **Appareil du jour** : choisis l'appareil que tu emportes parmi ceux de ton matériel.
+
+## Mon matériel
+
+Le bouton **Mon matériel**, en haut à droite, permet d'enregistrer tes appareils et tes objectifs :
+
+- **Appareil** : nom, type de capteur (plein format, APS-C…) et ISO maximal que tu juges acceptable.
+- **Objectif** : nom, focale minimale et maximale (la même valeur pour une focale fixe), ouverture maximale, macro ou non, et appareils avec lesquels il est compatible.
+
+Pour chaque défi, l'app conseille l'objectif le mieux adapté parmi ceux compatibles avec l'appareil du jour (grand-angle, focale de portrait, le plus lumineux…). Pour un zoom, elle indique la focale à utiliser. Elle précise aussi la focale « équivalente » sur un capteur APS-C (un 50 mm cadre comme un 80 mm sur un capteur Canon APS-C) et donne un conseil ISO pour les défis de nuit.
 
 Certains défis sont saisonniers (brume d'automne, Saint-Nicolas) et n'apparaissent qu'aux bons mois.
 

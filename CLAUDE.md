@@ -14,9 +14,16 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `D` : la liste des défis. Champs : `id` (préfixe du thème + numéro, ex. `n3`), `t` (thème), `n` (difficulté 1–3), `titre`, `brief`, `astuce`, `reg` (réglages affichés en étiquettes), et en option `nuit: true` (choisit la note appareil « nuit ») et `mois: [...]` (mois où le défi est disponible).
 - Champs de contexte des défis : `ou` (`"in"`, `"out"` ou `"any"`), `pref` (conditions où le défi brille : `clair`, `nuageux`, `brouillard`, `pluie`, `neige`, `vent`, `jour`, `doree`, `bleue`, `nuit`), `req` (conditions obligatoires : le défi n'est proposé que si elles sont réunies, et jamais en « Défi du jour »).
 - `BONUS` : contraintes bonus tirées au hasard.
-- `CAM_NOTE` : conseils par appareil, en version jour et nuit.
-- État dans `localStorage`, clé `defis-photo-v1` : `{themes, levels, cam, history}`. Toujours entourer les accès de `try/catch`.
+- `obj` (champ des défis) : type d'objectif conseillé, `grand`, `normal`, `portrait`, `tele`, `lumineux` ou `macro`.
+- État dans `localStorage`, clé `defis-photo-v1` : `{themes, levels, cam, history, gear, geo}`. Toujours entourer les accès de `try/catch`.
 - `pickToday()` : défi déterministe selon un hash de la date (hors défis avec `req`). `pickRandom()` (bouton « Défi pour maintenant ») : tirage filtré par les réglages, pondéré par `score()`, en évitant les 10 derniers défis réalisés.
+
+## Matériel
+
+- `state.gear` : `{cams:[{id, nom, capteur, isoMax}], lenses:[{id, nom, fmin, fmax, ouv, macro, cams:[ids d'appareils compatibles]}]}`. Valeurs par défaut dans `DEFAULT_GEAR` ; `state.cam` est l'id de l'appareil du jour.
+- `CAPTEURS` : type de capteur et coefficient de recadrage (`crop`).
+- `gearAdvice(c, nuit)` : texte du bloc appareil. `bestLens()` choisit l'objectif selon `OBJ` (plage de focale équivalente visée) ; `FAUTE` quand aucun objectif ne la couvre.
+- Écran « Mon matériel » : `<dialog id="gearDlg">`, rendu par `renderGear()`, modifications via `onGearInput` (événements délégués). Ne pas redessiner la liste pendant la saisie (ça fait perdre le champ en cours) ; échapper les noms saisis avec `esc()`.
 
 ## Contexte (lieu, météo, lumière)
 
