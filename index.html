@@ -105,6 +105,16 @@ button{font:inherit; cursor:pointer; color:inherit}
 .alt .btn{flex:1; padding:.75rem .4rem; white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis}
 .alt .ia{color:var(--accent-ink)}
 .linkbtn{background:none; border:0; color:var(--soft); text-decoration:underline; text-underline-offset:2px; padding:0; font-size:.8125rem}
+.quota{text-align:center; font-size:.75rem; color:var(--soft); margin:.5rem 0 0}
+.quota:empty{display:none}
+.alt[hidden]{display:none}
+.tag{flex:none; font-size:.75rem; font-weight:600; padding:.15rem .5rem; border-radius:999px; background:var(--surface-2); color:var(--soft)}
+.tag.gratuit{color:var(--ok)} .tag.joker{background:var(--accent-soft); color:var(--accent-ink)}
+.row-head[disabled]{opacity:.45; cursor:default}
+.row-head[aria-pressed="true"]{background:var(--accent-soft)}
+#chgWhy .rh-name,#chgWhy .rh-meta{white-space:normal}
+.qgroup{margin:0 0 .75rem}
+.qgroup > span{display:block; font-size:.8125rem; font-weight:500; color:var(--soft); margin-bottom:.3rem}
 .foot{text-align:center; font-size:.75rem; color:var(--soft); margin:1.5rem 0 0}
 
 /* ---------- Barre d'onglets ---------- */
@@ -292,13 +302,9 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 
   <div class="actions">
     <button class="btn primary" id="done">Je l’ai fait</button>
-    <div class="alt">
-      <button class="btn" id="next">Maintenant</button>
-      <button class="btn" id="today">Défi du jour</button>
-      <button class="btn ia" id="iaBtn" hidden>✨ IA</button>
-    </div>
+    <div class="alt" id="altRow"><button class="btn" id="change">Changer de défi</button></div>
+    <p class="quota" id="quota"></p>
   </div>
-  <p class="ia-status err" id="iaErr" aria-live="polite" hidden></p>
   <section class="coach" id="coach" aria-live="polite" hidden></section>
   <input type="file" id="coachFile" accept="image/*" hidden>
   <p class="foot" id="version"></p>
@@ -357,6 +363,29 @@ a{color:var(--accent-ink); text-underline-offset:2px}
   </div>
 </dialog>
 
+<dialog id="chgDlg" class="sheet" aria-labelledby="chgTitle">
+  <div class="sheet-head"><div class="sheet-title"><h2 id="chgTitle">Changer de défi</h2><button class="x-btn" data-close aria-label="Fermer">×</button></div></div>
+  <div class="sheet-body">
+    <section class="sec" id="chgWhySec">
+      <h3>Pourquoi ?</h3>
+      <div class="list" id="chgWhy"></div>
+      <button class="add" id="chgIci">Tu n’es pas là où le planning le pense ? Indique où tu es</button>
+    </section>
+    <section class="sec">
+      <h3 id="chgSrcTitre">Remplacer par</h3>
+      <div class="chips seg" id="chgSrc"></div>
+      <p class="hint" id="chgNoKey" hidden>Ajoute une clé IA dans « Réglages » pour des défis inventés sur mesure.</p>
+    </section>
+    <section class="sec" id="chgQ" hidden>
+      <h3>3 questions rapides <span style="text-transform:none; letter-spacing:0; font-weight:500">(pré-remplies, corrige si besoin)</span></h3>
+      <div id="chgQBody"></div>
+    </section>
+    <p class="hint" id="chgCost"></p>
+    <p class="ia-status err" id="chgErr" aria-live="polite" hidden></p>
+    <button class="btn primary" id="chgGo">Changer</button>
+  </div>
+</dialog>
+
 <dialog id="iciDlg" class="sheet" aria-labelledby="iciTitle">
   <div class="sheet-head"><div class="sheet-title"><h2 id="iciTitle">Là, maintenant, je suis…</h2><button class="x-btn" data-close aria-label="Fermer">×</button></div></div>
   <div class="sheet-body">
@@ -408,7 +437,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "18"; // à augmenter à chaque PR fusionnée (numéro seul)
+const VERSION = "19"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -643,7 +672,10 @@ function gearAdvice(c, nuit){
 
 /* ---------- Écran « Mon matériel » ---------- */
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-function gearChanged(){ save(); renderChips(); render(); }
+function gearChanged(){
+  if(state.exclus) for(const id in state.exclus) if(state.exclus[id].raison==="materiel") delete state.exclus[id];
+  save(); renderChips(); render();
+}
 let gearOpen = null; // fiche ouverte dans « Mon matériel »
 const CHEV = `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
 const camMeta = c => [CAPTEURS[c.capteur]?.label, c.monture && c.monture!=="autre" ? c.monture : "monture ?", `ISO ${c.isoMax}`].filter(Boolean).join(" · ");
@@ -967,30 +999,39 @@ function reasons(c){
 function pool(){
   return D.filter(c => inSeason(c) && state.themes.includes(c.t) && state.levels.includes(String(c.n)));
 }
+/* ---------- Défi en cours : conservé jusqu'à ce qu'il soit réalisé ou changé ---------- */
+function poser(c, bonus){
+  current = c; currentBonus = bonus;
+  state.encours = c ? {date:dayKey(), bonus, ...(c.ia ? {ia:c} : {id:c.id})} : null;
+  save(); render();
+}
+// Défis écartés (« Changer de défi ») : matériel = jusqu'à un changement de matériel ; lieu, météo = aujourd'hui ; autres = 7 jours
+const exclu = c => { const e = state.exclus?.[c.id]; return !!e && (e.raison==="materiel" || Date.now() < e.jusqua); };
 function pickToday(){
   // Défi du jour : faisable à un moment de la journée (créneaux du jour + temps perso)
   const auj = new Date(), jour = new Set(["perso", ...slotsDu(auj).map(x=>typeEffectif(x, auj))]);
   let p = D.filter(c => inSeason(c) && !c.req && faisable(c, jour));
   if(!p.length) p = D.filter(c => inSeason(c) && !c.req);
   const h = hash(dayKey());
-  current = p[h % p.length]; currentBonus = BONUS[h % BONUS.length];
-  render();
+  poser(p[h % p.length], BONUS[h % BONUS.length]);
 }
-function pickRandom(){
-  let p = pool();
-  if(!p.length){ current = null; render(); return; }
+function pickRandom(opts={}){
+  let p = pool().filter(c=>!exclu(c));
+  if(opts.facile && current){ // « trop difficile » : plus facile, du même thème si possible
+    const meme = p.filter(c=>c.t===current.t && c.n < current.n), plus = p.filter(c=>c.n < current.n);
+    if(meme.length) p = meme; else if(plus.length) p = plus;
+  }
+  if(!p.length){ poser(null); return; }
   const doneIds = new Set(state.history.slice(-10).map(x=>x.id));
   const fresh = p.filter(c => !doneIds.has(c.id) && (!current || c.id !== current.id));
   if(fresh.length && fresh.some(c=>score(c)>0)) p = fresh;
   let w = p.map(c=>score(c)), total = w.reduce((a,b)=>a+b,0);
   // Rien de faisable à ce moment-là : on ignore le rythme plutôt que de ne rien proposer
   if(!total){ w = p.map(c=>score(c,false)); total = w.reduce((a,b)=>a+b,0); }
-  if(!total){ current = null; render(); return; }
+  if(!total){ poser(null); return; }
   let x = Math.random()*total, i = 0;
   while(x >= w[i]){ x -= w[i]; i++; }
-  current = p[i];
-  currentBonus = BONUS[Math.floor(Math.random()*BONUS.length)];
-  render();
+  poser(p[i], BONUS[Math.floor(Math.random()*BONUS.length)]);
 }
 
 function render(){
@@ -998,7 +1039,8 @@ function render(){
   el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
   if(!current){
     el.innerHTML = `<h2>Aucun défi ne correspond</h2><p class="brief">${pool().length ? "Aucun défi de tes réglages ne colle au lieu ou à la météo actuels : active d’autres thèmes dans « Réglages »." : "Active au moins un thème et une difficulté dans « Réglages »."}</p>`;
-    document.getElementById("done").disabled = true; document.getElementById("coach").hidden = true; return;
+    document.getElementById("done").disabled = true; document.getElementById("coach").hidden = true;
+    document.getElementById("altRow").hidden = false; document.getElementById("quota").textContent = ""; return;
   }
   const c = current;
   const dots = [1,2,3].map(i=>`<i class="${i<=c.n?"on":""}"></i>`).join("");
@@ -1019,7 +1061,10 @@ function render(){
     </dl>
     <div class="exif">${c.reg.map(r=>`<span>${E(r)}</span>`).join("")}</div>`;
   const b = document.getElementById("done");
-  b.disabled = doneToday; b.textContent = doneToday ? "Réalisé aujourd’hui" : "Je l’ai fait";
+  b.disabled = false; b.textContent = doneToday ? "Défi suivant" : "Je l’ai fait";
+  document.getElementById("altRow").hidden = doneToday;
+  const j = jokersRestants();
+  document.getElementById("quota").textContent = doneToday ? "Bravo ! Le défi suivant est offert." : `🃏 ${j} joker${j>1?"s":""} restant${j>1?"s":""} cette semaine`;
   try{ renderCoach(); }catch(e){}
 }
 
@@ -1051,7 +1096,9 @@ function chips(id, map, isOn, onClick){
       onClick(k); save();
       if(id==="planDays"){ renderPlanDay(); return; }
       if(id==="planCopy"){ planChanged(); return; }
-      renderChips(); if(id==="themes"||id==="levels") pickRandom(); else { renderCtx(); render(); } };
+      renderChips();
+      if((id==="themes"||id==="levels") && current && !current.ia && !pool().some(c=>c.id===current.id)) pickRandom(); // le défi ne fait plus partie des réglages
+      else { renderCtx(); render(); } };
     box.appendChild(b);
   });
 }
@@ -1131,10 +1178,10 @@ document.getElementById("addSlot").onclick = ()=>{
 document.addEventListener("visibilitychange", ()=>{
   if(document.visibilityState!=="visible") return;
   if(ctx) ctx.light = lightPhase(ctx.sr, ctx.ss);
+  if(state.encours && state.encours.date !== dayKey()){ renderCtx(); pickToday(); return; } // nouveau jour, nouveau défi
   renderCtx(); renderTodayPlan(); render();
 });
 
-document.getElementById("next").onclick = pickRandom;
 document.getElementById("gear").onclick = openGear;
 document.getElementById("openSet").onclick = ()=>openSet(false);
 document.getElementById("stats").onclick = ()=>openSet(true);
@@ -1158,7 +1205,6 @@ document.getElementById("addLens").onclick = ()=>{
   const id = uid("o"); state.gear.lenses.push({id, nom:"Nouvel objectif", fmin:50, fmax:50, ouv:1.8, macro:false, cams:state.gear.cams.map(c=>c.id)});
   gearOpen = id; gearChanged(); renderGear(); document.querySelector(`[data-lens="${id}"] input`).select();
 };
-document.getElementById("today").onclick = pickToday;
 
 /* ---------- Défis inventés par l'IA (Gemini, clé de l'utilisateur, stockée sur l'appareil) ---------- */
 const IA_KEY = "defis-photo-gemini";
@@ -1168,7 +1214,6 @@ try{ ia = Object.assign(ia, JSON.parse(localStorage.getItem(IA_KEY))||{}); }catc
 function iaSave(){ try{ localStorage.setItem(IA_KEY, JSON.stringify(ia)); }catch(e){} }
 function iaStatus(txt, cls=""){ const el = document.getElementById("iaStatus"); el.textContent = txt; el.className = "ia-status " + cls; }
 function iaRender(){
-  document.getElementById("iaBtn").hidden = !ia.cle;
   try{ renderCoach(); }catch(e){} // le coach n'est pas encore prêt au tout premier chargement
   document.getElementById("iaKey").placeholder = ia.cle ? "Clé enregistrée (••••" + ia.cle.slice(-4) + ")" : "Colle ta clé API Gemini";
   if(ia.cle && !document.getElementById("iaStatus").textContent) iaStatus(ia.modele ? `Clé enregistrée · modèle ${ia.modele.replace("models/","")}` : "Clé enregistrée.", "ok");
@@ -1221,7 +1266,7 @@ async function iaTester(){
   }catch(e){ iaStatus(e.message, "err"); if(saisie){ ia.cle = ""; } }
   iaRender();
 }
-function iaContexte(){
+function iaContexte(extra={}){
   const now = new Date(), {types} = maintenant(), cam = curCam();
   const situation = {travail:"au travail (au bureau ou en visite d’entreprise) : défi discret, sans quitter le travail",
     tele:"en télétravail chez lui, à son poste : défi rapide, dans la maison", pause:"en pause déjeuner près de son travail : 30 à 60 minutes, à pied",
@@ -1238,6 +1283,8 @@ function iaContexte(){
     `Thèmes autorisés : ${state.themes.map(t=>THEMES[t]).join(", ")}. Difficultés autorisées : ${state.levels.map(n=>LEVELS[n]).join(", ")}.`,
     `Défis récents à ne pas répéter : ${state.history.slice(-15).map(h=>h.titre).join(" ; ") || "aucun"}.`
   ];
+  if(extra.q) lignes.push(`Réponses du photographe : lumière ${Q.lumiere.ia[extra.q.lumiere]} ; temps disponible ${Q.temps.ia[extra.q.temps]} ; envie ${Q.envie.ia[extra.q.envie]}.`);
+  if(extra.raison && extra.precedent) lignes.push(`Le défi précédent « ${extra.precedent} » a été écarté : ${RAISONS[extra.raison].ia}.`);
   return lignes.join("\n");
 }
 const IA_SCHEMA = {type:"OBJECT", properties:{
@@ -1258,15 +1305,19 @@ async function genererAvecSecours(consigne, btn, opts={}){
     try{ ia.modeles = classeModeles((await geminiFetch("models?pageSize=200")).models||[]).slice(0, 8).map(m=>m.name); iaSave(); }catch(e){ ia.modeles = []; }
   }
   const essais = [ia.modele || "models/gemini-2.5-flash", ...ia.modeles.filter(m=>m!==ia.modele)].slice(0, 3);
-  const corps = JSON.stringify({contents:[{role:"user", parts:[{text:consigne}, ...(opts.parts||[])]}],
-    generationConfig:{temperature:opts.temperature ?? 1.1, responseMimeType:"application/json", responseSchema:opts.schema || IA_SCHEMA}});
+  // « rapide » : désactive la phase de réflexion des modèles 2.5 Flash (bien plus rapide pour inventer un défi)
+  const corps = sansReflexion => JSON.stringify({contents:[{role:"user", parts:[{text:consigne}, ...(opts.parts||[])]}],
+    generationConfig:{temperature:opts.temperature ?? 1.1, responseMimeType:"application/json", responseSchema:opts.schema || IA_SCHEMA,
+      ...(sansReflexion ? {thinkingConfig:{thinkingBudget:0}} : {})}});
   let derniere;
   for(const [i, modele] of essais.entries()){
+    let rapide = !!opts.rapide && /gemini-2\.5-flash/.test(modele);
     for(let tentative = 0; tentative < 2; tentative++){
       if(i || tentative) btn.textContent = "Nouvel essai…";
-      try{ return await geminiFetch(`${modele}:generateContent`, {method:"POST", body:corps, delai:opts.delai}); }
+      try{ return await geminiFetch(`${modele}:generateContent`, {method:"POST", body:corps(rapide), delai:opts.delai}); }
       catch(e){
         derniere = e;
+        if(e.status===400 && rapide){ rapide = false; tentative--; continue; } // option refusée : on réessaie sans
         if(e.temporaire && tentative===0){ await pause(2000); continue; }
         if(e.temporaire || e.status===429 || e.status===404) break; // modèle suivant
         throw e;
@@ -1275,34 +1326,31 @@ async function genererAvecSecours(consigne, btn, opts={}){
   }
   throw derniere;
 }
-async function defiIA(){
-  const btn = document.getElementById("iaBtn"), err = document.getElementById("iaErr");
-  btn.disabled = true; btn.textContent = "Réflexion…"; err.hidden = true;
+// Invente un défi ; extra = {q, raison, precedent}. Lance une erreur lisible en cas d'échec.
+async function defiIA(btn, extra={}){
   const consigne = `Tu es un coach photo bienveillant. Invente UN défi photo original pour un photographe amateur, en français, en le tutoyant.
 Il doit être concret, faisable tout de suite dans la situation décrite, et différent des défis classiques et des défis récents.
 Respecte les thèmes et difficultés autorisés. Donne des réglages adaptés à l’appareil, au capteur et à la lumière.
+Respecte strictement les réponses du photographe : sans « soleil direct », ne base jamais le défi sur le soleil, l’heure dorée, les rayons ou les ombres marquées. Adapte l’ampleur du défi au temps disponible.
 Personnes reconnaissables : seulement avec leur accord ; pour l’enfant, privilégie des images où son visage n’est pas reconnaissable.
 Typographie française (apostrophe ’, guillemets « »).
 
 Contexte :
-${iaContexte()}`;
-  try{
-    const data = await genererAvecSecours(consigne, btn);
+${iaContexte(extra)}`;
+  {
+    const data = await genererAvecSecours(consigne, btn, {rapide:true});
     const texte = (data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
     let d; try{ d = JSON.parse(texte); }catch(e){ throw new Error("Réponse de l’IA illisible : réessaie."); }
     const court = (v, n) => String(v||"").trim().slice(0, n);
     if(!court(d.titre,1) || !court(d.brief,1)) throw new Error("Réponse de l’IA incomplète : réessaie.");
-    current = {id:"ia-" + Date.now().toString(36), ia:true,
+    poser({id:"ia-" + Date.now().toString(36), ia:true,
       t: THEMES[d.theme] ? d.theme : "technique", n: Math.min(3, Math.max(1, parseInt(d.difficulte)||2)),
       titre: court(d.titre, 70), brief: court(d.brief, 500), astuce: court(d.astuce, 300), pourquoi: court(d.pourquoi, 200),
       reg: (Array.isArray(d.reglages) ? d.reglages : []).slice(0,5).map(r=>court(r,40)).filter(Boolean),
-      obj: ["grand","normal","portrait","tele","lumineux","macro"].includes(d.objectif) ? d.objectif : undefined};
-    currentBonus = BONUS[Math.floor(Math.random()*BONUS.length)];
-    render();
-  }catch(e){ err.textContent = e.message; err.hidden = false; }
-  btn.disabled = false; btn.textContent = "✨ IA";
+      obj: ["grand","normal","portrait","tele","lumineux","macro"].includes(d.objectif) ? d.objectif : undefined},
+      BONUS[Math.floor(Math.random()*BONUS.length)]);
+  }
 }
-document.getElementById("iaBtn").onclick = defiIA;
 document.getElementById("iaSave").onclick = iaTester;
 document.getElementById("iaModel").onchange = e=>{ ia.modele = e.target.value; iaSave(); iaStatus(`Modèle ${ia.modele.replace("models/","")} choisi.`, "ok"); };
 document.getElementById("iaClear").onclick = ()=>{
@@ -1316,7 +1364,10 @@ function validerDefi(note){
   state.history.push({id:current.id, titre:current.titre, date:dayKey(), ...(note ? {note} : {})});
   save(); renderMeta(); render();
 }
-document.getElementById("done").onclick = ()=>validerDefi(coach.pour===current?.id ? coach.res?.note : undefined);
+document.getElementById("done").onclick = ()=>{
+  if(current && state.history.some(h=>h.id===current.id && h.date===dayKey())) openChange(true); // déjà réalisé : défi suivant offert
+  else validerDefi(coach.pour===current?.id ? coach.res?.note : undefined);
+};
 
 /* ---------- Coach photo : l'IA analyse la photo du défi (avis, pas de blocage) ---------- */
 let coach = {pour:null, etape:"repos"}; // repos | apercu | analyse | resultat | erreur
@@ -1580,6 +1631,99 @@ document.getElementById("majGo").onclick = ()=>location.reload();
 setTimeout(verifierMaj, 4000);
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "visible") verifierMaj(); });
 
+/* ---------- Tiroir « Changer de défi » : raisons, jokers, questions pour l'IA ---------- */
+const RAISONS = {
+  materiel:{emoji:"🎒", label:"Je n’ai pas le matériel", desc:"Écarté tant que ton matériel ne change pas", ia:"il n’a pas le matériel nécessaire"},
+  lieu:{emoji:"📍", label:"Pas possible ici ou maintenant", desc:"Écarté pour aujourd’hui", ia:"il n’est pas faisable là où il se trouve"},
+  meteo:{emoji:"🌧️", label:"La météo ne s’y prête pas", desc:"Écarté pour aujourd’hui", ia:"la météo ou la lumière ne s’y prêtent pas"},
+  difficile:{emoji:"😰", label:"Trop difficile pour moi", desc:"Remplacé par un défi plus facile", ia:"trop difficile pour lui : propose nettement plus simple"},
+  envie:{emoji:"😐", label:"Pas envie", desc:"Utilise un joker", ia:"il n’en avait pas envie : propose quelque chose de différent"}
+};
+const Q = {
+  lumiere:{titre:"Lumière là où tu es", choix:{soleil:"☀️ Soleil direct", gris:"☁️ Voilé ou gris", nuit:"🌙 Nuit, lampe"},
+    ia:{soleil:"soleil direct", gris:"ciel voilé ou gris, pas de soleil direct", nuit:"nuit ou lumière artificielle"}},
+  temps:{titre:"Temps disponible", choix:{"5":"5 min", "20":"15–30 min", "60":"1 h ou +"},
+    ia:{"5":"environ 5 minutes", "20":"15 à 30 minutes", "60":"une heure ou plus"}},
+  envie:{titre:"Envie de…", choix:{technique:"Technique", creatif:"Créatif", surprise:"Surprends-moi"},
+    ia:{technique:"un défi technique (réglages, maîtrise de l’appareil)", creatif:"un défi créatif (idée, composition, regard)", surprise:"au choix du coach"}}
+};
+function debutSemaine(){ const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return d.getTime(); }
+function finJour(){ const d = new Date(); d.setHours(23,59,59,999); return d.getTime(); }
+function changes(){ return Array.isArray(state.changes) ? state.changes : []; }
+function gratuitsRestants(){ return Math.max(0, 3 - changes().filter(c=>c.date===dayKey() && c.cout==="gratuit").length); } // 3 changements « objectifs » par jour
+function jokersRestants(){ return Math.max(0, 2 - changes().filter(c=>c.ts >= debutSemaine() && c.cout==="joker").length); }  // 2 jokers par semaine
+// Coût d'un changement : gratuit (raison objective, dans la limite du jour), sinon un joker, sinon impossible
+function coutChange(r){ return r!=="envie" && gratuitsRestants() > 0 ? "gratuit" : jokersRestants() > 0 ? "joker" : null; }
+function questionsParDefaut(){
+  const lumiere = !ctx ? "gris" : (ctx.light==="nuit" || ctx.light==="bleue") ? "nuit" : ctx.cat==="clair" ? "soleil" : "gris";
+  const ici = iciActif(), pr = maintenantPlanning().principal, now = new Date(), t = now.getHours()*60 + now.getMinutes();
+  const reste = ici ? (ici.jusqua - Date.now())/60000 : pr ? minutes(pr.fin) - t : 60;
+  return {lumiere, temps: reste < 12 ? "5" : reste < 50 ? "20" : "60", envie:"surprise"};
+}
+let chg = {};
+function openChange(libre){
+  chg = {libre:!!libre, raison:null, src:"liste", q:questionsParDefaut()};
+  renderChange(); openSheet(document.getElementById("chgDlg"));
+}
+function renderChange(){
+  const libre = chg.libre, seg = (nom, choix, val) => `<div class="chips seg">${Object.entries(choix).map(([k,v])=>`<button class="chip" data-seg="${nom}" data-val="${k}" aria-pressed="${k===val}">${v}</button>`).join("")}</div>`;
+  document.getElementById("chgTitle").textContent = libre ? "Défi suivant" : "Changer de défi";
+  document.getElementById("chgWhySec").hidden = libre;
+  document.getElementById("chgSrcTitre").textContent = libre ? "Type de défi" : "Remplacer par";
+  document.getElementById("chgWhy").innerHTML = Object.entries(RAISONS).map(([k,r])=>{
+    const cout = coutChange(k), tag = cout==="gratuit" ? `<span class="tag gratuit">Gratuit</span>` : cout==="joker" ? `<span class="tag joker">1 joker</span>` : `<span class="tag">Épuisé</span>`;
+    return `<div class="item"><button class="row-head" data-raison="${k}" aria-pressed="${chg.raison===k}"${cout ? "" : " disabled"}><span class="ico" aria-hidden="true">${r.emoji}</span><span class="rh-text"><span class="rh-name">${r.label}</span><span class="rh-meta">${r.desc}</span></span>${tag}</button></div>`;
+  }).join("");
+  document.getElementById("chgSrc").innerHTML = ia.cle
+    ? `<button class="chip" data-seg="src" data-val="liste" aria-pressed="${chg.src==="liste"}">Défi de la liste</button><button class="chip" data-seg="src" data-val="ia" aria-pressed="${chg.src==="ia"}">✨ Inventé par l’IA</button>`
+    : `<button class="chip" aria-pressed="true">Défi de la liste</button>`;
+  document.getElementById("chgNoKey").hidden = !!ia.cle;
+  document.getElementById("chgQ").hidden = chg.src!=="ia";
+  document.getElementById("chgQBody").innerHTML = Object.entries(Q).map(([k,q])=>`<div class="qgroup"><span>${q.titre}</span>${seg(k, q.choix, chg.q[k])}</div>`).join("");
+  const cout = chg.raison ? coutChange(chg.raison) : null, g = gratuitsRestants(), j = jokersRestants();
+  document.getElementById("chgCost").textContent = libre ? "Défi réalisé : le suivant est offert."
+    : !chg.raison ? (j || g ? `Choisis une raison. Aujourd’hui : ${g} changement${g>1?"s":""} gratuit${g>1?"s":""} · cette semaine : ${j} joker${j>1?"s":""}.` : "Plus de changement possible : tente ce défi, tu pourrais être surpris ! Nouveaux jokers lundi.")
+    : cout==="gratuit" ? `Gratuit · il te restera ${g-1} changement${g-1>1?"s":""} gratuit${g-1>1?"s":""} aujourd’hui.`
+    : `Utilise 1 joker · il t’en restera ${j-1} cette semaine.`;
+  document.getElementById("chgErr").hidden = true;
+  const go = document.getElementById("chgGo");
+  go.disabled = !libre && !cout; go.textContent = libre ? "Nouveau défi" : "Changer";
+}
+async function changerDefi(){
+  const libre = chg.libre, raison = chg.raison, cout = libre ? "offert" : coutChange(raison);
+  if(!libre && !cout) return;
+  const ancien = current, go = document.getElementById("chgGo"), err = document.getElementById("chgErr");
+  // Écarte l'ancien défi (avant le tirage, pour qu'il ne revienne pas)
+  if(!libre && ancien && !ancien.ia){
+    state.exclus = state.exclus || {};
+    state.exclus[ancien.id] = {raison, jusqua: raison==="materiel" ? null : (raison==="lieu" || raison==="meteo") ? finJour() : Date.now() + 7*86400000};
+  }
+  try{
+    if(chg.src==="ia" && ia.cle){
+      go.disabled = true; go.textContent = "L’IA invente ton défi…"; err.hidden = true;
+      await defiIA(go, {q:chg.q, raison: libre ? null : raison, precedent: ancien?.titre});
+    } else pickRandom({facile: raison==="difficile"});
+  }catch(e){
+    if(!libre && ancien && !ancien.ia) delete state.exclus[ancien.id]; // échec : rien n'est consommé
+    save(); err.textContent = e.message; err.hidden = false; go.disabled = false; go.textContent = libre ? "Nouveau défi" : "Changer"; return;
+  }
+  if(!libre){
+    const liste = changes().filter(c=>c.ts > Date.now() - 60*86400000);
+    liste.push({date:dayKey(), ts:Date.now(), raison, cout, id:ancien?.id, titre:ancien?.titre});
+    state.changes = liste;
+  }
+  save(); render();
+  document.getElementById("chgDlg").close();
+}
+document.getElementById("change").onclick = ()=>openChange(false);
+document.getElementById("chgDlg").addEventListener("click", e=>{
+  const r = e.target.closest("[data-raison]"); if(r && !r.disabled){ chg.raison = r.dataset.raison; renderChange(); return; }
+  const sg = e.target.closest("[data-seg]");
+  if(sg){ if(sg.dataset.seg==="src") chg.src = sg.dataset.val; else chg.q[sg.dataset.seg] = sg.dataset.val; renderChange(); }
+});
+document.getElementById("chgGo").onclick = changerDefi;
+document.getElementById("chgIci").onclick = ()=>{ document.getElementById("chgDlg").close(); openIci(); };
+
 /* ---------- Tiroir « Là, maintenant, je suis… » ---------- */
 // Le choix vaut 2 h, ou jusqu'au prochain créneau du planning s'il commence avant (et dans plus de 15 min)
 function finIci(){
@@ -1604,13 +1748,21 @@ document.getElementById("iciList").addEventListener("click", e=>{
   const cle = b.dataset.ici;
   state.ici = cle==="planning" ? null : {cle, jusqua:finIci()};
   save(); document.getElementById("iciDlg").close();
-  renderCtx(); pickRandom(); // nouveau défi adapté au moment choisi
+  renderCtx();
+  if(!current || (!current.ia && !faisable(current))) pickRandom(); else render(); // nouveau défi seulement si l'actuel n'est plus faisable
 });
 document.getElementById("iciPlan").onclick = ()=>{ document.getElementById("iciDlg").close(); openPlan(); };
 setInterval(()=>{ renderCtx(); }, 60000); // la pastille suit l'heure (fin du choix, créneaux)
 
 document.getElementById("version").textContent = `Version ${VERSION}`;
-renderChips(); renderMeta(); renderTodayPlan(); pickToday();
+renderChips(); renderMeta(); renderTodayPlan();
+{
+  const e = state.encours, txt = v => String(v ?? "");
+  const c = e && e.date===dayKey() ? (e.ia && typeof e.ia==="object"
+    ? {...e.ia, ia:true, t: THEMES[e.ia.t] ? e.ia.t : "technique", n: Math.min(3, Math.max(1, parseInt(e.ia.n)||2)), titre:txt(e.ia.titre), brief:txt(e.ia.brief), astuce:txt(e.ia.astuce), pourquoi:txt(e.ia.pourquoi), reg: Array.isArray(e.ia.reg) ? e.ia.reg.map(txt) : []}
+    : D.find(x=>x.id===e.id)) : null;
+  if(c && c.titre){ current = c; currentBonus = e.bonus || BONUS[0]; render(); } else pickToday();
+}
 if(state.geo==="oui") locate(); else { ctxSource = state.geo==="non" ? "refus" : "defaut"; loadContext(NANCY); }
 </script>
 </body>
