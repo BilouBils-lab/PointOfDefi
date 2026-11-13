@@ -12,7 +12,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 - Style léger : noir, blanc et or (comme le logo « Point of Nabil »), variables `--bg`, `--surface`, `--surface-2`, `--ink`, `--soft`, `--line`, `--accent`, `--accent-ink`, `--accent-soft`, `--ok`, `--danger` (thèmes clair et sombre).
 - Logo : SVG inline provisoire (`.logo`, `currentColor`, texte en Cinzel), redessiné d'après une capture ; à remplacer par le fichier original. Favicon : crochets + cercle du viseur (data URI SVG).
-- Écran principal : en-tête (logo + bouton `#stats` qui ouvre l'historique), pastilles de contexte (`#ctx`, `.pill`, `.pill.moment` ouvre le planning), carte du défi (`.card.viewfinder`, coins dorés), bouton « Je l'ai fait » puis « Maintenant », « Défi du jour », « ✨ IA ».
+- Écran principal : en-tête en grille (logo et `#stats` sur la même ligne, statistiques sur deux lignes centrées sur le texte du logo, « Défis photo » dessous ; `viewBox` du logo recadré au plus près du dessin pour l'aligner à gauche), bouton `#stats` qui ouvre l'historique, pastilles de contexte (`#ctx`, `.pill`, `.pill.moment` ouvre le planning), carte du défi (`.card.viewfinder`, coins dorés), bouton « Je l'ai fait » puis « Maintenant », « Défi du jour », « ✨ IA ».
 - Barre d'onglets fixe en bas (`.tabbar`) : Défi, Planning (`#openPlan`), Matériel (`#gear`), Réglages (`#openSet`).
 - Tiroirs `dialog.sheet` (montent du bas sur téléphone, centrés sur grand écran) : `#gearDlg`, `#planDlg`, `#setDlg` (thèmes, difficulté, IA, historique, à propos). `openSheet()` bloque la page ; croix `[data-close]`, clic à côté ou Échap pour fermer. Un style qui fixe `display` doit prévoir `[hidden]{display:none}`.
 
@@ -70,7 +70,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 ## Workflow Git
 
-- Augmenter `VERSION` (en haut du script, affichée en bas de l'app) dans chaque PR qui modifie `index.html` : c'est le seul moyen pour le propriétaire de vérifier que son navigateur n'affiche pas une ancienne version gardée en mémoire.
+- Augmenter `VERSION` (numéro seul, sans date ; en haut du script, affiché en bas de l'app) dans chaque PR qui modifie `index.html` : c'est le seul moyen pour le propriétaire de vérifier que son navigateur n'affiche pas une ancienne version gardée en mémoire.
 
 - Ne jamais pousser directement sur `main` : `main` est publiée telle quelle sur GitHub Pages (https://biloubils-lab.github.io/PointOfDefi/).
 - Travailler sur une branche, la pousser, puis ouvrir une pull request vers `main`, avec une description en français (quoi, pourquoi, comment c'est testé).
