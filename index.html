@@ -107,6 +107,18 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .item .compat{margin-top:.6rem; font-size:.8125rem; color:var(--soft)}
 .item .compat div{display:flex; flex-wrap:wrap; gap:.3rem 1rem; margin-top:.25rem}
 .item .del{margin-top:.6rem}
+.search{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:.8rem; margin-bottom:.9rem}
+.search .row{display:flex; flex-wrap:wrap; gap:.6rem}
+.search label{display:flex; flex-direction:column; gap:.2rem; font-size:.8125rem; color:var(--soft); flex:1 1 10rem; min-width:0}
+.search input,.search select{font:inherit; font-size:1rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.45rem .55rem; width:100%}
+.results{list-style:none; margin:.6rem 0 0; padding:0}
+.results li{display:flex; justify-content:space-between; align-items:center; gap:.75rem; padding:.5rem 0; border-top:1px solid var(--line)}
+.results li > div{min-width:0}
+.results b{display:block; font-weight:600; font-size:.9375rem}
+.results small{color:var(--soft); font-size:.8125rem}
+.results .adapt{color:var(--gilt)}
+.results .btn{padding:.35rem .8rem; font-size:.875rem; flex:none}
+.results .more{display:block; color:var(--soft); font-size:.8125rem; border-top:1px solid var(--line); padding-top:.5rem}
 .addbtn{padding:.5rem 1rem; font-size:.9375rem}
 .linkbtn{background:none; border:0; color:var(--soft); text-decoration:underline; padding:0; font-size:.8125rem}
 </style>
@@ -158,7 +170,14 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
     <div id="camList"></div>
     <button class="btn addbtn" id="addCam">+ Ajouter un appareil</button>
     <h3>Objectifs</h3>
-    <p class="hint">Pour une focale fixe, mets la même valeur en min et max.</p>
+    <div class="search" id="lensSearch">
+      <div class="row">
+        <label>Pour l’appareil<select id="lsCam"></select></label>
+        <label>Rechercher un objectif<input type="search" id="lsQ" placeholder="ex. 50, 24-105, macro, sigma" autocomplete="off"></label>
+      </div>
+      <ul class="results" id="lsRes"></ul>
+    </div>
+    <p class="hint">Pas dans la liste ? Ajoute-le à la main. Pour une focale fixe, mets la même valeur en min et max.</p>
     <div id="lensList"></div>
     <button class="btn addbtn" id="addLens">+ Ajouter un objectif</button>
   </div>
@@ -169,8 +188,47 @@ const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", loisirs
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
   apsc15:{label:"APS-C ×1,5 (Nikon, Sony, Fuji)", crop:1.5}, m43:{label:"Micro 4/3 ×2", crop:2}, autre:{label:"Autre / smartphone", crop:1}};
+const MONTURES = {RF:"Canon RF (hybrides EOS R)", "EF-M":"Canon EF-M (hybrides EOS M)", EF:"Canon EF (reflex plein format)", "EF-S":"Canon EF-S (reflex APS-C)", autre:"Autre / je ne sais pas"};
+// Compatibilité monture de l'appareil → monture de l'objectif : "natif" ou nom de l'adaptateur
+const COMPAT = {
+  RF:{RF:"natif", "RF-S":"natif", EF:"adaptateur EF-EOS R", "EF-S":"adaptateur EF-EOS R"},
+  "EF-M":{"EF-M":"natif", EF:"adaptateur EF-EOS M", "EF-S":"adaptateur EF-EOS M"},
+  EF:{EF:"natif"},
+  "EF-S":{EF:"natif", "EF-S":"natif"}
+};
+// Catalogue intégré : [nom, monture, focale min, focale max, ouverture max, macro]
+const CATALOGUE = [
+ ["RF 10-20mm F4 L IS STM","RF",10,20,4],["RF 14-35mm F4 L IS USM","RF",14,35,4],["RF 15-35mm F2.8 L IS USM","RF",15,35,2.8],
+ ["RF 15-30mm F4.5-6.3 IS STM","RF",15,30,4.5],["RF 16mm F2.8 STM","RF",16,16,2.8],["RF 24mm F1.8 Macro IS STM","RF",24,24,1.8,1],
+ ["RF 24-50mm F4.5-6.3 IS STM","RF",24,50,4.5],["RF 24-70mm F2.8 L IS USM","RF",24,70,2.8],["RF 24-105mm F4 L IS USM","RF",24,105,4],
+ ["RF 24-105mm F4-7.1 IS STM","RF",24,105,4],["RF 24-240mm F4-6.3 IS USM","RF",24,240,4],["RF 28mm F2.8 STM","RF",28,28,2.8],
+ ["RF 28-70mm F2 L USM","RF",28,70,2],["RF 35mm F1.8 Macro IS STM","RF",35,35,1.8,1],["RF 50mm F1.2 L USM","RF",50,50,1.2],
+ ["RF 50mm F1.8 STM","RF",50,50,1.8],["RF 70-200mm F2.8 L IS USM","RF",70,200,2.8],["RF 70-200mm F4 L IS USM","RF",70,200,4],
+ ["RF 85mm F1.2 L USM","RF",85,85,1.2],["RF 85mm F2 Macro IS STM","RF",85,85,2,1],["RF 100mm F2.8 L Macro IS USM","RF",100,100,2.8,1],
+ ["RF 100-400mm F5.6-8 IS USM","RF",100,400,5.6],["RF 100-500mm F4.5-7.1 L IS USM","RF",100,500,4.5],["RF 135mm F1.8 L IS USM","RF",135,135,1.8],
+ ["RF 600mm F11 IS STM","RF",600,600,11],
+ ["RF-S 10-18mm F4.5-6.3 IS STM","RF-S",10,18,4.5],["RF-S 18-45mm F4.5-6.3 IS STM","RF-S",18,45,4.5],
+ ["RF-S 18-150mm F3.5-6.3 IS STM","RF-S",18,150,3.5],["RF-S 55-210mm F5-7.1 IS STM","RF-S",55,210,5],
+ ["Sigma 10-18mm F2.8 DC DN Contemporary (RF)","RF-S",10,18,2.8],["Sigma 18-50mm F2.8 DC DN Contemporary (RF)","RF-S",18,50,2.8],
+ ["Sigma 16mm F1.4 DC DN Contemporary (RF)","RF-S",16,16,1.4],["Sigma 30mm F1.4 DC DN Contemporary (RF)","RF-S",30,30,1.4],
+ ["Sigma 56mm F1.4 DC DN Contemporary (RF)","RF-S",56,56,1.4],
+ ["EF-M 11-22mm f/4-5.6 IS STM","EF-M",11,22,4],["EF-M 15-45mm f/3.5-6.3 IS STM","EF-M",15,45,3.5],["EF-M 18-55mm f/3.5-5.6 IS STM","EF-M",18,55,3.5],
+ ["EF-M 18-150mm f/3.5-6.3 IS STM","EF-M",18,150,3.5],["EF-M 22mm f/2 STM","EF-M",22,22,2],["EF-M 28mm f/3.5 Macro IS STM","EF-M",28,28,3.5,1],
+ ["EF-M 32mm f/1.4 STM","EF-M",32,32,1.4],["EF-M 55-200mm f/4.5-6.3 IS STM","EF-M",55,200,4.5],
+ ["Sigma 16mm F1.4 DC DN Contemporary (EF-M)","EF-M",16,16,1.4],["Sigma 30mm F1.4 DC DN Contemporary (EF-M)","EF-M",30,30,1.4],
+ ["Sigma 56mm F1.4 DC DN Contemporary (EF-M)","EF-M",56,56,1.4],
+ ["EF 16-35mm f/4L IS USM","EF",16,35,4],["EF 24-70mm f/2.8L II USM","EF",24,70,2.8],["EF 24-105mm f/4L IS II USM","EF",24,105,4],
+ ["EF 35mm f/2 IS USM","EF",35,35,2],["EF 40mm f/2.8 STM","EF",40,40,2.8],["EF 50mm f/1.4 USM","EF",50,50,1.4],["EF 50mm f/1.8 STM","EF",50,50,1.8],
+ ["EF 85mm f/1.8 USM","EF",85,85,1.8],["EF 100mm f/2.8 Macro USM","EF",100,100,2.8,1],["EF 100mm f/2.8L Macro IS USM","EF",100,100,2.8,1],
+ ["EF 135mm f/2L USM","EF",135,135,2],["EF 70-200mm f/4L IS II USM","EF",70,200,4],["EF 70-200mm f/2.8L IS III USM","EF",70,200,2.8],
+ ["EF 75-300mm f/4-5.6 III","EF",75,300,4],["EF 100-400mm f/4.5-5.6L IS II USM","EF",100,400,4.5],
+ ["Sigma 35mm F1.4 DG HSM Art (EF)","EF",35,35,1.4],["Sigma 50mm F1.4 DG HSM Art (EF)","EF",50,50,1.4],
+ ["EF-S 10-18mm f/4.5-5.6 IS STM","EF-S",10,18,4.5],["EF-S 17-55mm f/2.8 IS USM","EF-S",17,55,2.8],["EF-S 18-55mm f/3.5-5.6 IS STM","EF-S",18,55,3.5],
+ ["EF-S 18-135mm f/3.5-5.6 IS USM","EF-S",18,135,3.5],["EF-S 24mm f/2.8 STM","EF-S",24,24,2.8],["EF-S 35mm f/2.8 Macro IS STM","EF-S",35,35,2.8,1],
+ ["EF-S 55-250mm f/4-5.6 IS STM","EF-S",55,250,4],["Sigma 18-35mm F1.8 DC HSM Art (EF)","EF-S",18,35,1.8]
+].map(([nom,monture,fmin,fmax,ouv,macro])=>({nom, monture, fmin, fmax, ouv, macro:!!macro}));
 const DEFAULT_GEAR = {
-  cams:[{id:"m50", nom:"EOS M50", capteur:"apsc", isoMax:3200}, {id:"r6", nom:"R6 Mark II", capteur:"ff", isoMax:12800}],
+  cams:[{id:"m50", nom:"EOS M50", capteur:"apsc", isoMax:3200, monture:"EF-M"}, {id:"r6", nom:"R6 Mark II", capteur:"ff", isoMax:12800, monture:"RF"}],
   lenses:[{id:"o50", nom:"50 mm f/1.8", fmin:50, fmax:50, ouv:1.8, macro:false, cams:["m50","r6"]}]
 };
 
@@ -235,6 +293,7 @@ const KEY = "defis-photo-v1";
 let state = {themes:Object.keys(THEMES), levels:["1","2","3"], cam:"m50", history:[], gear:structuredClone(DEFAULT_GEAR)};
 try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s) state = Object.assign(state, s); }catch(e){}
 if(!state.gear || !state.gear.cams || !state.gear.cams.length) state.gear = structuredClone(DEFAULT_GEAR);
+state.gear.cams.forEach(c=>{ if(!c.monture) c.monture = c.id==="m50" ? "EF-M" : c.id==="r6" ? "RF" : "autre"; });
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
 const month = new Date().getMonth()+1;
@@ -312,6 +371,7 @@ function renderGear(){
       <div class="row">
         <label class="wide">Nom<input type="text" data-f="nom" value="${esc(c.nom)}" maxlength="40"></label>
         <label style="flex-basis:11rem">Capteur<select data-f="capteur">${Object.entries(CAPTEURS).map(([k,v])=>`<option value="${k}"${k===c.capteur?" selected":""}>${v.label}</option>`).join("")}</select></label>
+        <label style="flex-basis:11rem">Monture<select data-f="monture">${Object.entries(MONTURES).map(([k,v])=>`<option value="${k}"${k===c.monture?" selected":""}>${v}</option>`).join("")}</select></label>
         <label>ISO max confortable<input type="number" data-f="isoMax" value="${c.isoMax}" min="100" step="100" inputmode="numeric"></label>
       </div>
       ${g.cams.length>1 ? `<button class="linkbtn del" data-del>Supprimer cet appareil</button>` : ""}
@@ -328,6 +388,7 @@ function renderGear(){
       <div class="compat">Compatible avec :<div>${g.cams.map(c=>`<label class="check"><input type="checkbox" data-compat="${c.id}"${l.cams.includes(c.id)?" checked":""}><span>${esc(c.nom)}</span></label>`).join("")}</div></div>
       <button class="linkbtn del" data-del>Supprimer cet objectif</button>
     </div>`).join("") : `<p class="hint">Aucun objectif pour l’instant.</p>`;
+  renderSearch();
 }
 function onGearInput(e){
   if(e.type==="input" && e.target.type==="checkbox") return; // une case déclenche aussi « change »
@@ -338,6 +399,7 @@ function onGearInput(e){
   if(e.target.dataset.compat){ const id=e.target.dataset.compat; e.target.checked ? it.cams.push(id) : it.cams.splice(it.cams.indexOf(id),1); }
   else if(f==="nom") it.nom = v.trim() || (isCam ? "Appareil" : "Objectif");
   else if(f==="capteur") it.capteur = v;
+  else if(f==="monture"){ it.monture = v; renderSearch(); }
   else if(f==="macro") it.macro = e.target.checked;
   else if(f){ const n = parseFloat(String(v).replace(",", ".")); if(!(n>0)) return; it[f] = n; }
   // À la sortie du champ seulement : garder min ≤ max, sans redessiner la liste (ça ferait perdre la saisie)
@@ -345,10 +407,12 @@ function onGearInput(e){
     const autre = f==="fmin" ? "fmax" : "fmin"; it[autre] = it[f];
     box.querySelector(`[data-f="${autre}"]`).value = it[f];
   }
-  if(isCam && f==="nom") document.querySelectorAll(`[data-compat="${it.id}"]`).forEach(cb=>{ cb.nextSibling.textContent = it.nom; });
+  if(isCam && f==="nom"){ document.querySelectorAll(`[data-compat="${it.id}"]`).forEach(cb=>{ cb.nextSibling.textContent = it.nom; });
+    const o = document.querySelector(`#lsCam option[value="${it.id}"]`); if(o) o.textContent = it.nom; }
   gearChanged();
 }
 function onGearClick(e){
+  if(e.target.matches("[data-add-cat]")){ addFromCatalogue(+e.target.dataset.addCat); return; }
   if(!e.target.matches("[data-del]")) return;
   const box = e.target.closest("[data-cam],[data-lens]");
   if(box.dataset.cam){
@@ -362,6 +426,40 @@ function onGearClick(e){
     if(!confirm(`Supprimer l’objectif « ${l.nom} » ?`)) return;
     state.gear.lenses = state.gear.lenses.filter(x=>x!==l);
   }
+  gearChanged(); renderGear();
+}
+/* ---------- Recherche d'objectifs dans le catalogue ---------- */
+const norm = t => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/,/g,".").replace(/f\//g,"f").replace(/mm/g,"").replace(/\s+/g,"");
+function compatFor(cam, monture){ return (COMPAT[cam.monture]||{})[monture] || null; }
+// Objectif APS-C sur un boîtier plein format : il se monte, mais l'appareil passe en mode recadrage
+const recadre = (cam, l) => cam.capteur==="ff" && (l.monture==="RF-S" || l.monture==="EF-S");
+const rang = (cam, l) => recadre(cam, l) ? 2 : compatFor(cam, l.monture)==="natif" ? 0 : 1;
+function renderSearch(){
+  const sel = document.getElementById("lsCam"), prev = sel.value || state.cam;
+  sel.innerHTML = state.gear.cams.map(c=>`<option value="${c.id}">${esc(c.nom)}</option>`).join("");
+  sel.value = state.gear.cams.some(c=>c.id===prev) ? prev : state.gear.cams[0].id;
+  const cam = state.gear.cams.find(c=>c.id===sel.value), res = document.getElementById("lsRes");
+  if(!COMPAT[cam.monture]){
+    res.innerHTML = `<li><small>Indique la monture de ton ${esc(cam.nom)} (dans « Appareils photo » ci-dessus) pour voir les objectifs compatibles. Le catalogue couvre les montures Canon.</small></li>`;
+    return;
+  }
+  const mots = document.getElementById("lsQ").value.split(/\s+/).map(norm).filter(Boolean);
+  const owned = new Set(state.gear.lenses.map(l=>norm(l.nom)));
+  const list = CATALOGUE.filter(l=>compatFor(cam, l.monture) && mots.every(m=>norm(l.nom + (l.macro?" macro":"")).includes(m)))
+    .sort((a,b)=> rang(cam,a) - rang(cam,b) || a.fmin-b.fmin || a.fmax-b.fmax);
+  const MAX = 10;
+  res.innerHTML = list.length ? list.slice(0,MAX).map(l=>{
+    const i = CATALOGUE.indexOf(l), c = compatFor(cam, l.monture), has = owned.has(norm(l.nom));
+    const foc = l.fmin===l.fmax ? `${l.fmin} mm` : `${l.fmin}–${l.fmax} mm`;
+    return `<li><div><b>${esc(l.nom)}</b><small>${foc} · f/${fmt(l.ouv)}${l.macro?" · macro":""} · ${c==="natif" ? "natif" : `<span class="adapt">avec ${c}</span>`}${recadre(cam,l) ? ` · <span class="adapt">mode recadrage APS-C</span>` : ""}</small></div>
+      <button class="btn" data-add-cat="${i}"${has?" disabled":""}>${has?"Ajouté":"Ajouter"}</button></li>`;
+  }).join("") + (list.length>MAX ? `<li class="more">${list.length} objectifs compatibles : précise ta recherche pour voir les autres.</li>` : "")
+  : `<li><small>Aucun objectif du catalogue ne correspond. Tu peux l’ajouter à la main ci-dessous.</small></li>`;
+}
+function addFromCatalogue(i){
+  const l = CATALOGUE[i];
+  state.gear.lenses.push({id:uid("o"), nom:l.nom, fmin:l.fmin, fmax:l.fmax, ouv:l.ouv, macro:l.macro, monture:l.monture,
+    cams: state.gear.cams.filter(c=>compatFor(c, l.monture)).map(c=>c.id)});
   gearChanged(); renderGear();
 }
 function openGear(){ renderGear(); document.getElementById("gearDlg").showModal(); }
@@ -567,8 +665,10 @@ const gearDlg = document.getElementById("gearDlg");
 gearDlg.addEventListener("input", onGearInput);
 gearDlg.addEventListener("change", onGearInput);
 gearDlg.addEventListener("click", e=>{ if(e.target===gearDlg) gearDlg.close(); else onGearClick(e); });
+document.getElementById("lsQ").addEventListener("input", renderSearch);
+document.getElementById("lsCam").addEventListener("change", renderSearch);
 document.getElementById("addCam").onclick = ()=>{
-  const id = uid("c"); state.gear.cams.push({id, nom:"Nouvel appareil", capteur:"ff", isoMax:6400});
+  const id = uid("c"); state.gear.cams.push({id, nom:"Nouvel appareil", capteur:"ff", isoMax:6400, monture:"autre"});
   gearChanged(); renderGear(); document.querySelector(`[data-cam="${id}"] input`).select();
 };
 document.getElementById("addLens").onclick = ()=>{

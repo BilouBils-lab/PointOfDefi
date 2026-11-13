@@ -20,8 +20,9 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 ## Matériel
 
-- `state.gear` : `{cams:[{id, nom, capteur, isoMax}], lenses:[{id, nom, fmin, fmax, ouv, macro, cams:[ids d'appareils compatibles]}]}`. Valeurs par défaut dans `DEFAULT_GEAR` ; `state.cam` est l'id de l'appareil du jour.
-- `CAPTEURS` : type de capteur et coefficient de recadrage (`crop`).
+- `state.gear` : `{cams:[{id, nom, capteur, isoMax, monture}], lenses:[{id, nom, fmin, fmax, ouv, macro, monture?, cams:[ids d'appareils compatibles]}]}`. Valeurs par défaut dans `DEFAULT_GEAR` ; `state.cam` est l'id de l'appareil du jour.
+- `CAPTEURS` : type de capteur et coefficient de recadrage (`crop`). `MONTURES` : monture d'un appareil (`cam.monture`).
+- Recherche d'objectifs : `CATALOGUE` (liste intégrée `[nom, monture, fmin, fmax, ouv, macro]`, montures RF, RF-S, EF, EF-S, EF-M), `COMPAT` (monture appareil → monture objectif : `"natif"` ou nom de l'adaptateur), `recadre()` (objectif APS-C sur plein format), `renderSearch()`, `addFromCatalogue()`. Pour ajouter un objectif au catalogue : une ligne dans `CATALOGUE`, valeurs vérifiées sur la fiche du fabricant.
 - `gearAdvice(c, nuit)` : texte du bloc appareil. `bestLens()` choisit l'objectif selon `OBJ` (plage de focale équivalente visée) ; `FAUTE` quand aucun objectif ne la couvre.
 - Écran « Mon matériel » : `<dialog id="gearDlg">`, rendu par `renderGear()`, modifications via `onGearInput` (événements délégués). Ne pas redessiner la liste pendant la saisie (ça fait perdre le champ en cours) ; échapper les noms saisis avec `esc()`.
 
