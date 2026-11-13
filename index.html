@@ -307,6 +307,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
   </div>
   <section class="coach" id="coach" aria-live="polite" hidden></section>
   <input type="file" id="coachFile" accept="image/*" hidden>
+  <input type="file" id="coachCamFile" accept="image/*" capture="environment" hidden>
   <p class="foot" id="version"></p>
 </div>
 
@@ -437,12 +438,12 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "19"; // à augmenter à chaque PR fusionnée (numéro seul)
+const VERSION = "20"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
-  apsc15:{label:"APS-C ×1,5 (Nikon, Sony, Fuji)", crop:1.5}, m43:{label:"Micro 4/3 ×2", crop:2}, autre:{label:"Autre / smartphone", crop:1}};
-const MONTURES = {RF:"Canon RF (hybrides EOS R)", "EF-M":"Canon EF-M (hybrides EOS M)", EF:"Canon EF (reflex plein format)", "EF-S":"Canon EF-S (reflex APS-C)", autre:"Autre / je ne sais pas"};
+  apsc15:{label:"APS-C ×1,5 (Nikon, Sony, Fuji)", crop:1.5}, m43:{label:"Micro 4/3 ×2", crop:2}, phone:{label:"Smartphone (focales équivalentes)", crop:1}, autre:{label:"Autre", crop:1}};
+const MONTURES = {RF:"Canon RF (hybrides EOS R)", "EF-M":"Canon EF-M (hybrides EOS M)", EF:"Canon EF (reflex plein format)", "EF-S":"Canon EF-S (reflex APS-C)", smartphone:"Smartphone (objectifs intégrés)", autre:"Autre / je ne sais pas"};
 // Compatibilité monture de l'appareil → monture de l'objectif : "natif" ou nom de l'adaptateur
 const COMPAT = {
   RF:{RF:"natif", "RF-S":"natif", EF:"adaptateur EF-EOS R", "EF-S":"adaptateur EF-EOS R"},
@@ -595,6 +596,17 @@ if(!state.themesMaison){ if(!state.themes.includes("maison")) state.themes.push(
 for(let d=0; d<7; d++) if(!Array.isArray(state.planning[d])) state.planning[d] = [];
 state.gear.lenses = (Array.isArray(state.gear.lenses) ? state.gear.lenses : []).filter(l=>l && l.id).map(l=>({...l, cams:Array.isArray(l.cams) ? l.cams : []}));
 if(!Array.isArray(state.history)) state.history = [];
+// Ajout unique de l'iPhone 13 Pro et de ses trois objectifs (focales équivalentes plein format)
+if(!state.iphone13){
+  if(!state.gear.cams.some(c=>c.capteur==="phone")){
+    state.gear.cams.push({id:"ip13", nom:"iPhone 13 Pro", capteur:"phone", isoMax:1600, monture:"smartphone"});
+    state.gear.lenses.push(
+      {id:"ip13uw", nom:"×0,5 ultra grand-angle (13 mm)", fmin:13, fmax:13, ouv:1.8, macro:true, monture:"smartphone", cams:["ip13"]},
+      {id:"ip13w", nom:"×1 grand-angle (26 mm)", fmin:26, fmax:26, ouv:1.5, macro:false, monture:"smartphone", cams:["ip13"]},
+      {id:"ip13t", nom:"×3 téléobjectif (77 mm)", fmin:77, fmax:77, ouv:2.8, macro:false, monture:"smartphone", cams:["ip13"]});
+  }
+  state.iphone13 = true;
+}
 state.gear.cams.forEach(c=>{ if(!c.monture) c.monture = c.id==="m50" ? "EF-M" : c.id==="r6" ? "RF" : "autre"; });
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
@@ -637,9 +649,62 @@ function bestLens(type, lenses, crop){
   return lenses.slice().sort((a,b)=> gap(a)-gap(b) || (type==="portrait" ? a.ouv-b.ouv : 0))[0];
 }
 function eqTxt(l, crop){ const a=Math.round(l.fmin*crop), b=Math.round(l.fmax*crop); return a===b ? `${a} mm` : `${a}–${b} mm`; }
+// Défis au smartphone : "non" = demande un vrai appareil (exclu quand l'iPhone est l'appareil du jour), sinon conseil iPhone
+const PHONE = {
+  t6:"non", t2:"non", t4:"non",
+  n2:"Active le mode Nuit et pose l’iPhone sur un muret : posé, il peut allonger la pose jusqu’à 30 s.",
+  n7:"Prends une Live Photo, puis dans Photos choisis l’effet « Pose longue » : le passant devient un flou de mouvement.",
+  m5:"Prends une Live Photo, puis applique l’effet « Pose longue » dans Photos : seul ce qui bouge devient flou.",
+  n4:"Touche la brume, puis fais glisser le petit soleil vers le haut pour la garder blanche.",
+  m4:"Touche la neige, puis fais glisser le petit soleil vers le haut pour qu’elle reste blanche.",
+  b7:"Touche la vapeur, puis fais glisser le petit soleil vers le bas pour sous-exposer.",
+  t3:"Touche le ciel pour exposer dessus, puis baisse encore un peu le petit soleil.",
+  n12:"Passe en ×0,5 et approche-toi : le mode Macro s’active tout seul, jusqu’à 2 cm du sujet.",
+  h4:"Passe en ×0,5 et approche-toi : le mode Macro s’active tout seul, jusqu’à 2 cm.",
+  n1:"Passe en ×3, ou en mode Portrait pour flouter l’arrière-plan derrière le doré.",
+  t1:"Aujourd’hui, uniquement le ×1 : interdiction de zoomer, ce sont tes pieds qui cadrent.",
+  t7:"Choisis le style Mono, ou shoote en ProRAW (Réglages › Appareil photo › Formats) pour garder la couleur au besoin.",
+  f6:"Glisse le déclencheur vers la gauche pour lancer la rafale, puis garde la meilleure image.",
+  l2:"Glisse le déclencheur vers la gauche pour la rafale au moment du geste.",
+  f3:"Pose l’iPhone, puis appui long sur le jouet : « Verrouillage AE/AF » fige l’exposition et la mise au point pour les 12 images.",
+  n9:"Active la grille et le niveau : Réglages › Appareil photo › Grille.",
+  b5:"Active la grille (Réglages › Appareil photo) et place le point de fuite sur un tiers.",
+  l3:"Pose l’iPhone et utilise le retardateur de l’app Appareil photo (3 ou 10 s)."
+};
+const estPhone = cam => cam?.capteur==="phone";
+function conseilPhone(c, nuit){
+  if(typeof PHONE[c.id]==="string" && PHONE[c.id]!=="non") return PHONE[c.id];
+  const r = (c.reg||[]).join(" ");
+  if(nuit) return "Active le mode Nuit et cale l’iPhone : il allonge la pose tout seul.";
+  if(/Rafale/.test(r)) return "Glisse le déclencheur vers la gauche pour la rafale.";
+  if(/RAW/.test(r)) return "Shoote en ProRAW : Réglages › Appareil photo › Formats.";
+  if(/(^|[^\/\d])\d+ s\b|1\/(\d|1\d) s\b/.test(r)) return "Pour une pose longue, prends une Live Photo puis choisis l’effet « Pose longue » dans Photos.";
+  if(/MF|Mise au point/.test(r)) return "Appui long sur le sujet pour verrouiller la mise au point et l’exposition (AE/AF).";
+  if(/Correction/.test(r)) return "Touche le sujet, puis fais glisser le petit soleil pour corriger l’exposition.";
+  if(/Grille/.test(r)) return "Active la grille : Réglages › Appareil photo › Grille.";
+  if(/Mode M|Priorité|ISO/.test(r)) return "L’iPhone gère l’exposition : concentre-toi sur le cadrage et la lumière, et ajuste avec le petit soleil si besoin.";
+  return "";
+}
 function gearAdvice(c, nuit){
   const cam = curCam(), crop = CAPTEURS[cam.capteur]?.crop || 1, lenses = camLenses(cam);
   const parts = [];
+  if(estPhone(cam)){
+    // Smartphone : on parle en zooms (×0,5, ×1, ×3) et en gestes de l'app Appareil photo
+    const zoom = l => esc(l.nom.split(" ")[0]);
+    if(!lenses.length) return {titre:esc(cam.nom), texte:[conseilPhone(c, nuit) || "Ajoute ses objectifs dans « Mon matériel »."].join(" ")};
+    const type = c.obj, l = type ? bestLens(type, lenses, 1) : lenses.find(x=>x.fmin>=24 && x.fmin<=35) || lenses[0];
+    let t = `Passe en ${zoom(l)} (${l.fmin} mm)`;
+    if(type==="normal" || (!type && l.fmin>=24 && l.fmin<=35)) t = `Reste en ${zoom(l)} (${l.fmin} mm), le cadrage le plus naturel.`;
+    else if(type==="portrait") t += " pour isoler le sujet, ou en mode Portrait pour flouter l’arrière-plan.";
+    else if(type==="lumineux") t += ` : c’est ton objectif le plus lumineux (f/${fmt(l.ouv)}).`;
+    else if(type==="macro") t += l.macro ? " et approche-toi : mode Macro." : ".";
+    else if(type && lensGap(l, OBJ[type], 1) > 0) t += /^c/.test(FAUTE[type]) ? ` : ${FAUTE[type]}` : ` ${FAUTE[type]}`;
+    else t += type ? ` ${OBJ[type].pour}.` : ".";
+    const p = conseilPhone(c, nuit);
+    if(!/^(Passe|Aujourd’hui, uniquement)/.test(p)) parts.push(t); // le conseil précis indique déjà le zoom
+    if(p) parts.push(p);
+    return {titre:`${esc(cam.nom)} · ${zoom(l)}`, texte:parts.join(" ")};
+  }
   if(nuit){
     parts.push(cam.isoMax >= 6400
       ? `Ton ${esc(cam.nom)} encaisse ${cam.isoMax.toLocaleString("fr-FR")} ISO sans souci : n’aie pas peur de monter.`
@@ -678,7 +743,7 @@ function gearChanged(){
 }
 let gearOpen = null; // fiche ouverte dans « Mon matériel »
 const CHEV = `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
-const camMeta = c => [CAPTEURS[c.capteur]?.label, c.monture && c.monture!=="autre" ? c.monture : "monture ?", `ISO ${c.isoMax}`].filter(Boolean).join(" · ");
+const camMeta = c => c.capteur==="phone" ? "Smartphone · objectifs intégrés" : [CAPTEURS[c.capteur]?.label, c.monture && c.monture!=="autre" ? c.monture : "monture ?", `ISO ${c.isoMax}`].filter(Boolean).join(" · ");
 function lensMeta(l){
   const foc = l.fmin===l.fmax ? `${l.fmin} mm` : `${l.fmin}–${l.fmax} mm`;
   const sur = state.gear.cams.filter(c=>l.cams.includes(c.id)).map(c=>c.nom);
@@ -775,6 +840,10 @@ function renderSearch(){
   const tape = !!document.getElementById("lsQ").value.trim();
   document.getElementById("lsFor").hidden = !tape;
   if(!tape){ res.innerHTML = ""; return; } // liste légère : rien tant qu'on ne tape pas
+  if(cam.monture==="smartphone" || cam.capteur==="phone"){
+    res.innerHTML = `<li><small>Les objectifs d’un smartphone sont intégrés : ajoute-les à la main avec leur focale équivalente (ex. ×3 = 77 mm sur iPhone 13 Pro).</small></li>`;
+    return;
+  }
   if(!COMPAT[cam.monture]){
     res.innerHTML = `<li><small>Indique la monture de ton ${esc(cam.nom)} dans « Appareils » pour voir les objectifs compatibles. Le catalogue couvre les montures Canon.</small></li>`;
     return;
@@ -964,6 +1033,7 @@ function ctxTags(){ if(!ctx) return []; const t=[ctx.cat, ctx.light]; if(ctx.ven
   if(ctx.cat==="clair" && (ctx.light==="jour" || ctx.light==="doree")) t.push("soleil"); // soleil visible
   return t; }
 function score(c, avecRythme=true){
+  if(PHONE[c.id]==="non" && estPhone(curCam())) return 0; // demande un vrai appareil photo
   if(c.req && !c.req.every(r=>ctxTags().includes(r))) return 0;
   if(avecRythme && !faisable(c)) return 0;
   if(!ctx) return 1;
@@ -1010,7 +1080,7 @@ const exclu = c => { const e = state.exclus?.[c.id]; return !!e && (e.raison==="
 function pickToday(){
   // Défi du jour : faisable à un moment de la journée (créneaux du jour + temps perso)
   const auj = new Date(), jour = new Set(["perso", ...slotsDu(auj).map(x=>typeEffectif(x, auj))]);
-  let p = D.filter(c => inSeason(c) && !c.req && faisable(c, jour));
+  let p = D.filter(c => inSeason(c) && !c.req && faisable(c, jour) && !(PHONE[c.id]==="non" && estPhone(curCam())));
   if(!p.length) p = D.filter(c => inSeason(c) && !c.req);
   const h = hash(dayKey());
   poser(p[h % p.length], BONUS[h % BONUS.length]);
@@ -1098,6 +1168,7 @@ function chips(id, map, isOn, onClick){
       if(id==="planCopy"){ planChanged(); return; }
       renderChips();
       if((id==="themes"||id==="levels") && current && !current.ia && !pool().some(c=>c.id===current.id)) pickRandom(); // le défi ne fait plus partie des réglages
+      else if(id==="cams" && current && PHONE[current.id]==="non" && estPhone(curCam())) pickRandom(); // ce défi demande un vrai appareil photo
       else { renderCtx(); render(); } };
     box.appendChild(b);
   });
@@ -1278,11 +1349,14 @@ function iaContexte(extra={}){
     `Situation : ${[...types].map(t=>situation[t]||t).join(" ; ")}.`,
     `Lieu : ${ctx ? (ctx.nancy ? "Nancy (Lorraine) : place Stanislas, Vieille Ville, Art nouveau, parc de la Pépinière, canal" : "hors de Nancy") : "Nancy (Lorraine)"}.`,
     ctx ? `Météo : ${CTX_LABEL[ctx.cat]}${ctx.vent ? ", du vent" : ""}, ${ctx.temp} °C. Lumière : ${CTX_LABEL[ctx.light]}${sunHint() ? " (" + sunHint() + ")" : ""}.` : "Météo inconnue.",
-    `Appareil du jour : ${cam.nom} (${CAPTEURS[cam.capteur]?.label || "capteur inconnu"}, ISO confortable jusqu’à ${cam.isoMax}).`,
-    `Objectifs disponibles : ${camLenses(cam).map(l=>l.nom).join(", ") || "inconnus"}.`,
+    estPhone(cam)
+      ? `Appareil du jour : ${cam.nom}, un smartphone (pas de réglage d’ouverture ni de vitesse ; zooms ${camLenses(cam).map(l=>l.nom).join(", ")} ; modes Portrait, Nuit, Macro, ProRAW, Live Photo avec effet « Pose longue », correction d’exposition par le curseur). Propose un défi faisable au smartphone et donne des réglages sous forme de gestes iPhone (ex. « ×3 », « mode Nuit », « verrouillage AE/AF »).`
+      : `Appareil du jour : ${cam.nom} (${CAPTEURS[cam.capteur]?.label || "capteur inconnu"}, ISO confortable jusqu’à ${cam.isoMax}).`,
+    estPhone(cam) ? "" : `Objectifs disponibles : ${camLenses(cam).map(l=>l.nom).join(", ") || "inconnus"}.`,
     `Thèmes autorisés : ${state.themes.map(t=>THEMES[t]).join(", ")}. Difficultés autorisées : ${state.levels.map(n=>LEVELS[n]).join(", ")}.`,
     `Défis récents à ne pas répéter : ${state.history.slice(-15).map(h=>h.titre).join(" ; ") || "aucun"}.`
   ];
+  for(let i = lignes.length - 1; i >= 0; i--) if(!lignes[i]) lignes.splice(i, 1);
   if(extra.q) lignes.push(`Réponses du photographe : lumière ${Q.lumiere.ia[extra.q.lumiere]} ; temps disponible ${Q.temps.ia[extra.q.temps]} ; envie ${Q.envie.ia[extra.q.envie]}.`);
   if(extra.raison && extra.precedent) lignes.push(`Le défi précédent « ${extra.precedent} » a été écarté : ${RAISONS[extra.raison].ia}.`);
   return lignes.join("\n");
@@ -1409,12 +1483,15 @@ function lireExif(buf){
 const txtVitesse = s => s >= 1 ? `${fmt(s)} s` : `1/${Math.round(1/s)} s`;
 function exifTexte(x){
   if(!x) return [];
-  return [x.ouverture ? `f/${fmt(x.ouverture)}` : "", x.vitesse ? txtVitesse(x.vitesse) : "", x.iso ? `ISO ${x.iso}` : "", x.focale ? `${Math.round(x.focale)} mm` : ""].filter(Boolean);
+  const foc = x.focale35 && x.focale && Math.abs(x.focale35 - x.focale) > 2 ? `${Math.round(x.focale35)} mm éq.` : x.focale ? `${Math.round(x.focale)} mm` : "";
+  return [x.ouverture ? `f/${fmt(x.ouverture)}` : "", x.vitesse ? txtVitesse(x.vitesse) : "", x.iso ? `ISO ${x.iso}` : "", foc].filter(Boolean);
 }
 // Compare les réglages réels à ceux conseillés par le défi (à un diaphragme près = ✓)
 function comparerReglages(reg, x){
   if(!x) return [];
   const out = [], num = t => parseFloat(String(t).replace(",", "."));
+  const tel = /iphone|pixel|galaxy|smartphone/i.test(x.appareil||""); // ouverture fixe : on ne la compare pas
+  const focale = x.focale35 || x.focale;
   const etat = r => r <= 1.45 ? "ok" : r <= 2.9 ? "proche" : "ecart";
   const ratio = (a, b) => Math.max(a, b) / Math.min(a, b);
   for(const r of reg){
@@ -1424,7 +1501,7 @@ function comparerReglages(reg, x){
       const a = v(m[1]), b = m[2] ? num(m[2]) : a;
       const k = x.vitesse >= Math.min(a,b) && x.vitesse <= Math.max(a,b) ? 1 : Math.min(ratio(x.vitesse, a), ratio(x.vitesse, b));
       out.push({etat:/mini/.test(r) && x.vitesse <= a ? "ok" : etat(k), txt:`${r} → ${txtVitesse(x.vitesse)}`});
-    } else if(x.ouverture && (m = r.match(/f\/(\d+(?:[.,]\d+)?)(?:\s*à\s*f\/(\d+(?:[.,]\d+)?))?/))){
+    } else if(x.ouverture && !tel && (m = r.match(/f\/(\d+(?:[.,]\d+)?)(?:\s*à\s*f\/(\d+(?:[.,]\d+)?))?/))){
       const a = num(m[1]), b = m[2] ? num(m[2]) : a;
       const k = x.ouverture >= Math.min(a,b) && x.ouverture <= Math.max(a,b) ? 1 : Math.min(ratio(x.ouverture, a), ratio(x.ouverture, b))**2; // 1 diaphragme = ×1,4
       out.push({etat:etat(k), txt:`${r} → f/${fmt(x.ouverture)}`});
@@ -1432,9 +1509,9 @@ function comparerReglages(reg, x){
       const a = num(m[1]), b = m[2] ? num(m[2]) : a;
       const k = x.iso >= a && x.iso <= b ? 1 : Math.min(ratio(x.iso, a), ratio(x.iso, b));
       out.push({etat:etat(k), txt:`${r} → ISO ${x.iso}`});
-    } else if(x.focale && (m = r.match(/^(\d+)\s*mm/))){
-      const k = ratio(x.focale, num(m[1]));
-      out.push({etat:k <= 1.15 ? "ok" : k <= 1.5 ? "proche" : "ecart", txt:`${r} → ${Math.round(x.focale)} mm`});
+    } else if(focale && (m = r.match(/^(\d+)\s*mm/))){
+      const k = ratio(focale, num(m[1]));
+      out.push({etat:k <= 1.15 ? "ok" : k <= 1.5 ? "proche" : "ecart", txt:`${r} → ${Math.round(focale)} mm${x.focale35 ? " éq." : ""}`});
     }
   }
   return out;
@@ -1469,7 +1546,8 @@ function renderCoach(){
   const c = current, x = coach.exif, E = c.ia ? esc : (v=>v);
   if(coach.etape==="repos"){
     el.innerHTML = `<h3>Coach photo</h3><p class="hint">Fais analyser ta photo : ce qui marche, ce qui peut progresser, et un conseil pour la suite.</p>
-      <button class="btn" id="coachPick">📷 Faire analyser ma photo</button>`;
+      <div class="coach-row"><button class="btn" id="coachCam">📷 Prendre la photo</button><button class="btn" id="coachPick">🖼️ Galerie</button></div>
+      <p class="hint" style="margin:.6rem 0 0; font-size:.8125rem">Pour les modes Nuit, Portrait ou ProRAW, prends la photo avec l’app Appareil photo, puis choisis-la dans la galerie.</p>`;
   } else if(coach.etape==="apercu" || coach.etape==="analyse"){
     const fort = c.t==="famille" || /portrait|visage|passant|commerçant|recruteur/i.test(c.titre + c.brief);
     el.innerHTML = `<h3>Coach photo</h3>
@@ -1540,12 +1618,13 @@ Réglages réels de la photo : ${exifTexte(x).join(", ") || "inconnus"}${x?.appa
 }
 document.getElementById("coach").addEventListener("click", e=>{
   const id = e.target.closest("button")?.id;
-  if(id==="coachPick"){ const f = document.getElementById("coachFile"); f.value = ""; f.click(); }
+  if(id==="coachPick" || id==="coachCam"){ const f = document.getElementById(id==="coachCam" ? "coachCamFile" : "coachFile"); f.value = ""; f.click(); }
   else if(id==="coachCancel"){ coach.etape = "repos"; renderCoach(); }
   else if(id==="coachGo") coachAnalyser();
   else if(id==="coachValider") validerDefi(coach.res.note);
 });
 document.getElementById("coachFile").addEventListener("change", e=>coachFichier(e.target.files[0]));
+document.getElementById("coachCamFile").addEventListener("change", e=>coachFichier(e.target.files[0]));
 document.getElementById("reset").onclick = ()=>{
   if(confirm("Effacer tout l’historique des défis réalisés ?")){ state.history=[]; save(); renderMeta(); render(); }
 };
