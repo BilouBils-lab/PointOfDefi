@@ -63,6 +63,11 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - **Coach photo** (`#coach`, sous les boutons, `renderCoach()` appelé par `render()`, remis à zéro quand le défi change) : l'utilisateur choisit une photo (`#coachFile`) ; `lireExif()` lit sur l'appareil les réglages d'un JPEG (ouverture, vitesse, ISO, focale, appareil, objectif, logiciel) ; un export Lightroom ou autre logiciel coche « Photo retouchée » ; `reduirePhoto()` redimensionne à 1024 px via un canvas (supprime EXIF et GPS) ; `coachAnalyser()` envoie photo + défi + réglages à Gemini, réponse JSON `COACH_SCHEMA` (verdict, note /10, points forts, à améliorer, conseil, retouche). Mode coach : avis seulement, la validation reste au propriétaire (`validerDefi(note)`, note gardée dans `state.history[].note`). `comparerReglages()` compare l'EXIF aux réglages du défi (✓ à un diaphragme près, ≈ à deux). Rappel de confidentialité, renforcé pour le thème famille et les portraits. Formats : JPEG, PNG, HEIC si le navigateur le décode ; pas de RAW.
 - Le texte venant de l'IA est **toujours échappé** au rendu (`E = esc` dans `render()`), comme les titres de l'historique.
 
+## Sauvegarde
+
+- Réglages → Sauvegarde (`#bkSec`) : `sauvegarder()` crée un JSON `{app:"defis-photo", format:1, version, date, donnees:state, ia}` (clé IA seulement si `#bkKey` est cochée), partagé via `navigator.share` sur téléphone ou téléchargé ; date gardée dans `state.derniereSauvegarde`.
+- `restaurer()` vérifie `app`, résume le contenu, demande confirmation, écrit `localStorage` puis recharge la page : les mises à niveau et le nettoyage au chargement (objectifs sans `cams`, historique non tableau, créneaux de type inconnu ou mal formés) protègent contre un fichier ancien ou abîmé.
+
 ## Conventions
 
 - Couleurs en variables CSS sur `:root`, avec un thème sombre (`prefers-color-scheme` et `data-theme`).

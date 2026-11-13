@@ -350,6 +350,14 @@ a{color:var(--accent-ink); text-underline-offset:2px}
       <p class="ia-status" id="iaStatus" aria-live="polite"></p>
       <p class="hint" style="font-size:.8125rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom. <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
     </section>
+    <section class="sec" id="bkSec">
+      <h3>Sauvegarde</h3>
+      <p class="hint">Ton historique, tes notes, ton matériel et ton planning sont enregistrés dans ce navigateur uniquement. Sauvegarde-les dans un fichier (iCloud Drive, Google Drive…) pour ne pas les perdre et les retrouver sur un autre appareil.</p>
+      <label class="check"><input type="checkbox" id="bkKey"> Inclure ma clé IA (garde alors ce fichier pour toi)</label>
+      <div class="coach-row" style="margin-top:.6rem"><button class="btn" id="bkSave">Sauvegarder</button><button class="btn" id="bkLoad">Restaurer</button></div>
+      <p class="ia-status" id="bkStatus" aria-live="polite"></p>
+      <input type="file" id="bkFile" accept="application/json,.json" hidden>
+    </section>
     <section class="sec" id="histSec">
       <h3>Défis réalisés</h3>
       <div class="list"><ul class="history" id="history"></ul></div>
@@ -364,7 +372,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "15"; // à augmenter à chaque PR fusionnée (numéro seul)
+const VERSION = "16"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -520,6 +528,8 @@ if(!state.planning) state.planning = planningDepuisRythme(state.rythme);
 // Nouveau thème « À la maison » : activé une fois pour les réglages enregistrés avant son ajout
 if(!state.themesMaison){ if(!state.themes.includes("maison")) state.themes.push("maison"); state.themesMaison = true; }
 for(let d=0; d<7; d++) if(!Array.isArray(state.planning[d])) state.planning[d] = [];
+state.gear.lenses = (Array.isArray(state.gear.lenses) ? state.gear.lenses : []).filter(l=>l && l.id).map(l=>({...l, cams:Array.isArray(l.cams) ? l.cams : []}));
+if(!Array.isArray(state.history)) state.history = [];
 state.gear.cams.forEach(c=>{ if(!c.monture) c.monture = c.id==="m50" ? "EF-M" : c.id==="r6" ? "RF" : "autre"; });
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
@@ -856,6 +866,8 @@ function faisable(c, types=maintenant().types){
   return [...types].some(m => q.includes(m) || (m==="fils" && q.includes("perso")));
 }
 const filsLa = () => maintenant().types.has("fils");
+// Créneaux inconnus ou incomplets (ancienne sauvegarde, fichier modifié) : ignorés
+for(let d=0; d<7; d++) state.planning[d] = state.planning[d].filter(x=>x && TYPES[x.type] && /^\d\d:\d\d$/.test(x.debut) && /^\d\d:\d\d$/.test(x.fin));
 
 // Plus une condition est rare, plus un défi qui en profite est favorisé.
 const POIDS = {brouillard:10, neige:10, pluie:6, vent:6, doree:6, bleue:8, nuit:4, clair:2, nuageux:2, jour:1};
@@ -1429,6 +1441,47 @@ document.getElementById("coachFile").addEventListener("change", e=>coachFichier(
 document.getElementById("reset").onclick = ()=>{
   if(confirm("Effacer tout l’historique des défis réalisés ?")){ state.history=[]; save(); renderMeta(); render(); }
 };
+
+/* ---------- Sauvegarde et restauration dans un fichier ---------- */
+const dateLongue = iso => new Date(iso).toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"});
+function bkStatus(txt, cls=""){ const el = document.getElementById("bkStatus"); el.textContent = txt; el.className = "ia-status " + cls; }
+function bkRender(){
+  bkStatus(state.derniereSauvegarde ? `Dernière sauvegarde : ${dateLongue(state.derniereSauvegarde)}.` : "Aucune sauvegarde pour l’instant.");
+}
+async function sauvegarder(){
+  const avecCle = document.getElementById("bkKey").checked && !!ia.cle;
+  state.derniereSauvegarde = new Date().toISOString(); save();
+  const contenu = {app:"defis-photo", format:1, version:VERSION, date:state.derniereSauvegarde, donnees:state,
+    ia: avecCle ? {cle:ia.cle, modele:ia.modele, modeles:ia.modeles} : {modele:ia.modele}};
+  const nom = `defis-photo-sauvegarde-${dayKey()}.json`;
+  const fichier = new File([JSON.stringify(contenu, null, 1)], nom, {type:"application/json"});
+  // Sur téléphone : menu de partage (« Enregistrer dans Fichiers », iCloud Drive…) ; sinon téléchargement
+  try{
+    if(navigator.canShare?.({files:[fichier]}) && matchMedia("(pointer:coarse)").matches){ await navigator.share({files:[fichier], title:"Sauvegarde Défis photo"}); bkRender(); return; }
+  }catch(e){ if(e.name==="AbortError"){ bkRender(); return; } }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(fichier); a.download = nom;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  bkStatus(`Sauvegarde téléchargée (${nom}).`, "ok");
+}
+async function restaurer(file){
+  if(!file) return;
+  let o;
+  try{ o = JSON.parse(await file.text()); }catch(e){ bkStatus("Ce fichier n’est pas une sauvegarde lisible.", "err"); return; }
+  const d = o?.donnees;
+  if(o?.app!=="defis-photo" || !d || typeof d!=="object" || Array.isArray(d)){ bkStatus("Ce fichier n’est pas une sauvegarde de Défis photo.", "err"); return; }
+  const n = (a, un, plusieurs) => { const k = Array.isArray(a) ? a.length : 0; return `${k} ${k>1 ? plusieurs : un}`; };
+  const resume = [n(d.history,"défi réalisé","défis réalisés"), n(d.gear?.cams,"appareil","appareils"), n(d.gear?.lenses,"objectif","objectifs")].join(", ");
+  if(!confirm(`Remplacer tes données actuelles par la sauvegarde du ${o.date ? dateLongue(o.date) : "fichier"} ?\n\n${resume}${o.ia?.cle ? ", clé IA" : ""}.`)) return;
+  try{
+    localStorage.setItem(KEY, JSON.stringify(d));
+    if(o.ia?.cle) localStorage.setItem(IA_KEY, JSON.stringify({cle:String(o.ia.cle), modele:String(o.ia.modele||""), modeles:Array.isArray(o.ia.modeles) ? o.ia.modeles.map(String) : []}));
+  }catch(e){ bkStatus("Impossible d’enregistrer la sauvegarde dans ce navigateur.", "err"); return; }
+  location.reload(); // recharge l'app avec les données restaurées (et leurs mises à niveau)
+}
+document.getElementById("bkSave").onclick = sauvegarder;
+document.getElementById("bkLoad").onclick = ()=>{ const f = document.getElementById("bkFile"); f.value = ""; f.click(); };
+document.getElementById("bkFile").addEventListener("change", e=>restaurer(e.target.files[0]));
+bkRender();
 
 document.getElementById("version").textContent = `Version ${VERSION}`;
 renderChips(); renderMeta(); renderTodayPlan(); pickToday();

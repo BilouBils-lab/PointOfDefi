@@ -69,6 +69,13 @@ Avec la clé Gemini, le bouton **📷 Faire analyser ma photo** (sous la carte d
 
 C'est un avis, pas un juge : tu valides le défi toi-même, et la note est gardée dans ton historique. Photos acceptées : JPEG (sorti de l'appareil ou exporté de Lightroom, la case « Photo retouchée » se coche alors toute seule), PNG ; pas de fichiers RAW. La photo est réduite et ses métadonnées (dont le GPS) sont retirées avant l'envoi. Avec l'offre gratuite, Google peut utiliser les photos envoyées : évite celles où ton fils ou d'autres personnes sont reconnaissables.
 
+## Sauvegarde
+
+Toutes tes données (historique et notes, matériel, planning) sont enregistrées **dans le navigateur de l'appareil uniquement**. Dans **Réglages → Sauvegarde** :
+
+- **Sauvegarder** crée un fichier `defis-photo-sauvegarde-AAAA-MM-JJ.json` (sur téléphone, via le menu de partage : « Enregistrer dans Fichiers », iCloud Drive…). La clé IA n'y est incluse que si tu coches la case.
+- **Restaurer** recharge ce fichier, après confirmation : pour retrouver tes données sur un autre appareil, après avoir vidé le navigateur, ou dans l'app installée sur l'écran d'accueil (sur iPhone, elle ne partage pas ses données avec Safari).
+
 ## Réglages
 
 - **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Mes passions, Technique pure.
