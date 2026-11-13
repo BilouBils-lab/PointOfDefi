@@ -7,6 +7,12 @@
 <meta name="theme-color" content="#F5F4F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0D0D0D" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3'%3E%3Cpath d='M23 13H14V26M14 38V51H23M41 13H50V26M50 38V51H41'/%3E%3Cpath d='M24.6 27.7A9 9 0 0 1 39.4 27.7M39.4 36.3A9 9 0 0 1 24.6 36.3'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Défis photo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -218,6 +224,18 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 .history time{color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums}
 .history .hn{font-weight:600; color:var(--accent-ink); margin-right:.5rem}
 
+/* Mise à jour, installation */
+.maj{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(4.6rem + env(safe-area-inset-bottom,0px)); z-index:6; display:flex; align-items:center; gap:.75rem;
+  background:var(--ink); color:var(--bg); border-radius:999px; padding:.5rem .55rem .5rem 1rem; font-size:.875rem; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,.25); width:max-content; max-width:calc(100% - 2rem)}
+.maj[hidden]{display:none}
+.maj button{border:0; border-radius:999px; background:var(--accent); color:#141414; font-weight:600; font-size:.8125rem; padding:.4rem .8rem}
+.tip{display:flex; align-items:start; gap:.75rem; background:var(--accent-soft); border-radius:16px; padding:.8rem .9rem; margin:0 0 1rem; font-size:.9rem}
+.tip[hidden]{display:none}
+.tip p{margin:0; flex:1}
+.tip .x-btn{width:28px; height:28px; font-size:1.1rem; background:transparent}
+.steps{margin:.3rem 0 .6rem; padding-left:1.2rem; font-size:.9375rem}
+.steps li{margin:.2rem 0}
+
 /* Coach photo */
 .coach{background:var(--surface); border-radius:20px; box-shadow:var(--shadow-sm); padding:1rem 1.1rem; margin-top:1rem}
 .coach[hidden]{display:none}
@@ -262,6 +280,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
     <button class="stats" id="stats" aria-label="Voir mes défis réalisés"></button>
     <span class="app-name">Défis photo</span>
   </header>
+  <div class="tip" id="tipRestore" hidden><p>Bienvenue dans l’app ! Si tu utilisais déjà Défis photo dans Safari, restaure ta sauvegarde dans <button class="linkbtn" id="tipGo" style="font-size:inherit; color:var(--ink)">Réglages → Sauvegarde</button>.</p><button class="x-btn" id="tipClose" aria-label="Masquer">×</button></div>
   <div class="ctx" id="ctx" aria-live="polite"></div>
 
   <section class="card viewfinder" aria-live="polite">
@@ -282,6 +301,8 @@ a{color:var(--accent-ink); text-underline-offset:2px}
   <input type="file" id="coachFile" accept="image/*" hidden>
   <p class="foot" id="version"></p>
 </div>
+
+<div class="maj" id="maj" role="status" hidden><span>Nouvelle version disponible</span><button id="majGo">Mettre à jour</button></div>
 
 <nav class="tabbar" aria-label="Navigation">
   <button id="tabDefi" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4"/><circle cx="12" cy="12" r="3.5"/></svg><span>Défi</span></button>
@@ -350,6 +371,10 @@ a{color:var(--accent-ink); text-underline-offset:2px}
       <p class="ia-status" id="iaStatus" aria-live="polite"></p>
       <p class="hint" style="font-size:.8125rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom. <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
     </section>
+    <section class="sec" id="instSec">
+      <h3>Installer l’app</h3>
+      <div id="instBody"></div>
+    </section>
     <section class="sec" id="bkSec">
       <h3>Sauvegarde</h3>
       <p class="hint">Ton historique, tes notes, ton matériel et ton planning sont enregistrés dans ce navigateur uniquement. Sauvegarde-les dans un fichier (iCloud Drive, Google Drive…) pour ne pas les perdre et les retrouver sur un autre appareil.</p>
@@ -372,7 +397,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "16"; // à augmenter à chaque PR fusionnée (numéro seul)
+const VERSION = "17"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -1482,6 +1507,46 @@ document.getElementById("bkSave").onclick = sauvegarder;
 document.getElementById("bkLoad").onclick = ()=>{ const f = document.getElementById("bkFile"); f.value = ""; f.click(); };
 document.getElementById("bkFile").addEventListener("change", e=>restaurer(e.target.files[0]));
 bkRender();
+
+/* ---------- App installable : service worker, installation, mise à jour ---------- */
+const installee = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+let invite = null; // proposition d'installation (Chrome, Edge, Android)
+if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+if(installee) navigator.storage?.persist?.().catch(()=>{}); // demande au navigateur de ne pas effacer les données
+addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); invite = e; instRender(); });
+addEventListener("appinstalled", ()=>{ invite = null; instRender(); });
+function instRender(){
+  const el = document.getElementById("instBody");
+  if(installee){ el.innerHTML = `<p class="ia-status ok" style="margin:0">✓ Tu utilises l’app installée.</p><p class="hint">Elle fonctionne hors connexion (sauf la météo et l’IA) et se met à jour toute seule.</p>`; return; }
+  const note = `<p class="hint">Sur l’écran d’accueil, l’app s’ouvre en plein écran et fonctionne hors connexion.${iOS ? " <b>Sur iPhone, l’app installée ne voit pas les données de Safari</b> : fais d’abord une sauvegarde ci-dessous, puis restaure-la dans l’app." : ""}</p>`;
+  if(invite){ el.innerHTML = note + `<button class="btn" id="instGo" style="width:100%">Installer l’app</button>`; document.getElementById("instGo").onclick = async ()=>{ invite.prompt(); await invite.userChoice.catch(()=>{}); invite = null; instRender(); }; return; }
+  el.innerHTML = note + (iOS
+    ? `<ol class="steps"><li>Ouvre cette page dans <b>Safari</b>.</li><li>Touche le bouton <b>Partager</b> (carré avec une flèche).</li><li>Choisis <b>« Sur l’écran d’accueil »</b>, puis <b>Ajouter</b>.</li></ol>`
+    : `<ol class="steps"><li>Ouvre le menu du navigateur (⋮).</li><li>Choisis <b>« Installer l’application »</b> ou <b>« Ajouter à l’écran d’accueil »</b>.</li></ol>`);
+}
+instRender();
+// Première ouverture de l'app installée, sans données : rappeler la restauration
+if(installee && !state.history.length && !state.astuceInstall){ document.getElementById("tipRestore").hidden = false; }
+const fermerAstuce = ()=>{ state.astuceInstall = true; save(); document.getElementById("tipRestore").hidden = true; };
+document.getElementById("tipClose").onclick = fermerAstuce;
+document.getElementById("tipGo").onclick = ()=>{ fermerAstuce(); openSet(false); document.getElementById("bkSec").scrollIntoView({block:"start"}); };
+// Nouvelle version publiée pendant que l'app était ouverte : proposer de mettre à jour
+let derniereVerif = 0;
+async function verifierMaj(){
+  if(location.protocol === "file:" || !navigator.onLine || Date.now() - derniereVerif < 10*60000) return;
+  derniereVerif = Date.now();
+  try{
+    const t = await (await fetch(`index.html?maj=${Date.now()}`, {cache:"no-store"})).text();
+    const v = (t.match(/const VERSION = "([^"]+)"/)||[])[1];
+    if(v && v !== VERSION) document.getElementById("maj").hidden = false;
+  }catch(e){}
+}
+document.getElementById("majGo").onclick = ()=>location.reload();
+setTimeout(verifierMaj, 4000);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "visible") verifierMaj(); });
 
 document.getElementById("version").textContent = `Version ${VERSION}`;
 renderChips(); renderMeta(); renderTodayPlan(); pickToday();
