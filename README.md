@@ -22,6 +22,17 @@ En haut de l'app, une ligne résume le contexte : lieu, température, temps qu'i
 
 Tout est gratuit, sans compte ni clé : la position vient du navigateur (avec ta permission, via « Utiliser ma position ») et la météo du service Open-Meteo. Sans permission, l'app prend Nancy comme position par défaut. Seules des coordonnées arrondies (à environ 1 km) quittent ton appareil.
 
+## Mon rythme
+
+Dans **Mon rythme**, indique tes jours travaillés, tes horaires, ta pause déjeuner et les jours où ton fils est avec toi. L'app sait alors où tu en es (« Au travail », « Pause déjeuner », « Après le travail », « Jour de repos ») et ne propose que des défis faisables à ce moment-là :
+
+- **au travail** : les défis « Boulot » (nature morte de bureau, lignes de fuite…) ;
+- **pendant la pause** : des défis courts à faire près du travail ;
+- **avant ou après le travail** : les défis à la maison, avec ton fils ou pour tes passions ;
+- **les jours de repos** : tout, y compris les sorties dans Nancy comme la place Stanislas.
+
+Le « Défi du jour » suit la même logique : en semaine, il est faisable pendant la pause ou après le travail.
+
 ## Réglages
 
 - **Thèmes** : Nancy, Boulot, Avec mon fils, Mes passions, Technique pure.

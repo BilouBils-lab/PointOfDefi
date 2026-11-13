@@ -80,6 +80,9 @@ summary{cursor:pointer; font-weight:600}
 .chips{display:flex; flex-wrap:wrap; gap:.4rem}
 .chip{padding:.4rem .8rem; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:.9375rem}
 .chip[aria-pressed="true"]{background:var(--sage); border-color:var(--green); color:var(--ink)}
+.times{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; font-size:.9375rem}
+.times input{font:inherit; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:6px; padding:.35rem .5rem}
+.group .sub{display:block; font-size:.8125rem; color:var(--soft); margin-top:.3rem}
 .history{list-style:none; padding:0; margin:.75rem 0 0}
 .history li{display:flex; justify-content:space-between; gap:1rem; padding:.45rem 0; border-bottom:1px solid var(--line); font-size:.9375rem}
 .history time{color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums}
@@ -161,6 +164,15 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
   </details>
 
   <details>
+    <summary>Mon rythme</summary>
+    <p class="empty" style="margin:.6rem 0 0">L’app ne propose que des défis faisables selon le moment : au travail, pendant ta pause, après le travail ou les jours de repos.</p>
+    <div class="group"><span>Jours travaillés</span><div class="chips" id="workdays"></div></div>
+    <div class="group"><span>Horaires de travail</span><div class="times">de <input type="time" id="wStart"> à <input type="time" id="wEnd"></div></div>
+    <div class="group"><span>Pause déjeuner</span><div class="times">de <input type="time" id="pStart"> à <input type="time" id="pEnd"></div></div>
+    <div class="group"><span>Jours avec mon fils</span><div class="chips" id="sondays"></div><span class="sub">Les défis « Avec mon fils » ne sont proposés que ces jours-là, hors heures de travail.</span></div>
+  </details>
+
+  <details>
     <summary>Défis réalisés</summary>
     <ul class="history" id="history"></ul>
   </details>
@@ -195,7 +207,7 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
 </dialog>
 
 <script>
-const VERSION = "7 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
+const VERSION = "8 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -260,56 +272,56 @@ const DEFAULT_GEAR = {
 };
 
 const D = [
- {id:"n1",obj:"portrait",ou:"out",pref:["jour","nuageux"],t:"nancy",n:1,titre:"Les grilles d’or",brief:"Place Stanislas : oublie la vue d’ensemble. Isole un seul détail des grilles dorées de Jean Lamour, assez près pour qu’on ne reconnaisse plus la place.",astuce:"Ouvre grand pour flouter l’arrière-plan, et cherche un fond sombre derrière le doré.",reg:["Priorité ouverture","f/2 à f/4","ISO auto"]},
- {id:"n2",obj:"grand",ou:"out",pref:["bleue"],t:"nancy",n:2,nuit:true,titre:"L’heure bleue sur Stan",brief:"Reviens place Stanislas 20 à 30 minutes après le coucher du soleil, quand le bleu du ciel équilibre les lumières des façades.",astuce:"Cale l’appareil sur un muret ou un sac, retardateur 2 s pour ne pas bouger.",reg:["f/8","ISO 100–400","Pose de 1 à 4 s"]},
- {id:"n3",obj:"normal",ou:"out",pref:["nuageux","jour"],t:"nancy",n:1,titre:"Art nouveau en cinq détails",brief:"Autour de la Villa Majorelle ou dans le quartier Saurupt, ramène une série de cinq détails : ferronnerie, vitrail, poignée, motif végétal, et un au choix.",astuce:"Garde le même cadrage carré pour les cinq : ça fera un carrousel Instagram cohérent.",reg:["50 mm","f/4","Format 1:1"]},
- {id:"n4",obj:"normal",ou:"out",pref:["brouillard"],t:"nancy",n:2,mois:[10,11,12,1,2],titre:"Brume à la Pépinière",brief:"Un matin de brouillard, va au parc de la Pépinière et photographie une silhouette (arbre, banc, promeneur) qui se dissout dans la brume.",astuce:"Le posemètre voit gris : corrige l’exposition de +2/3 à +1 IL pour garder une brume blanche.",reg:["Correction +2/3 IL","f/5.6","Tôt le matin"]},
- {id:"n5",obj:"normal",ou:"out",pref:["clair","doree"],t:"nancy",n:2,titre:"Le reflet d’abord",brief:"Au port Sainte-Catherine ou le long du canal, fais une photo où le reflet dans l’eau est le vrai sujet, et le « réel » seulement un indice.",astuce:"Baisse-toi au ras de l’eau et fais la mise au point sur le reflet, pas sur la surface.",reg:["f/8","Mise au point manuelle"]},
- {id:"n6",obj:"grand",ou:"out",pref:["jour"],t:"nancy",n:1,titre:"La Craffe sans carte postale",brief:"Photographie la Porte de la Craffe, mais la vue frontale classique est interdite : contre-plongée, cadre dans le cadre, ou un fragment de pierre de tout près.",astuce:"Fais d’abord la carte postale pour t’en débarrasser, puis tourne autour pendant 10 minutes.",reg:["Libre"]},
- {id:"n7",obj:"normal",ou:"out",pref:["jour","nuageux"],t:"nancy",n:3,titre:"Grande Rue, la vie qui passe",brief:"Choisis un beau décor de la Vieille Ville et attends qu’un passant le traverse. Le décor est net, le passant est un flou de mouvement.",astuce:"Les passants restent ainsi non reconnaissables : pratique pour publier.",reg:["Priorité vitesse","1/15 s","f/8","Appui stable"]},
- {id:"n8",obj:"lumineux",ou:"out",pref:["nuit"],t:"nancy",n:2,nuit:true,mois:[11,12],titre:"Saint-Nicolas arrive",brief:"Pendant les fêtes de Saint-Nicolas, ne photographie pas le char : cherche une émotion ou une lumière (un enfant qui regarde, des lampions, des confettis dans un phare).",astuce:"Passe en AF Servo et rafale, les expressions durent une demi-seconde.",reg:["f/1.8 à f/2.8","1/250 s mini","ISO auto"]},
- {id:"n9",obj:"grand",ou:"out",pref:["clair","jour"],t:"nancy",n:1,titre:"Symétrie parfaite",brief:"Sous l’Arc Héré ou face à un bâtiment de la place de la Carrière, réalise une image rigoureusement symétrique, centrée au millimètre.",astuce:"Active la grille de l’écran et le niveau électronique.",reg:["f/8","Grille affichée"]},
- {id:"n10",ou:"out",pref:["jour"],t:"nancy",n:3,titre:"Nancy en une couleur",brief:"Pendant une balade, ramène six photos où domine la même couleur : le doré de Stan, le vert des vitraux, le rouge d’une enseigne…",astuce:"Choisis la couleur avant de partir, sinon tu ne la verras pas.",reg:["Série de 6","Libre"]},
- {id:"n11",obj:"normal",ou:"in",pref:["jour"],t:"nancy",n:2,titre:"Couleurs du marché",brief:"Au Marché central, compose une image avec les couleurs des étals et, si le commerçant est d’accord, ses mains au travail.",astuce:"Demander « je peux photographier votre étal ? » ouvre souvent une vraie conversation.",reg:["50 mm","f/2.8","1/250 s"]},
- {id:"n12",obj:"macro",ou:"out",pref:["nuageux"],t:"nancy",n:2,titre:"Au plus près",brief:"Au jardin botanique Jean-Marie Pelt, photographie une plante à la distance minimale de mise au point de ton objectif, pour en faire un paysage abstrait.",astuce:"À cette distance, la profondeur de champ est infime : ferme un peu à f/4 ou f/5.6.",reg:["Distance mini","f/4 à f/5.6"]},
+ {id:"n1",quand:["libre"],obj:"portrait",ou:"out",pref:["jour","nuageux"],t:"nancy",n:1,titre:"Les grilles d’or",brief:"Place Stanislas : oublie la vue d’ensemble. Isole un seul détail des grilles dorées de Jean Lamour, assez près pour qu’on ne reconnaisse plus la place.",astuce:"Ouvre grand pour flouter l’arrière-plan, et cherche un fond sombre derrière le doré.",reg:["Priorité ouverture","f/2 à f/4","ISO auto"]},
+ {id:"n2",quand:["libre"],obj:"grand",ou:"out",pref:["bleue"],t:"nancy",n:2,nuit:true,titre:"L’heure bleue sur Stan",brief:"Reviens place Stanislas 20 à 30 minutes après le coucher du soleil, quand le bleu du ciel équilibre les lumières des façades.",astuce:"Cale l’appareil sur un muret ou un sac, retardateur 2 s pour ne pas bouger.",reg:["f/8","ISO 100–400","Pose de 1 à 4 s"]},
+ {id:"n3",quand:["libre"],obj:"normal",ou:"out",pref:["nuageux","jour"],t:"nancy",n:1,titre:"Art nouveau en cinq détails",brief:"Autour de la Villa Majorelle ou dans le quartier Saurupt, ramène une série de cinq détails : ferronnerie, vitrail, poignée, motif végétal, et un au choix.",astuce:"Garde le même cadrage carré pour les cinq : ça fera un carrousel Instagram cohérent.",reg:["50 mm","f/4","Format 1:1"]},
+ {id:"n4",quand:["libre"],obj:"normal",ou:"out",pref:["brouillard"],t:"nancy",n:2,mois:[10,11,12,1,2],titre:"Brume à la Pépinière",brief:"Un matin de brouillard, va au parc de la Pépinière et photographie une silhouette (arbre, banc, promeneur) qui se dissout dans la brume.",astuce:"Le posemètre voit gris : corrige l’exposition de +2/3 à +1 IL pour garder une brume blanche.",reg:["Correction +2/3 IL","f/5.6","Tôt le matin"]},
+ {id:"n5",quand:["libre"],obj:"normal",ou:"out",pref:["clair","doree"],t:"nancy",n:2,titre:"Le reflet d’abord",brief:"Au port Sainte-Catherine ou le long du canal, fais une photo où le reflet dans l’eau est le vrai sujet, et le « réel » seulement un indice.",astuce:"Baisse-toi au ras de l’eau et fais la mise au point sur le reflet, pas sur la surface.",reg:["f/8","Mise au point manuelle"]},
+ {id:"n6",quand:["libre"],obj:"grand",ou:"out",pref:["jour"],t:"nancy",n:1,titre:"La Craffe sans carte postale",brief:"Photographie la Porte de la Craffe, mais la vue frontale classique est interdite : contre-plongée, cadre dans le cadre, ou un fragment de pierre de tout près.",astuce:"Fais d’abord la carte postale pour t’en débarrasser, puis tourne autour pendant 10 minutes.",reg:["Libre"]},
+ {id:"n7",quand:["libre"],obj:"normal",ou:"out",pref:["jour","nuageux"],t:"nancy",n:3,titre:"Grande Rue, la vie qui passe",brief:"Choisis un beau décor de la Vieille Ville et attends qu’un passant le traverse. Le décor est net, le passant est un flou de mouvement.",astuce:"Les passants restent ainsi non reconnaissables : pratique pour publier.",reg:["Priorité vitesse","1/15 s","f/8","Appui stable"]},
+ {id:"n8",quand:["libre"],obj:"lumineux",ou:"out",pref:["nuit"],t:"nancy",n:2,nuit:true,mois:[11,12],titre:"Saint-Nicolas arrive",brief:"Pendant les fêtes de Saint-Nicolas, ne photographie pas le char : cherche une émotion ou une lumière (un enfant qui regarde, des lampions, des confettis dans un phare).",astuce:"Passe en AF Servo et rafale, les expressions durent une demi-seconde.",reg:["f/1.8 à f/2.8","1/250 s mini","ISO auto"]},
+ {id:"n9",quand:["libre"],obj:"grand",ou:"out",pref:["clair","jour"],t:"nancy",n:1,titre:"Symétrie parfaite",brief:"Sous l’Arc Héré ou face à un bâtiment de la place de la Carrière, réalise une image rigoureusement symétrique, centrée au millimètre.",astuce:"Active la grille de l’écran et le niveau électronique.",reg:["f/8","Grille affichée"]},
+ {id:"n10",quand:["libre"],ou:"out",pref:["jour"],t:"nancy",n:3,titre:"Nancy en une couleur",brief:"Pendant une balade, ramène six photos où domine la même couleur : le doré de Stan, le vert des vitraux, le rouge d’une enseigne…",astuce:"Choisis la couleur avant de partir, sinon tu ne la verras pas.",reg:["Série de 6","Libre"]},
+ {id:"n11",quand:["libre"],obj:"normal",ou:"in",pref:["jour"],t:"nancy",n:2,titre:"Couleurs du marché",brief:"Au Marché central, compose une image avec les couleurs des étals et, si le commerçant est d’accord, ses mains au travail.",astuce:"Demander « je peux photographier votre étal ? » ouvre souvent une vraie conversation.",reg:["50 mm","f/2.8","1/250 s"]},
+ {id:"n12",quand:["libre"],obj:"macro",ou:"out",pref:["nuageux"],t:"nancy",n:2,titre:"Au plus près",brief:"Au jardin botanique Jean-Marie Pelt, photographie une plante à la distance minimale de mise au point de ton objectif, pour en faire un paysage abstrait.",astuce:"À cette distance, la profondeur de champ est infime : ferme un peu à f/4 ou f/5.6.",reg:["Distance mini","f/4 à f/5.6"]},
 
- {id:"b1",obj:"normal",ou:"in",pref:["jour"],t:"boulot",n:1,titre:"Nature morte de bureau",brief:"Ton poste de travail en nature morte : trois objets maximum, éclairés par la lumière latérale d’une fenêtre.",astuce:"Retire tout le reste du cadre. Le vide fait la photo.",reg:["f/2.8","Lumière de fenêtre"]},
- {id:"b2",ou:"any",pref:["jour"],t:"boulot",n:2,titre:"Ma tournée de prospection",brief:"Raconte une journée de visites d’entreprises en quatre images, sans aucune personne : panneau de zone d’activité, parking, porte d’entrée, café d’accueil.",astuce:"Pense à l’ordre de lecture du carrousel avant de déclencher.",reg:["Série de 4","Libre"]},
- {id:"b3",obj:"normal",ou:"in",t:"boulot",n:3,titre:"Les mains qui travaillent",brief:"Lors d’une visite en entreprise, avec l’accord des personnes, photographie des mains en action : atelier, cuisine, chantier, laboratoire.",astuce:"Propose d’envoyer les photos à l’entreprise : ça fait plaisir et ça entretient la relation.",reg:["50 mm","1/250 s","f/2.8","Accord obligatoire"]},
- {id:"b4",obj:"portrait",ou:"in",t:"boulot",n:2,titre:"Portrait d’un recruteur",brief:"Avec son accord, fais le portrait d’un recruteur ou d’un chef d’entreprise dans son lieu de travail, en lumière naturelle.",astuce:"Fais parler la personne de son métier pendant que tu cadres : le visage se détend.",reg:["50 mm","f/2","Mise au point sur l’œil"]},
- {id:"b5",obj:"grand",ou:"in",t:"boulot",n:1,titre:"Lignes de fuite",brief:"Un couloir, un escalier, un open space vide : trouve une ligne de fuite qui guide l’œil vers le fond de l’image.",astuce:"Place le point de fuite sur un tiers plutôt qu’au centre, pour voir la différence.",reg:["f/5.6","Grille affichée"]},
- {id:"b6",obj:"tele",ou:"out",pref:["clair"],t:"boulot",n:2,titre:"Enseignes locales",brief:"Une série de trois logos ou enseignes d’entreprises que tu croises, photographiés comme des formes graphiques plutôt que comme des panneaux.",astuce:"Cherche un angle fort et un ciel uni derrière.",reg:["Série de 3","f/8"]},
- {id:"b7",obj:"lumineux",ou:"in",t:"boulot",n:1,titre:"La pause café",brief:"Ta tasse en contre-jour, avec la vapeur qui monte sur un fond sombre.",astuce:"La vapeur n’est visible qu’éclairée par derrière. Sous-expose un peu.",reg:["Correction −2/3 IL","f/2"]},
+ {id:"b1",quand:["travail","pause"],obj:"normal",ou:"in",pref:["jour"],t:"boulot",n:1,titre:"Nature morte de bureau",brief:"Ton poste de travail en nature morte : trois objets maximum, éclairés par la lumière latérale d’une fenêtre.",astuce:"Retire tout le reste du cadre. Le vide fait la photo.",reg:["f/2.8","Lumière de fenêtre"]},
+ {id:"b2",quand:["travail"],ou:"any",pref:["jour"],t:"boulot",n:2,titre:"Ma tournée de prospection",brief:"Raconte une journée de visites d’entreprises en quatre images, sans aucune personne : panneau de zone d’activité, parking, porte d’entrée, café d’accueil.",astuce:"Pense à l’ordre de lecture du carrousel avant de déclencher.",reg:["Série de 4","Libre"]},
+ {id:"b3",quand:["travail"],obj:"normal",ou:"in",t:"boulot",n:3,titre:"Les mains qui travaillent",brief:"Lors d’une visite en entreprise, avec l’accord des personnes, photographie des mains en action : atelier, cuisine, chantier, laboratoire.",astuce:"Propose d’envoyer les photos à l’entreprise : ça fait plaisir et ça entretient la relation.",reg:["50 mm","1/250 s","f/2.8","Accord obligatoire"]},
+ {id:"b4",quand:["travail"],obj:"portrait",ou:"in",t:"boulot",n:2,titre:"Portrait d’un recruteur",brief:"Avec son accord, fais le portrait d’un recruteur ou d’un chef d’entreprise dans son lieu de travail, en lumière naturelle.",astuce:"Fais parler la personne de son métier pendant que tu cadres : le visage se détend.",reg:["50 mm","f/2","Mise au point sur l’œil"]},
+ {id:"b5",quand:["travail","pause"],obj:"grand",ou:"in",t:"boulot",n:1,titre:"Lignes de fuite",brief:"Un couloir, un escalier, un open space vide : trouve une ligne de fuite qui guide l’œil vers le fond de l’image.",astuce:"Place le point de fuite sur un tiers plutôt qu’au centre, pour voir la différence.",reg:["f/5.6","Grille affichée"]},
+ {id:"b6",quand:["travail","pause"],obj:"tele",ou:"out",pref:["clair"],t:"boulot",n:2,titre:"Enseignes locales",brief:"Une série de trois logos ou enseignes d’entreprises que tu croises, photographiés comme des formes graphiques plutôt que comme des panneaux.",astuce:"Cherche un angle fort et un ciel uni derrière.",reg:["Série de 3","f/8"]},
+ {id:"b7",quand:["travail","pause"],obj:"lumineux",ou:"in",t:"boulot",n:1,titre:"La pause café",brief:"Ta tasse en contre-jour, avec la vapeur qui monte sur un fond sombre.",astuce:"La vapeur n’est visible qu’éclairée par derrière. Sous-expose un peu.",reg:["Correction −2/3 IL","f/2"]},
 
- {id:"f1",obj:"normal",ou:"any",t:"famille",n:1,titre:"À hauteur d’enfant",brief:"Toute la séance, reste à la hauteur des yeux de ton fils, accroupi ou assis. Pas une seule photo prise debout.",astuce:"Tu verras le monde comme lui : les adultes deviennent des géants.",reg:["50 mm","f/2.8","AF Servo"]},
- {id:"f2",ou:"any",t:"famille",n:2,titre:"Le petit photographe",brief:"Prête-lui le M50 : il choisit un sujet, et toi tu le photographies en train de photographier.",astuce:"Montrez-vous ensuite vos photos respectives et choisissez chacun votre préférée.",reg:["Libre"]},
- {id:"f3",ou:"in",t:"famille",n:2,titre:"Douze images qui bougent",brief:"Préparez ensemble une courte séquence de stop motion : douze photos d’un jouet qui traverse la table.",astuce:"Tout en manuel (exposition, mise au point, balance des blancs), sinon l’animation va scintiller.",reg:["Mode M","MF","Balance des blancs fixe","Trépied"]},
- {id:"f4",obj:"lumineux",ou:"in",pref:["nuit"],t:"famille",n:1,titre:"Le décor de la petite souris",brief:"Photographie la mini porte de la petite souris comme un décor de film : objectif au ras du sol, petite profondeur de champ, lumière chaude.",astuce:"Une guirlande ou une bougie LED en arrière-plan donnera de jolis bokehs.",reg:["f/1.8","Au ras du sol"]},
- {id:"f5",obj:"normal",ou:"any",t:"famille",n:2,titre:"Portrait sans visage",brief:"Raconte qui est ton fils sans montrer son visage : ses mains, ses chaussures, ses jouets, son ombre.",astuce:"C’est aussi la meilleure façon de publier en ligne sans exposer un enfant.",reg:["Série de 3","Libre"]},
- {id:"f6",obj:"portrait",ou:"out",pref:["clair","jour"],t:"famille",n:3,titre:"Rafale au parc",brief:"Fige ton fils en pleine course, saut ou glissade, net et les pieds décollés du sol.",astuce:"Mets-toi dans l’axe de sa course : l’autofocus suit mieux qu’en travers.",reg:["AF Servo","Rafale","1/1000 s"]},
- {id:"f7",obj:"normal",ou:"in",t:"famille",n:1,titre:"Partie de Croque-Carotte",brief:"Pendant une partie, capture le moment où un lapin tombe dans un trou, et la réaction autour de la table.",astuce:"Vue plongeante au-dessus du plateau pour l’action, puis à hauteur des joueurs pour la réaction.",reg:["f/2.8","1/250 s"]},
+ {id:"f1",quand:["perso","libre"],obj:"normal",ou:"any",t:"famille",n:1,titre:"À hauteur d’enfant",brief:"Toute la séance, reste à la hauteur des yeux de ton fils, accroupi ou assis. Pas une seule photo prise debout.",astuce:"Tu verras le monde comme lui : les adultes deviennent des géants.",reg:["50 mm","f/2.8","AF Servo"]},
+ {id:"f2",quand:["perso","libre"],ou:"any",t:"famille",n:2,titre:"Le petit photographe",brief:"Prête-lui le M50 : il choisit un sujet, et toi tu le photographies en train de photographier.",astuce:"Montrez-vous ensuite vos photos respectives et choisissez chacun votre préférée.",reg:["Libre"]},
+ {id:"f3",quand:["perso","libre"],ou:"in",t:"famille",n:2,titre:"Douze images qui bougent",brief:"Préparez ensemble une courte séquence de stop motion : douze photos d’un jouet qui traverse la table.",astuce:"Tout en manuel (exposition, mise au point, balance des blancs), sinon l’animation va scintiller.",reg:["Mode M","MF","Balance des blancs fixe","Trépied"]},
+ {id:"f4",quand:["perso","libre"],obj:"lumineux",ou:"in",pref:["nuit"],t:"famille",n:1,titre:"Le décor de la petite souris",brief:"Photographie la mini porte de la petite souris comme un décor de film : objectif au ras du sol, petite profondeur de champ, lumière chaude.",astuce:"Une guirlande ou une bougie LED en arrière-plan donnera de jolis bokehs.",reg:["f/1.8","Au ras du sol"]},
+ {id:"f5",quand:["perso","libre"],obj:"normal",ou:"any",t:"famille",n:2,titre:"Portrait sans visage",brief:"Raconte qui est ton fils sans montrer son visage : ses mains, ses chaussures, ses jouets, son ombre.",astuce:"C’est aussi la meilleure façon de publier en ligne sans exposer un enfant.",reg:["Série de 3","Libre"]},
+ {id:"f6",quand:["perso","libre"],obj:"portrait",ou:"out",pref:["clair","jour"],t:"famille",n:3,titre:"Rafale au parc",brief:"Fige ton fils en pleine course, saut ou glissade, net et les pieds décollés du sol.",astuce:"Mets-toi dans l’axe de sa course : l’autofocus suit mieux qu’en travers.",reg:["AF Servo","Rafale","1/1000 s"]},
+ {id:"f7",quand:["perso","libre"],obj:"normal",ou:"in",t:"famille",n:1,titre:"Partie de Croque-Carotte",brief:"Pendant une partie, capture le moment où un lapin tombe dans un trou, et la réaction autour de la table.",astuce:"Vue plongeante au-dessus du plateau pour l’action, puis à hauteur des joueurs pour la réaction.",reg:["f/2.8","1/250 s"]},
 
- {id:"l1",obj:"normal",ou:"in",pref:["nuit"],t:"loisirs",n:2,titre:"Mangas en clair-obscur",brief:"Une étagère ou un seul tome de ta collection, éclairé par une seule lampe dans une pièce sombre.",astuce:"Éclaire de côté et rasant pour faire ressortir les reliefs des tranches.",reg:["f/4","Une seule source"]},
- {id:"l2",obj:"lumineux",ou:"in",t:"loisirs",n:3,nuit:true,titre:"Craie et sueur",brief:"À la salle de CrossFit, fige un mouvement au moment où la magnésie s’envole des mains.",astuce:"Pré-règle la mise au point sur la zone de l’action et attends le geste.",reg:["1/1000 s","f/2","ISO auto"]},
- {id:"l3",obj:"grand",ou:"any",t:"loisirs",n:2,titre:"Autoportrait du photographe",brief:"Toi et ton appareil : dans un miroir, une vitrine ou au retardateur, dans un lieu qui te ressemble.",astuce:"Utilise l’appli Canon Camera Connect pour déclencher depuis ton téléphone.",reg:["Retardateur 10 s","f/2.8"]},
- {id:"l4",obj:"normal",ou:"in",t:"loisirs",n:1,titre:"Photo produit maison",brief:"Photographie ton propre appareil comme pour une pub : fond uni, une lumière, un reflet maîtrisé.",astuce:"Une feuille blanche face à la fenêtre suffit comme réflecteur.",reg:["f/8","ISO 100","Trépied ou appui"]},
+ {id:"l1",quand:["perso","libre"],obj:"normal",ou:"in",pref:["nuit"],t:"loisirs",n:2,titre:"Mangas en clair-obscur",brief:"Une étagère ou un seul tome de ta collection, éclairé par une seule lampe dans une pièce sombre.",astuce:"Éclaire de côté et rasant pour faire ressortir les reliefs des tranches.",reg:["f/4","Une seule source"]},
+ {id:"l2",quand:["perso","libre"],obj:"lumineux",ou:"in",t:"loisirs",n:3,nuit:true,titre:"Craie et sueur",brief:"À la salle de CrossFit, fige un mouvement au moment où la magnésie s’envole des mains.",astuce:"Pré-règle la mise au point sur la zone de l’action et attends le geste.",reg:["1/1000 s","f/2","ISO auto"]},
+ {id:"l3",quand:["perso","libre"],obj:"grand",ou:"any",t:"loisirs",n:2,titre:"Autoportrait du photographe",brief:"Toi et ton appareil : dans un miroir, une vitrine ou au retardateur, dans un lieu qui te ressemble.",astuce:"Utilise l’appli Canon Camera Connect pour déclencher depuis ton téléphone.",reg:["Retardateur 10 s","f/2.8"]},
+ {id:"l4",quand:["perso","libre"],obj:"normal",ou:"in",t:"loisirs",n:1,titre:"Photo produit maison",brief:"Photographie ton propre appareil comme pour une pub : fond uni, une lumière, un reflet maîtrisé.",astuce:"Une feuille blanche face à la fenêtre suffit comme réflecteur.",reg:["f/8","ISO 100","Trépied ou appui"]},
 
- {id:"t1",obj:"normal",ou:"any",pref:["jour"],t:"technique",n:1,titre:"Zoome avec tes pieds",brief:"Aujourd’hui, uniquement le 50 mm. Pour chaque sujet, fais trois photos : loin, à mi-distance, très près.",astuce:"Compare ensuite : laquelle raconte le mieux ?",reg:["50 mm uniquement"]},
- {id:"t2",obj:"normal",ou:"out",pref:["jour","clair"],t:"technique",n:2,titre:"Le filé",brief:"Suis un vélo, une voiture ou un tram en mouvement : le sujet net, le décor qui file.",astuce:"Pivote les hanches avec le sujet et continue le mouvement après le déclenchement.",reg:["Priorité vitesse","1/30 s","AF Servo"]},
- {id:"t3",obj:"normal",ou:"out",pref:["doree","clair"],t:"technique",n:2,titre:"Silhouette",brief:"Un contre-jour assumé : un sujet totalement noir découpé sur un ciel lumineux.",astuce:"Mesure la lumière sur le ciel, pas sur le sujet.",reg:["Mesure spot sur le ciel","f/8"]},
- {id:"t4",obj:"grand",ou:"out",pref:["nuit"],t:"technique",n:3,nuit:true,titre:"Traînées de lumière",brief:"De nuit, au bord d’une avenue, transforme les phares en lignes de lumière.",astuce:"Lance la pose juste avant qu’une voiture n’entre dans le cadre.",reg:["Mode M","10 à 20 s","f/11","ISO 100","Trépied"]},
- {id:"t5",ou:"any",t:"technique",n:1,titre:"Tiers, puis rien",brief:"Même sujet, deux photos : une parfaitement selon la règle des tiers, une qui la casse volontairement. Garde celle que tu préfères.",astuce:"Il n’y a pas de bonne réponse, juste une intention.",reg:["Grille affichée"]},
- {id:"t6",ou:"out",pref:["clair"],t:"technique",n:2,titre:"Manuel intégral",brief:"Une sortie entière en mode M, ISO compris, sans aucune automatisme.",astuce:"Retiens la règle du « 16 au soleil » : f/16, ISO 100, 1/100 s par grand soleil.",reg:["Mode M","ISO fixe"]},
- {id:"t7",ou:"any",pref:["nuageux"],t:"technique",n:2,titre:"Voir en noir et blanc",brief:"Passe le style d’image en monochrome et ne photographie que des textures et des contrastes.",astuce:"Shoote en RAW : l’écran est en noir et blanc, mais tu gardes la couleur au besoin.",reg:["Style Monochrome","RAW"]},
- {id:"t8",ou:"any",t:"technique",n:3,titre:"Une seule photo",brief:"Tu n’as droit qu’à un seul déclenchement pour toute la journée. Choisis bien.",astuce:"Pense ta photo pendant des heures avant de l’oser.",reg:["1 déclenchement"]},
+ {id:"t1",quand:["pause","perso","libre"],obj:"normal",ou:"any",pref:["jour"],t:"technique",n:1,titre:"Zoome avec tes pieds",brief:"Aujourd’hui, uniquement le 50 mm. Pour chaque sujet, fais trois photos : loin, à mi-distance, très près.",astuce:"Compare ensuite : laquelle raconte le mieux ?",reg:["50 mm uniquement"]},
+ {id:"t2",quand:["pause","libre"],obj:"normal",ou:"out",pref:["jour","clair"],t:"technique",n:2,titre:"Le filé",brief:"Suis un vélo, une voiture ou un tram en mouvement : le sujet net, le décor qui file.",astuce:"Pivote les hanches avec le sujet et continue le mouvement après le déclenchement.",reg:["Priorité vitesse","1/30 s","AF Servo"]},
+ {id:"t3",quand:["perso","libre"],obj:"normal",ou:"out",pref:["doree","clair"],t:"technique",n:2,titre:"Silhouette",brief:"Un contre-jour assumé : un sujet totalement noir découpé sur un ciel lumineux.",astuce:"Mesure la lumière sur le ciel, pas sur le sujet.",reg:["Mesure spot sur le ciel","f/8"]},
+ {id:"t4",quand:["perso","libre"],obj:"grand",ou:"out",pref:["nuit"],t:"technique",n:3,nuit:true,titre:"Traînées de lumière",brief:"De nuit, au bord d’une avenue, transforme les phares en lignes de lumière.",astuce:"Lance la pose juste avant qu’une voiture n’entre dans le cadre.",reg:["Mode M","10 à 20 s","f/11","ISO 100","Trépied"]},
+ {id:"t5",quand:["pause","perso","libre"],ou:"any",t:"technique",n:1,titre:"Tiers, puis rien",brief:"Même sujet, deux photos : une parfaitement selon la règle des tiers, une qui la casse volontairement. Garde celle que tu préfères.",astuce:"Il n’y a pas de bonne réponse, juste une intention.",reg:["Grille affichée"]},
+ {id:"t6",quand:["libre"],ou:"out",pref:["clair"],t:"technique",n:2,titre:"Manuel intégral",brief:"Une sortie entière en mode M, ISO compris, sans aucune automatisme.",astuce:"Retiens la règle du « 16 au soleil » : f/16, ISO 100, 1/100 s par grand soleil.",reg:["Mode M","ISO fixe"]},
+ {id:"t7",quand:["pause","libre"],ou:"any",pref:["nuageux"],t:"technique",n:2,titre:"Voir en noir et blanc",brief:"Passe le style d’image en monochrome et ne photographie que des textures et des contrastes.",astuce:"Shoote en RAW : l’écran est en noir et blanc, mais tu gardes la couleur au besoin.",reg:["Style Monochrome","RAW"]},
+ {id:"t8",quand:["libre"],ou:"any",t:"technique",n:3,titre:"Une seule photo",brief:"Tu n’as droit qu’à un seul déclenchement pour toute la journée. Choisis bien.",astuce:"Pense ta photo pendant des heures avant de l’oser.",reg:["1 déclenchement"]},
 
- {id:"m1",obj:"lumineux",t:"technique",ou:"in",pref:["pluie"],req:["pluie"],n:1,titre:"Gouttes sur la vitre",brief:"Il pleut : colle-toi à une fenêtre et fais la mise au point sur les gouttes, avec les lumières de la rue floues derrière.",astuce:"Mise au point manuelle sur la vitre, objectif presque contre le verre pour éviter les reflets.",reg:["f/2","MF","Au plus près"]},
- {id:"m2",obj:"normal",t:"technique",ou:"out",pref:["pluie"],req:["pluie"],n:2,titre:"Sous les parapluies",brief:"Depuis un porche ou un abri, photographie la rue sous la pluie : parapluies colorés, reflets sur les pavés, silhouettes pressées.",astuce:"Reste à l’abri pour déclencher et protège l’appareil avec le pare-soleil.",reg:["1/250 s","f/2.8","ISO auto"]},
- {id:"m3",obj:"grand",t:"technique",ou:"out",pref:["pluie","nuageux"],n:1,titre:"Le monde dans une flaque",brief:"Après la pluie, trouve une flaque et photographie le ciel, un arbre ou un bâtiment qui s’y reflète, appareil presque posé au sol.",astuce:"Plus tu es bas, plus la flaque devient un miroir. Essaie ensuite de retourner l’image.",reg:["f/8","Au ras du sol"]},
- {id:"m4",obj:"normal",t:"technique",ou:"out",pref:["neige"],req:["neige"],mois:[11,12,1,2,3],n:2,titre:"Blanc sur blanc",brief:"Il neige : une image presque entièrement blanche, avec un seul élément sombre (un arbre, un passant, un banc).",astuce:"Le posemètre rend la neige grise : corrige de +1 à +1 2/3 IL.",reg:["Correction +1 IL","f/8"]},
- {id:"m5",obj:"normal",t:"technique",ou:"out",pref:["vent"],req:["vent"],n:2,titre:"Le vent se voit",brief:"Montre le vent : un feuillage qui bouge en pose lente pendant que le tronc reste net, ou des cheveux et vêtements qui s’envolent.",astuce:"Appui stable et 1/4 s à 1 s : seul ce qui bouge devient flou.",reg:["Priorité vitesse","1/4 s","f/11","Appui stable"]},
- {id:"m6",obj:"portrait",t:"technique",ou:"out",pref:["doree"],n:1,titre:"Lumière dorée",brief:"Profite de l’heure dorée : un sujet (visage, façade, herbes hautes) éclairé par la lumière rasante et chaude du soleil bas.",astuce:"Place le soleil derrière ou sur le côté du sujet pour obtenir un liseré lumineux.",reg:["f/2.8","Balance des blancs Lumière du jour"]},
- {id:"m7",obj:"grand",t:"technique",ou:"out",pref:["nuageux"],n:2,titre:"Ciel dramatique",brief:"Gros nuages menaçants : fais du ciel le sujet principal, avec juste une ligne de toits ou d’arbres en bas de l’image.",astuce:"Sous-expose d’un tiers de diaphragme pour garder le relief des nuages.",reg:["Correction −1/3 IL","f/8","Horizon bas"]}
+ {id:"m1",quand:["travail","pause","perso","libre"],obj:"lumineux",t:"technique",ou:"in",pref:["pluie"],req:["pluie"],n:1,titre:"Gouttes sur la vitre",brief:"Il pleut : colle-toi à une fenêtre et fais la mise au point sur les gouttes, avec les lumières de la rue floues derrière.",astuce:"Mise au point manuelle sur la vitre, objectif presque contre le verre pour éviter les reflets.",reg:["f/2","MF","Au plus près"]},
+ {id:"m2",quand:["pause","libre"],obj:"normal",t:"technique",ou:"out",pref:["pluie"],req:["pluie"],n:2,titre:"Sous les parapluies",brief:"Depuis un porche ou un abri, photographie la rue sous la pluie : parapluies colorés, reflets sur les pavés, silhouettes pressées.",astuce:"Reste à l’abri pour déclencher et protège l’appareil avec le pare-soleil.",reg:["1/250 s","f/2.8","ISO auto"]},
+ {id:"m3",quand:["pause","perso","libre"],obj:"grand",t:"technique",ou:"out",pref:["pluie","nuageux"],n:1,titre:"Le monde dans une flaque",brief:"Après la pluie, trouve une flaque et photographie le ciel, un arbre ou un bâtiment qui s’y reflète, appareil presque posé au sol.",astuce:"Plus tu es bas, plus la flaque devient un miroir. Essaie ensuite de retourner l’image.",reg:["f/8","Au ras du sol"]},
+ {id:"m4",quand:["pause","libre"],obj:"normal",t:"technique",ou:"out",pref:["neige"],req:["neige"],mois:[11,12,1,2,3],n:2,titre:"Blanc sur blanc",brief:"Il neige : une image presque entièrement blanche, avec un seul élément sombre (un arbre, un passant, un banc).",astuce:"Le posemètre rend la neige grise : corrige de +1 à +1 2/3 IL.",reg:["Correction +1 IL","f/8"]},
+ {id:"m5",quand:["pause","libre"],obj:"normal",t:"technique",ou:"out",pref:["vent"],req:["vent"],n:2,titre:"Le vent se voit",brief:"Montre le vent : un feuillage qui bouge en pose lente pendant que le tronc reste net, ou des cheveux et vêtements qui s’envolent.",astuce:"Appui stable et 1/4 s à 1 s : seul ce qui bouge devient flou.",reg:["Priorité vitesse","1/4 s","f/11","Appui stable"]},
+ {id:"m6",quand:["perso","libre"],obj:"portrait",t:"technique",ou:"out",pref:["doree"],n:1,titre:"Lumière dorée",brief:"Profite de l’heure dorée : un sujet (visage, façade, herbes hautes) éclairé par la lumière rasante et chaude du soleil bas.",astuce:"Place le soleil derrière ou sur le côté du sujet pour obtenir un liseré lumineux.",reg:["f/2.8","Balance des blancs Lumière du jour"]},
+ {id:"m7",quand:["pause","perso","libre"],obj:"grand",t:"technique",ou:"out",pref:["nuageux"],n:2,titre:"Ciel dramatique",brief:"Gros nuages menaçants : fais du ciel le sujet principal, avec juste une ligne de toits ou d’arbres en bas de l’image.",astuce:"Sous-expose d’un tiers de diaphragme pour garder le relief des nuages.",reg:["Correction −1/3 IL","f/8","Horizon bas"]}
 ];
 
 const BONUS = ["Format vertical 4:5 pour Instagram","Mise au point manuelle uniquement","Dix photos maximum","Aucun visage reconnaissable","Uniquement en noir et blanc","Avant 9 h ou après 17 h","Une seule couleur dominante","Au moins une photo en contre-plongée"];
@@ -317,9 +329,11 @@ const BONUS = ["Format vertical 4:5 pour Instagram","Mise au point manuelle uniq
 
 
 const KEY = "defis-photo-v1";
-let state = {themes:Object.keys(THEMES), levels:["1","2","3"], cam:"m50", history:[], gear:structuredClone(DEFAULT_GEAR)};
+const DEFAULT_RYTHME = {travail:[1,2,3,4,5], debut:"08:30", fin:"17:30", pauseDebut:"12:00", pauseFin:"13:30", fils:[0,1,2,3,4,5,6]};
+let state = {themes:Object.keys(THEMES), levels:["1","2","3"], cam:"m50", history:[], gear:structuredClone(DEFAULT_GEAR), rythme:structuredClone(DEFAULT_RYTHME)};
 try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s) state = Object.assign(state, s); }catch(e){}
 if(!state.gear || !state.gear.cams || !state.gear.cams.length) state.gear = structuredClone(DEFAULT_GEAR);
+state.rythme = Object.assign(structuredClone(DEFAULT_RYTHME), state.rythme);
 state.gear.cams.forEach(c=>{ if(!c.monture) c.monture = c.id==="m50" ? "EF-M" : c.id==="r6" ? "RF" : "autre"; });
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
@@ -570,23 +584,52 @@ function sunHint(){
 function renderCtx(){
   const el = document.getElementById("ctx");
   const btn = ctxSource==="gps" ? "" : ` <button class="linkbtn" id="locate">Utiliser ma position</button>`;
-  if(ctxStatus==="chargement"){ el.innerHTML = `<span>Météo en cours de chargement…</span>`; return; }
-  if(ctxStatus==="erreur"){ el.innerHTML = `<span>Météo indisponible, défis sans contexte.</span> <button class="linkbtn" id="locate">Réessayer</button>`; bindLocate(); return; }
+  const mom = `<span><b>${momentLabel()}</b></span>`;
+  if(ctxStatus==="chargement"){ el.innerHTML = mom + `<span>Météo en cours de chargement…</span>`; return; }
+  if(ctxStatus==="erreur"){ el.innerHTML = mom + `<span>Météo indisponible.</span> <button class="linkbtn" id="locate">Réessayer</button>`; bindLocate(); return; }
   const lieu = ctxSource==="gps" ? (ctx.nancy ? "Nancy" : "Ta position") : (ctxSource==="refus" ? "Nancy (position refusée)" : "Nancy (par défaut)");
   const bits = [`<b>${lieu}</b>`, `${ctx.temp}°`, CTX_LABEL[ctx.cat]];
   if(ctx.vent) bits.push(CTX_LABEL.vent);
   bits.push(CTX_LABEL[ctx.light]);
   const h = sunHint(); if(h) bits.push(h);
-  el.innerHTML = bits.map(b=>`<span>${b}</span>`).join("") + btn;
+  el.innerHTML = bits.map(b=>`<span>${b}</span>`).join("") + mom + btn;
   bindLocate();
 }
 function bindLocate(){ const b=document.getElementById("locate"); if(b) b.onclick = locate; }
 
+/* ---------- Mon rythme : travail, pause, temps perso, repos ---------- */
+const JOURS = [["1","Lun"],["2","Mar"],["3","Mer"],["4","Jeu"],["5","Ven"],["6","Sam"],["0","Dim"]];
+const MOMENT_WHY = {travail:"tu peux le faire au travail", pause:"c’est faisable pendant ta pause déjeuner", perso:"c’est faisable hors de tes heures de travail", libre:"tu es en repos aujourd’hui"};
+const minutes = hm => { const [h,m] = String(hm).split(":").map(Number); return h*60 + (m||0); };
+const estTravaille = (d=new Date()) => state.rythme.travail.includes(d.getDay());
+function moment(d=new Date()){
+  if(!estTravaille(d)) return "libre";
+  const r = state.rythme, t = d.getHours()*60 + d.getMinutes();
+  if(r.pauseDebut && r.pauseFin && t >= minutes(r.pauseDebut) && t < minutes(r.pauseFin)) return "pause";
+  if(t >= minutes(r.debut) && t < minutes(r.fin)) return "travail";
+  return "perso";
+}
+function momentLabel(){
+  const m = moment(), r = state.rythme;
+  if(m==="libre") return "Jour de repos";
+  if(m==="pause") return `Pause déjeuner jusqu’à ${r.pauseFin}`;
+  if(m==="travail") return `Au travail jusqu’à ${r.fin}`;
+  const t = new Date(); return t.getHours()*60 + t.getMinutes() < minutes(r.debut) ? `Avant le travail (dès ${r.debut})` : "Après le travail";
+}
+// Le fils est disponible : jour coché et hors heures de travail
+const filsLa = () => state.rythme.fils.includes(new Date().getDay()) && ["perso","libre"].includes(moment());
+function faisable(c, m=moment()){
+  if(c.quand && !c.quand.includes(m)) return false;
+  if(c.t==="famille" && !filsLa()) return false;
+  return true;
+}
+
 // Plus une condition est rare, plus un défi qui en profite est favorisé.
 const POIDS = {brouillard:10, neige:10, pluie:6, vent:6, doree:6, bleue:8, nuit:4, clair:2, nuageux:2, jour:1};
 function ctxTags(){ if(!ctx) return []; const t=[ctx.cat, ctx.light]; if(ctx.vent) t.push("vent"); return t; }
-function score(c){
+function score(c, avecRythme=true){
   if(c.req && !c.req.every(r=>ctxTags().includes(r))) return 0;
+  if(avecRythme && !faisable(c)) return 0;
   if(!ctx) return 1;
   if(c.t==="nancy" && !ctx.nancy) return 0;
   const tags = ctxTags(), hits = (c.pref||[]).filter(p=>tags.includes(p));
@@ -601,8 +644,12 @@ function score(c){
   return s;
 }
 function reasons(c){
-  if(!ctx) return [];
-  const tags = ctxTags(), r = (c.pref||[]).filter(p=>p!=="jour" && tags.includes(p)).map(p=>WHY[p]);
+  const r = [];
+  if(faisable(c)){ const m = moment(); if(m!=="perso" || c.t!=="famille") r.push(MOMENT_WHY[m]); }
+  if(c.t==="famille" && filsLa()) r.push("ton fils est avec toi");
+  if(!ctx) return r;
+  const tags = ctxTags();
+  r.push(...(c.pref||[]).filter(p=>p!=="jour" && tags.includes(p)).map(p=>WHY[p]));
   if(c.ou==="in" && ["pluie","neige","orage"].includes(ctx.cat)) r.push("ce défi se fait au sec");
   else if(c.ou==="in" && ctx.light==="nuit") r.push("ce défi se fait à l’intérieur");
   if(c.t==="nancy" && ctxSource==="gps" && ctx.nancy) r.push("tu es à Nancy");
@@ -613,7 +660,11 @@ function pool(){
   return D.filter(c => inSeason(c) && state.themes.includes(c.t) && state.levels.includes(String(c.n)));
 }
 function pickToday(){
-  const p = D.filter(c => inSeason(c) && !c.req);
+  // Défi du jour : faisable aujourd'hui (pause ou après le travail en semaine, repos sinon)
+  const travaille = estTravaille(), fils = state.rythme.fils.includes(new Date().getDay());
+  let p = D.filter(c => inSeason(c) && !c.req && (!c.quand || (travaille ? c.quand.some(x=>x==="pause"||x==="perso") : c.quand.includes("libre")))
+    && (c.t!=="famille" || fils));
+  if(!p.length) p = D.filter(c => inSeason(c) && !c.req);
   const h = hash(dayKey());
   current = p[h % p.length]; currentBonus = BONUS[h % BONUS.length];
   render();
@@ -624,7 +675,9 @@ function pickRandom(){
   const doneIds = new Set(state.history.slice(-10).map(x=>x.id));
   const fresh = p.filter(c => !doneIds.has(c.id) && (!current || c.id !== current.id));
   if(fresh.length && fresh.some(c=>score(c)>0)) p = fresh;
-  const w = p.map(score), total = w.reduce((a,b)=>a+b,0);
+  let w = p.map(c=>score(c)), total = w.reduce((a,b)=>a+b,0);
+  // Rien de faisable à ce moment-là : on ignore le rythme plutôt que de ne rien proposer
+  if(!total){ w = p.map(c=>score(c,false)); total = w.reduce((a,b)=>a+b,0); }
   if(!total){ current = null; render(); return; }
   let x = Math.random()*total, i = 0;
   while(x >= w[i]){ x -= w[i]; i++; }
@@ -679,10 +732,10 @@ function renderMeta(){
 function chips(id, map, isOn, onClick){
   const box = document.getElementById(id);
   box.innerHTML = "";
-  Object.entries(map).forEach(([k,label])=>{
+  (Array.isArray(map) ? map : Object.entries(map)).forEach(([k,label])=>{
     const b = document.createElement("button");
     b.className = "chip"; b.textContent = label; b.setAttribute("aria-pressed", isOn(k));
-    b.onclick = ()=>{ onClick(k); save(); renderChips(); if(id!=="cams") pickRandom(); else render(); };
+    b.onclick = ()=>{ onClick(k); save(); renderChips(); if(id==="themes"||id==="levels") pickRandom(); else { renderCtx(); render(); } };
     box.appendChild(b);
   });
 }
@@ -692,7 +745,21 @@ function renderChips(){
   chips("levels", LEVELS, k=>state.levels.includes(k), k=>toggle(state.levels,k));
   if(!state.gear.cams.some(c=>c.id===state.cam)) state.cam = state.gear.cams[0].id;
   chips("cams", Object.fromEntries(state.gear.cams.map(c=>[c.id, c.nom])), k=>state.cam===k, k=>{state.cam=k;});
+  chips("workdays", JOURS, k=>state.rythme.travail.includes(+k), k=>toggle(state.rythme.travail,+k));
+  chips("sondays", JOURS, k=>state.rythme.fils.includes(+k), k=>toggle(state.rythme.fils,+k));
 }
+const HORAIRES = {wStart:"debut", wEnd:"fin", pStart:"pauseDebut", pEnd:"pauseFin"};
+Object.entries(HORAIRES).forEach(([id,key])=>{
+  const inp = document.getElementById(id);
+  inp.value = state.rythme[key] || "";
+  inp.addEventListener("change", ()=>{ state.rythme[key] = inp.value; save(); renderCtx(); render(); });
+});
+// En revenant sur l'app, le moment de la journée et la lumière ont pu changer
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState!=="visible") return;
+  if(ctx) ctx.light = lightPhase(ctx.sr, ctx.ss);
+  renderCtx(); render();
+});
 
 document.getElementById("next").onclick = pickRandom;
 document.getElementById("gear").onclick = openGear;
