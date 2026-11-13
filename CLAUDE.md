@@ -6,12 +6,20 @@
 
 ## Structure
 
-Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dépendance (hors polices Google Fonts : Young Serif et Instrument Sans).
+Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dépendance (hors polices Google Fonts : Instrument Sans pour l'interface, Cinzel pour le logo).
+
+## Interface
+
+- Style léger : noir, blanc et or (comme le logo « Point of Nabil »), variables `--bg`, `--surface`, `--surface-2`, `--ink`, `--soft`, `--line`, `--accent`, `--accent-ink`, `--accent-soft`, `--ok`, `--danger` (thèmes clair et sombre).
+- Logo : SVG inline provisoire (`.logo`, `currentColor`, texte en Cinzel), redessiné d'après une capture ; à remplacer par le fichier original. Favicon : crochets + cercle du viseur (data URI SVG).
+- Écran principal : en-tête (logo + bouton `#stats` qui ouvre l'historique), pastilles de contexte (`#ctx`, `.pill`, `.pill.moment` ouvre le planning), carte du défi (`.card.viewfinder`, coins dorés), bouton « Je l'ai fait » puis « Maintenant », « Défi du jour », « ✨ IA ».
+- Barre d'onglets fixe en bas (`.tabbar`) : Défi, Planning (`#openPlan`), Matériel (`#gear`), Réglages (`#openSet`).
+- Tiroirs `dialog.sheet` (montent du bas sur téléphone, centrés sur grand écran) : `#gearDlg`, `#planDlg`, `#setDlg` (thèmes, difficulté, IA, historique, à propos). `openSheet()` bloque la page ; croix `[data-close]`, clic à côté ou Échap pour fermer. Un style qui fixe `display` doit prévoir `[hidden]{display:none}`.
 
 ## Code (dans le `<script>`)
 
 - `THEMES`, `LEVELS` : libellés des thèmes et difficultés (les appareils sont dans `state.gear`).
-- En-tête : ligne titre + bouton « Mon matériel » (`.hrow`), puis statistiques sur une ligne, puis ligne météo (`#ctx`). À vérifier sur un écran de téléphone étroit (320 à 390 px).
+- Vérifier chaque écran sur un téléphone étroit (320 à 390 px), en clair et en sombre.
 - `D` : la liste des défis (thèmes `nancy`, `boulot`, `famille`, `maison` (préfixe `h`), `loisirs`, `technique` ; préfixe `m` pour les défis météo). Champs : `id` (préfixe du thème + numéro, ex. `n3`), `t` (thème), `n` (difficulté 1–3), `titre`, `brief`, `astuce`, `reg` (réglages affichés en étiquettes), et en option `nuit: true` (choisit la note appareil « nuit ») et `mois: [...]` (mois où le défi est disponible).
 - Champs de contexte des défis : `ou` (`"in"`, `"out"` ou `"any"`), `pref` (conditions où le défi brille : `clair`, `nuageux`, `brouillard`, `pluie`, `neige`, `vent`, `jour`, `doree`, `bleue`, `nuit`), `req` (conditions obligatoires : le défi n'est proposé que si elles sont réunies, et jamais en « Défi du jour »).
 - `BONUS` : contraintes bonus tirées au hasard.
@@ -25,7 +33,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `CAPTEURS` : type de capteur et coefficient de recadrage (`crop`). `MONTURES` : monture d'un appareil (`cam.monture`).
 - Recherche d'objectifs : `CATALOGUE` (liste intégrée `[nom, monture, fmin, fmax, ouv, macro]`, montures RF, RF-S, EF, EF-S, EF-M), `COMPAT` (monture appareil → monture objectif : `"natif"` ou nom de l'adaptateur), `recadre()` (objectif APS-C sur plein format), `renderSearch()`, `addFromCatalogue()`. Pour ajouter un objectif au catalogue : une ligne dans `CATALOGUE`, valeurs vérifiées sur la fiche du fabricant. La recherche ignore le mot « canon » et met la correspondance exacte en premier.
 - `gearAdvice(c, nuit)` : texte du bloc appareil. `bestLens()` choisit l'objectif selon `OBJ` (plage de focale équivalente visée) ; `FAUTE` quand aucun objectif ne la couvre.
-- Écran « Mon matériel » : `<dialog id="gearDlg">`, rendu par `renderGear()`, modifications via `onGearInput` (événements délégués). En-tête collant (`.dlg-top`) avec « Fermer » et « Rechercher un objectif » (`gotoSearch()`). Pendant que la fenêtre est ouverte, la page derrière est bloquée (`lockPage()` / `unlockPage()` sur l'événement `close`, plus `overscroll-behavior: contain`). Ne pas redessiner la liste pendant la saisie (ça fait perdre le champ en cours) ; échapper les noms saisis avec `esc()`.
+- Écran « Mon matériel » (`#gearDlg`) : appareil du jour (contrôle segmenté `#cams`), listes compactes d'appareils et d'objectifs (`.list` > `.item` avec résumé `.row-head` : `.rh-name`, `.rh-meta` via `camMeta()` / `lensMeta()`), fiche dépliée une à la fois (`gearOpen`, `[data-toggle]`). Recherche en haut des objectifs : résultats seulement quand on tape, « Compatible avec » (`#lsFor`) visible seulement pendant la recherche. `onGearInput` met à jour le résumé de la ligne sans redessiner la fiche (sinon la saisie en cours est perdue) ; échapper les noms saisis avec `esc()`. Page bloquée pendant l'ouverture (`lockPage()` / `unlockPage()`, `overscroll-behavior: contain`).
 
 ## Mon planning
 
@@ -35,7 +43,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `typeEffectif(slot, jour)` : une pause collée à du télétravail (sans travail au bureau autour), ou isolée dans une journée sans travail au bureau, devient `pausemaison` (pause chez soi ou dans le quartier).
 - Champ des défis `quand` : moments où le défi est faisable (`travail`, `tele`, `pause`, `pausemaison`, `crossfit`, `fils`, `perso`, `libre`). Un défi qui demande la lumière du jour ne doit pas avoir `perso` (soirées) ; `req:["soleil"]` = ciel dégagé et jour ou heure dorée. `faisable(c, types)` : le thème `famille` exige `fils` ; un défi `perso` est aussi faisable pendant `fils`.
 - `score(c)` renvoie 0 si le défi n'est pas faisable ; si plus rien n'est faisable, `pickRandom()` ignore le planning. `pickToday()` utilise les créneaux du jour plus `perso`.
-- Écran : `<dialog id="planDlg">`, `renderWeek()` (barres, `fils` en moitié basse si la journée a d'autres créneaux), `renderPlanDay()`, copie d'une journée (`planCopy`). Couleurs des créneaux : variables `--k-<type>` (thèmes clair et sombre). Ne pas redessiner les créneaux pendant la saisie d'une heure.
+- Écran : tiroir `#planDlg` (jours en contrôle segmenté `#planDays`), `renderWeek()` (barres, `fils` en moitié basse si la journée a d'autres créneaux), `renderPlanDay()`, copie d'une journée (`planCopy`). Couleurs des créneaux : variables `--k-<type>` (thèmes clair et sombre). Ne pas redessiner les créneaux pendant la saisie d'une heure.
 
 ## Contexte (lieu, météo, lumière)
 

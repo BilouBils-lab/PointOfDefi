@@ -2,10 +2,16 @@
 
 Une petite application web, en un seul fichier, qui propose chaque jour un défi photo pour progresser en s'amusant.
 
+## L'interface
+
+- **Écran principal** : le logo, tes statistiques (touche-les pour voir ton historique), le contexte en pastilles (créneau du planning, lieu, météo, lumière), la carte du défi, puis « Je l'ai fait » et trois choix : « Maintenant », « Défi du jour », « ✨ IA ».
+- **Barre d'onglets en bas** : Défi, Planning, Matériel, Réglages. Chaque écran s'ouvre dans un tiroir qui monte du bas ; la croix, un geste à côté ou Échap le referment.
+- Style noir, blanc et or, comme le logo, en mode clair ou sombre selon le téléphone.
+
 ## Ce que fait l'app
 
 - **Défi du jour** : le même défi pour toute la journée, choisi automatiquement selon la date.
-- **Défi pour maintenant** : choisit un défi adapté à l'endroit où tu es, à la météo et à la lumière du moment, en évitant ceux faits récemment.
+- **Maintenant** : choisit un défi adapté à l'endroit où tu es, à la météo et à la lumière du moment, en évitant ceux faits récemment.
 - **Je l'ai fait** : enregistre le défi dans ton historique et fait avancer ta série de jours d'affilée.
 - **Contrainte bonus** : une règle en plus (format vertical, noir et blanc, mise au point manuelle…) pour corser le défi.
 
@@ -24,7 +30,7 @@ Tout est gratuit, sans compte ni clé : la position vient du navigateur (avec ta
 
 ## Mon planning
 
-Dans **Mon planning**, remplis ta semaine jour par jour avec des créneaux :
+Dans l'onglet **Planning**, remplis ta semaine jour par jour avec des créneaux :
 
 | Créneau | Ce que l'app propose |
 |---|---|
@@ -60,7 +66,7 @@ Avec une clé API Gemini (gratuite sur [aistudio.google.com/apikey](https://aist
 
 ## Mon matériel
 
-Le bouton **Mon matériel**, en haut à droite, permet d'enregistrer tes appareils et tes objectifs :
+L'onglet **Matériel** permet d'enregistrer tes appareils et tes objectifs :
 
 - **Appareil** : nom, type de capteur (plein format, APS-C…) et ISO maximal que tu juges acceptable.
 - **Objectif** : nom, focale minimale et maximale (la même valeur pour une focale fixe), ouverture maximale, macro ou non, et appareils avec lesquels il est compatible.
