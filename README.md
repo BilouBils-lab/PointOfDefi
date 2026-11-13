@@ -29,8 +29,8 @@ Dans **Mon planning**, remplis ta semaine jour par jour avec des créneaux :
 | Créneau | Ce que l'app propose |
 |---|---|
 | Travail | Les défis « Boulot » (nature morte de bureau, lignes de fuite…) |
-| Télétravail | Des défis faisables à la maison pendant une pause (tasse de café, gouttes sur la vitre…) |
-| Pause déjeuner | Des défis courts à faire près du travail |
+| Télétravail | Des défis faisables à ton poste, à la maison (lumière de fenêtre, autoportrait en visio, reflet dans l'écran noir, tasse de café…) |
+| Pause déjeuner | Des défis courts à faire près du travail ; un jour de télétravail, des défis chez toi ou dans ton quartier (nature morte de cuisine, tour du pâté de maisons…) |
 | CrossFit | « Craie et sueur » |
 | Avec mon fils | Les défis avec ton fils, et ceux à faire chez toi |
 | Sortie possible | Tout, y compris les sorties dans Nancy (place Stanislas…) |
@@ -45,7 +45,7 @@ Le « Défi du jour » est choisi parmi les défis faisables à un moment de ta 
 
 ## Réglages
 
-- **Thèmes** : Nancy, Boulot, Avec mon fils, Mes passions, Technique pure.
+- **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Mes passions, Technique pure.
 - **Difficulté** : Facile, Moyen, Costaud.
 - **Appareil du jour** : choisis l'appareil que tu emportes parmi ceux de ton matériel.
 
