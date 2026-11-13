@@ -24,7 +24,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `CAPTEURS` : type de capteur et coefficient de recadrage (`crop`). `MONTURES` : monture d'un appareil (`cam.monture`).
 - Recherche d'objectifs : `CATALOGUE` (liste intégrée `[nom, monture, fmin, fmax, ouv, macro]`, montures RF, RF-S, EF, EF-S, EF-M), `COMPAT` (monture appareil → monture objectif : `"natif"` ou nom de l'adaptateur), `recadre()` (objectif APS-C sur plein format), `renderSearch()`, `addFromCatalogue()`. Pour ajouter un objectif au catalogue : une ligne dans `CATALOGUE`, valeurs vérifiées sur la fiche du fabricant.
 - `gearAdvice(c, nuit)` : texte du bloc appareil. `bestLens()` choisit l'objectif selon `OBJ` (plage de focale équivalente visée) ; `FAUTE` quand aucun objectif ne la couvre.
-- Écran « Mon matériel » : `<dialog id="gearDlg">`, rendu par `renderGear()`, modifications via `onGearInput` (événements délégués). Ne pas redessiner la liste pendant la saisie (ça fait perdre le champ en cours) ; échapper les noms saisis avec `esc()`.
+- Écran « Mon matériel » : `<dialog id="gearDlg">`, rendu par `renderGear()`, modifications via `onGearInput` (événements délégués). En-tête collant (`.dlg-top`) avec « Fermer » et « Rechercher un objectif » (`gotoSearch()`). Pendant que la fenêtre est ouverte, la page derrière est bloquée (`lockPage()` / `unlockPage()` sur l'événement `close`, plus `overscroll-behavior: contain`). Ne pas redessiner la liste pendant la saisie (ça fait perdre le champ en cours) ; échapper les noms saisis avec `esc()`.
 
 ## Contexte (lieu, météo, lumière)
 

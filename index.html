@@ -90,10 +90,17 @@ summary{cursor:pointer; font-weight:600}
 .hright{display:flex; align-items:flex-start; gap:.75rem}
 .gearbtn{display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--green); font-size:.875rem; font-weight:600; white-space:nowrap}
 .gearbtn svg{width:1.05rem; height:1.05rem}
-dialog{border:0; padding:0; background:var(--paper); color:var(--ink); width:min(36rem, calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); border-radius:12px}
+dialog{border:0; padding:0; background:var(--paper); color:var(--ink); width:min(36rem, calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); border-radius:12px;
+  overflow-y:auto; overscroll-behavior:contain}
 dialog::backdrop{background:rgba(0,0,0,.45)}
-.dlg{padding:1.25rem 1.25rem 1.5rem}
-.dlg-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem}
+.dlg{padding:0 1.25rem 1.5rem}
+.dlg-top{position:sticky; top:0; z-index:1; background:var(--paper); padding:1.25rem 0 .75rem; border-bottom:1px solid var(--line); margin-bottom:.75rem}
+.dlg-head{display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-bottom:.75rem}
+.dlg-top .btn{padding:.55rem 1rem}
+#gotoSearch{display:inline-flex; align-items:center; gap:.45rem}
+#gotoSearch svg{width:1.05rem; height:1.05rem}
+#lensTitle{scroll-margin-top:9rem}
+body.locked{position:fixed; left:0; right:0; overflow:hidden}
 .dlg h2{font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.375rem; color:var(--green); margin:0}
 .dlg h3{font-size:1rem; margin:1.25rem 0 .25rem}
 .dlg .hint{font-size:.875rem; color:var(--soft); margin:0 0 .6rem}
@@ -164,12 +171,15 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 
 <dialog id="gearDlg" aria-labelledby="gearTitle">
   <div class="dlg">
-    <div class="dlg-head"><h2 id="gearTitle">Mon matériel</h2><button class="btn" id="gearClose">Fermer</button></div>
+    <div class="dlg-top">
+      <div class="dlg-head"><h2 id="gearTitle">Mon matériel</h2><button class="btn" id="gearClose">Fermer</button></div>
+      <button class="btn primary" id="gotoSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>Rechercher un objectif</button>
+    </div>
     <p class="hint">Les modifications sont enregistrées automatiquement sur cet appareil.</p>
     <h3>Appareils photo</h3>
     <div id="camList"></div>
     <button class="btn addbtn" id="addCam">+ Ajouter un appareil</button>
-    <h3>Objectifs</h3>
+    <h3 id="lensTitle">Objectifs</h3>
     <div class="search" id="lensSearch">
       <div class="row">
         <label>Pour l’appareil<select id="lsCam"></select></label>
@@ -462,7 +472,16 @@ function addFromCatalogue(i){
     cams: state.gear.cams.filter(c=>compatFor(c, l.monture)).map(c=>c.id)});
   gearChanged(); renderGear();
 }
-function openGear(){ renderGear(); document.getElementById("gearDlg").showModal(); }
+// Bloque le défilement de la page derrière la fenêtre (y compris sur iPhone), puis le rétablit à la fermeture
+let lockedY = 0;
+function lockPage(){ lockedY = scrollY; document.body.style.top = `-${lockedY}px`; document.body.classList.add("locked"); }
+function unlockPage(){ document.body.classList.remove("locked"); document.body.style.top = ""; scrollTo(0, lockedY); }
+function openGear(){ renderGear(); lockPage(); document.getElementById("gearDlg").showModal(); }
+function gotoSearch(){
+  const q = document.getElementById("lsQ");
+  q.focus({preventScroll:true});
+  document.getElementById("lensTitle").scrollIntoView({block:"start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+}
 
 /* ---------- Contexte : position, météo, lumière ---------- */
 const NANCY = {lat:48.69, lon:6.18};
@@ -661,6 +680,8 @@ document.getElementById("next").onclick = pickRandom;
 document.getElementById("gear").onclick = openGear;
 document.getElementById("gear2").onclick = openGear;
 document.getElementById("gearClose").onclick = ()=>document.getElementById("gearDlg").close();
+document.getElementById("gotoSearch").onclick = gotoSearch;
+document.getElementById("gearDlg").addEventListener("close", unlockPage);
 const gearDlg = document.getElementById("gearDlg");
 gearDlg.addEventListener("input", onGearInput);
 gearDlg.addEventListener("change", onGearInput);
