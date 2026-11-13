@@ -270,7 +270,7 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
 </dialog>
 
 <script>
-const VERSION = "11 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
+const VERSION = "12 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -971,7 +971,7 @@ document.getElementById("today").onclick = pickToday;
 /* ---------- Défis inventés par l'IA (Gemini, clé de l'utilisateur, stockée sur l'appareil) ---------- */
 const IA_KEY = "defis-photo-gemini";
 const GEMINI = "https://generativelanguage.googleapis.com/v1beta/";
-let ia = {cle:"", modele:""};
+let ia = {cle:"", modele:"", modeles:[]};
 try{ ia = Object.assign(ia, JSON.parse(localStorage.getItem(IA_KEY))||{}); }catch(e){}
 function iaSave(){ try{ localStorage.setItem(IA_KEY, JSON.stringify(ia)); }catch(e){} }
 function iaStatus(txt, cls=""){ const el = document.getElementById("iaStatus"); el.textContent = txt; el.className = "ia-status " + cls; }
@@ -986,15 +986,16 @@ async function geminiFetch(path, opts={}){
     const r = await fetch(GEMINI + path, {...opts, signal:ac.signal, headers:{"Content-Type":"application/json", "x-goog-api-key":ia.cle}});
     const data = await r.json().catch(()=>({}));
     if(!r.ok){
-      const msg = data.error?.message || "";
-      if(r.status===400 && /api key/i.test(msg) || r.status===401 || r.status===403) throw new Error("Clé API refusée par Google : vérifie-la.");
-      if(r.status===429) throw new Error("Quota Gemini atteint pour le moment : réessaie un peu plus tard.");
-      if(r.status===404) throw new Error("Ce modèle n’est plus disponible : choisis-en un autre dans « Défis inventés par l’IA ».");
-      throw new Error(`Gemini a renvoyé une erreur (${r.status}).`);
+      const msg = data.error?.message || "", err = m => Object.assign(new Error(m), {status:r.status});
+      if(r.status===400 && /api key/i.test(msg) || r.status===401 || r.status===403) throw err("Clé API refusée par Google : vérifie-la.");
+      if(r.status===429) throw err("Quota Gemini atteint pour le moment : réessaie un peu plus tard.");
+      if(r.status===404) throw err("Ce modèle n’est plus disponible : choisis-en un autre dans « Défis inventés par l’IA ».");
+      if(r.status>=500) throw Object.assign(err("Gemini est surchargé en ce moment : réessaie dans quelques instants."), {temporaire:true});
+      throw err(`Gemini a renvoyé une erreur (${r.status}).`);
     }
     return data;
   } catch(e){
-    if(e.name==="AbortError") throw new Error("Gemini met trop de temps à répondre : réessaie.");
+    if(e.name==="AbortError") throw Object.assign(new Error("Gemini met trop de temps à répondre : réessaie."), {temporaire:true});
     if(e instanceof TypeError) throw new Error("Impossible de joindre Gemini : vérifie ta connexion.");
     throw e;
   } finally { clearTimeout(timer); }
@@ -1017,6 +1018,7 @@ async function iaTester(){
     const modeles = classeModeles(data.models||[]);
     if(!modeles.length) throw new Error("Aucun modèle Gemini utilisable avec cette clé.");
     if(!modeles.some(m=>m.name===ia.modele)) ia.modele = modeles[0].name;
+    ia.modeles = modeles.slice(0, 8).map(m=>m.name); // modèles de secours en cas de surcharge
     const sel = document.getElementById("iaModel");
     sel.innerHTML = modeles.map(m=>`<option value="${esc(m.name)}"${m.name===ia.modele?" selected":""}>${esc(m.displayName || m.name)}</option>`).join("");
     document.getElementById("iaModelRow").hidden = false;
@@ -1054,6 +1056,31 @@ const IA_SCHEMA = {type:"OBJECT", properties:{
   objectif:{type:"STRING", enum:["grand","normal","portrait","tele","lumineux","macro"]},
   pourquoi:{type:"STRING", description:"Pourquoi ce défi colle au moment présent, une phrase courte"}
 }, required:["titre","theme","difficulte","brief","astuce","reglages","objectif","pourquoi"]};
+// Surcharge (5xx) : un nouvel essai sur le même modèle, puis d'autres modèles de la clé.
+// Quota (429) ou modèle disparu (404) : modèle suivant directement. Clé refusée ou réseau : on s'arrête.
+const pause = ms => new Promise(r=>setTimeout(r, ms));
+async function genererAvecSecours(consigne, btn){
+  if(!ia.modeles?.length){
+    try{ ia.modeles = classeModeles((await geminiFetch("models?pageSize=200")).models||[]).slice(0, 8).map(m=>m.name); iaSave(); }catch(e){ ia.modeles = []; }
+  }
+  const essais = [ia.modele || "models/gemini-2.5-flash", ...ia.modeles.filter(m=>m!==ia.modele)].slice(0, 3);
+  const corps = JSON.stringify({contents:[{role:"user", parts:[{text:consigne}]}],
+    generationConfig:{temperature:1.1, responseMimeType:"application/json", responseSchema:IA_SCHEMA}});
+  let derniere;
+  for(const [i, modele] of essais.entries()){
+    for(let tentative = 0; tentative < 2; tentative++){
+      if(i || tentative) btn.textContent = "L’IA réfléchit… (nouvel essai)";
+      try{ return await geminiFetch(`${modele}:generateContent`, {method:"POST", body:corps}); }
+      catch(e){
+        derniere = e;
+        if(e.temporaire && tentative===0){ await pause(2000); continue; }
+        if(e.temporaire || e.status===429 || e.status===404) break; // modèle suivant
+        throw e;
+      }
+    }
+  }
+  throw derniere;
+}
 async function defiIA(){
   const btn = document.getElementById("iaBtn"), err = document.getElementById("iaErr");
   btn.disabled = true; btn.textContent = "L’IA réfléchit…"; err.hidden = true;
@@ -1066,10 +1093,7 @@ Typographie française (apostrophe ’, guillemets « »).
 Contexte :
 ${iaContexte()}`;
   try{
-    const data = await geminiFetch(`${ia.modele || "models/gemini-2.5-flash"}:generateContent`, {method:"POST", body:JSON.stringify({
-      contents:[{role:"user", parts:[{text:consigne}]}],
-      generationConfig:{temperature:1.1, responseMimeType:"application/json", responseSchema:IA_SCHEMA}
-    })});
+    const data = await genererAvecSecours(consigne, btn);
     const texte = (data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
     let d; try{ d = JSON.parse(texte); }catch(e){ throw new Error("Réponse de l’IA illisible : réessaie."); }
     const court = (v, n) => String(v||"").trim().slice(0, n);
