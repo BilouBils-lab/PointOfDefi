@@ -16,7 +16,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - Champs de contexte des défis : `ou` (`"in"`, `"out"` ou `"any"`), `pref` (conditions où le défi brille : `clair`, `nuageux`, `brouillard`, `pluie`, `neige`, `vent`, `jour`, `doree`, `bleue`, `nuit`), `req` (conditions obligatoires : le défi n'est proposé que si elles sont réunies, et jamais en « Défi du jour »).
 - `BONUS` : contraintes bonus tirées au hasard.
 - `obj` (champ des défis) : type d'objectif conseillé, `grand`, `normal`, `portrait`, `tele`, `lumineux` ou `macro`.
-- État dans `localStorage`, clé `defis-photo-v1` : `{themes, levels, cam, history, gear, geo, rythme}`. Toujours entourer les accès de `try/catch`.
+- État dans `localStorage`, clé `defis-photo-v1` : `{themes, levels, cam, history, gear, geo, planning}` (`rythme` : ancien format, lu seulement pour la migration). Toujours entourer les accès de `try/catch`.
 - `pickToday()` : défi déterministe selon un hash de la date (hors défis avec `req`). `pickRandom()` (bouton « Défi pour maintenant ») : tirage filtré par les réglages, pondéré par `score()`, en évitant les 10 derniers défis réalisés.
 
 ## Matériel
@@ -27,12 +27,14 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `gearAdvice(c, nuit)` : texte du bloc appareil. `bestLens()` choisit l'objectif selon `OBJ` (plage de focale équivalente visée) ; `FAUTE` quand aucun objectif ne la couvre.
 - Écran « Mon matériel » : `<dialog id="gearDlg">`, rendu par `renderGear()`, modifications via `onGearInput` (événements délégués). En-tête collant (`.dlg-top`) avec « Fermer » et « Rechercher un objectif » (`gotoSearch()`). Pendant que la fenêtre est ouverte, la page derrière est bloquée (`lockPage()` / `unlockPage()` sur l'événement `close`, plus `overscroll-behavior: contain`). Ne pas redessiner la liste pendant la saisie (ça fait perdre le champ en cours) ; échapper les noms saisis avec `esc()`.
 
-## Mon rythme
+## Mon planning
 
-- `state.rythme` : `{travail:[jours 0–6, 0 = dimanche], debut, fin, pauseDebut, pauseFin ("HH:MM"), fils:[jours]}`, valeurs par défaut dans `DEFAULT_RYTHME`.
-- `moment()` : `"travail"`, `"pause"`, `"perso"` (avant ou après le travail un jour travaillé) ou `"libre"` (jour non travaillé). `filsLa()` : jour coché et hors heures de travail.
-- Champ des défis `quand` : moments où le défi est faisable (les défis de Nancy : `["libre"]` seulement). `faisable(c)` l'applique, plus la présence du fils pour le thème `famille`.
-- `score(c)` renvoie 0 si le défi n'est pas faisable ; si plus rien n'est faisable, `pickRandom()` ignore le rythme plutôt que de ne rien proposer. `pickToday()` choisit un défi faisable aujourd'hui.
+- `state.planning` : `{0..6: [{type, debut, fin}]}` (0 = dimanche, heures `"HH:MM"`). Créé depuis l'ancien `state.rythme` par `planningDepuisRythme()` (valeurs par défaut `DEFAULT_RYTHME`).
+- `TYPES` : `travail`, `tele`, `pause`, `crossfit`, `fils`, `libre` (sortie possible), avec libellé et priorité. Hors créneau : moment `perso`.
+- `maintenant()` : créneaux en cours → `{types, principal}`. Une activité (priorité ≥ 4 : travail, télétravail, pause, CrossFit) l'emporte seule ; `libre` et `fils` se cumulent.
+- Champ des défis `quand` : moments où le défi est faisable (`travail`, `tele`, `pause`, `crossfit`, `fils`, `perso`, `libre`). `faisable(c, types)` : le thème `famille` exige `fils` ; un défi `perso` est aussi faisable pendant `fils`.
+- `score(c)` renvoie 0 si le défi n'est pas faisable ; si plus rien n'est faisable, `pickRandom()` ignore le planning. `pickToday()` utilise les créneaux du jour plus `perso`.
+- Écran : `<dialog id="planDlg">`, `renderWeek()` (barres, `fils` en moitié basse si la journée a d'autres créneaux), `renderPlanDay()`, copie d'une journée (`planCopy`). Couleurs des créneaux : variables `--k-<type>` (thèmes clair et sombre). Ne pas redessiner les créneaux pendant la saisie d'une heure.
 
 ## Contexte (lieu, météo, lumière)
 
