@@ -12,12 +12,12 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 - `THEMES`, `LEVELS` : libellés des thèmes et difficultés (les appareils sont dans `state.gear`).
 - En-tête : ligne titre + bouton « Mon matériel » (`.hrow`), puis statistiques sur une ligne, puis ligne météo (`#ctx`). À vérifier sur un écran de téléphone étroit (320 à 390 px).
-- `D` : la liste des défis. Champs : `id` (préfixe du thème + numéro, ex. `n3`), `t` (thème), `n` (difficulté 1–3), `titre`, `brief`, `astuce`, `reg` (réglages affichés en étiquettes), et en option `nuit: true` (choisit la note appareil « nuit ») et `mois: [...]` (mois où le défi est disponible).
+- `D` : la liste des défis (thèmes `nancy`, `boulot`, `famille`, `maison` (préfixe `h`), `loisirs`, `technique` ; préfixe `m` pour les défis météo). Champs : `id` (préfixe du thème + numéro, ex. `n3`), `t` (thème), `n` (difficulté 1–3), `titre`, `brief`, `astuce`, `reg` (réglages affichés en étiquettes), et en option `nuit: true` (choisit la note appareil « nuit ») et `mois: [...]` (mois où le défi est disponible).
 - Champs de contexte des défis : `ou` (`"in"`, `"out"` ou `"any"`), `pref` (conditions où le défi brille : `clair`, `nuageux`, `brouillard`, `pluie`, `neige`, `vent`, `jour`, `doree`, `bleue`, `nuit`), `req` (conditions obligatoires : le défi n'est proposé que si elles sont réunies, et jamais en « Défi du jour »).
 - `BONUS` : contraintes bonus tirées au hasard.
 - `obj` (champ des défis) : type d'objectif conseillé, `grand`, `normal`, `portrait`, `tele`, `lumineux` ou `macro`.
 - État dans `localStorage`, clé `defis-photo-v1` : `{themes, levels, cam, history, gear, geo, planning}` (`rythme` : ancien format, lu seulement pour la migration). Toujours entourer les accès de `try/catch`.
-- `pickToday()` : défi déterministe selon un hash de la date (hors défis avec `req`). `pickRandom()` (bouton « Défi pour maintenant ») : tirage filtré par les réglages, pondéré par `score()`, en évitant les 10 derniers défis réalisés.
+- `pickToday()` : défi déterministe selon `hash(dayKey())` (date locale, hachage bien mélangé pour que deux jours qui se suivent ne donnent pas deux défis voisins ; hors défis avec `req`). Un nouveau thème doit être ajouté aux réglages enregistrés (voir `state.themesMaison`). `pickRandom()` (bouton « Défi pour maintenant ») : tirage filtré par les réglages, pondéré par `score()`, en évitant les 10 derniers défis réalisés.
 
 ## Matériel
 
@@ -32,7 +32,8 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 - `state.planning` : `{0..6: [{type, debut, fin}]}` (0 = dimanche, heures `"HH:MM"`). Créé depuis l'ancien `state.rythme` par `planningDepuisRythme()` (valeurs par défaut `DEFAULT_RYTHME`).
 - `TYPES` : `travail`, `tele`, `pause`, `crossfit`, `fils`, `libre` (sortie possible), avec libellé et priorité. Hors créneau : moment `perso`.
 - `maintenant()` : créneaux en cours → `{types, principal}`. Une activité (priorité ≥ 4 : travail, télétravail, pause, CrossFit) l'emporte seule ; `libre` et `fils` se cumulent.
-- Champ des défis `quand` : moments où le défi est faisable (`travail`, `tele`, `pause`, `crossfit`, `fils`, `perso`, `libre`). `faisable(c, types)` : le thème `famille` exige `fils` ; un défi `perso` est aussi faisable pendant `fils`.
+- `typeEffectif(slot, jour)` : une pause collée à du télétravail (sans travail au bureau autour), ou isolée dans une journée sans travail au bureau, devient `pausemaison` (pause chez soi ou dans le quartier).
+- Champ des défis `quand` : moments où le défi est faisable (`travail`, `tele`, `pause`, `pausemaison`, `crossfit`, `fils`, `perso`, `libre`). Un défi qui demande la lumière du jour ne doit pas avoir `perso` (soirées) ; `req:["soleil"]` = ciel dégagé et jour ou heure dorée. `faisable(c, types)` : le thème `famille` exige `fils` ; un défi `perso` est aussi faisable pendant `fils`.
 - `score(c)` renvoie 0 si le défi n'est pas faisable ; si plus rien n'est faisable, `pickRandom()` ignore le planning. `pickToday()` utilise les créneaux du jour plus `perso`.
 - Écran : `<dialog id="planDlg">`, `renderWeek()` (barres, `fils` en moitié basse si la journée a d'autres créneaux), `renderPlanDay()`, copie d'une journée (`planCopy`). Couleurs des créneaux : variables `--k-<type>` (thèmes clair et sombre). Ne pas redessiner les créneaux pendant la saisie d'une heure.
 
