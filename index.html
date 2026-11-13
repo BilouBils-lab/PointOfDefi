@@ -4,273 +4,336 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Défis photo · Point of Nabil</title>
+<meta name="theme-color" content="#F5F4F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D0D0D" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3'%3E%3Cpath d='M23 13H14V26M14 38V51H23M41 13H50V26M50 38V51H41'/%3E%3Cpath d='M24.6 27.7A9 9 0 0 1 39.4 27.7M39.4 36.3A9 9 0 0 1 24.6 36.3'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ---------- Couleurs : noir, blanc et or, comme le logo ---------- */
 :root{
-  --paper:#E4E9E6; --card:#F6F8F6; --ink:#18231F; --soft:#4E5E57;
-  --green:#24453A; --gilt:#A9832A; --sage:#B9CBC1; --line:#C9D4CE;
-  color-scheme: light;
+  --bg:#F5F4F0; --surface:#FFFFFF; --surface-2:#EEECE7; --ink:#141414; --soft:#6E6B66; --line:rgba(20,20,20,.09);
+  --accent:#A8843A; --accent-ink:#86671F; --accent-soft:rgba(168,132,58,.13); --ok:#2E7D4F; --danger:#B3261E;
+  --shadow:0 1px 2px rgba(20,20,20,.04), 0 10px 30px rgba(20,20,20,.07); --shadow-sm:0 1px 2px rgba(20,20,20,.05);
+  --k-travail:#4F74A0; --k-tele:#8562AC; --k-pause:#B88C12; --k-crossfit:#BC4B33; --k-fils:#3F8F5E; --k-libre:#23808E;
+  color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#111815; --card:#19221E; --ink:#E2E9E5; --soft:#9DB0A7;
-    --green:#9CC7B2; --gilt:#D9B658; --sage:#2C3B34; --line:#2A3631;
-    color-scheme: dark;
+    --bg:#0D0D0D; --surface:#171717; --surface-2:#222221; --ink:#F2F1EE; --soft:#9C9893; --line:rgba(255,255,255,.09);
+    --accent:#D2B46E; --accent-ink:#E2C88A; --accent-soft:rgba(210,180,110,.14); --ok:#8ED1A8; --danger:#F2B8B5;
+    --shadow:0 0 0 1px rgba(255,255,255,.06); --shadow-sm:0 0 0 1px rgba(255,255,255,.05);
+    --k-travail:#7FA3CF; --k-tele:#B497D6; --k-pause:#E0B84A; --k-crossfit:#E88A73; --k-fils:#79C394; --k-libre:#5FC0CD;
+    color-scheme:dark;
   }
 }
-:root{--k-travail:#4F74A0; --k-tele:#8562AC; --k-pause:#B88C12; --k-crossfit:#BC4B33; --k-fils:#3F8F5E; --k-libre:#23808E}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--k-travail:#7FA3CF; --k-tele:#B497D6; --k-pause:#E0B84A; --k-crossfit:#E88A73; --k-fils:#79C394; --k-libre:#5FC0CD} }
-:root[data-theme="dark"]{--k-travail:#7FA3CF; --k-tele:#B497D6; --k-pause:#E0B84A; --k-crossfit:#E88A73; --k-fils:#79C394; --k-libre:#5FC0CD}
 :root[data-theme="dark"]{
-  --paper:#111815; --card:#19221E; --ink:#E2E9E5; --soft:#9DB0A7;
-  --green:#9CC7B2; --gilt:#D9B658; --sage:#2C3B34; --line:#2A3631;
-  color-scheme: dark;
+  --bg:#0D0D0D; --surface:#171717; --surface-2:#222221; --ink:#F2F1EE; --soft:#9C9893; --line:rgba(255,255,255,.09);
+  --accent:#D2B46E; --accent-ink:#E2C88A; --accent-soft:rgba(210,180,110,.14); --ok:#8ED1A8; --danger:#F2B8B5;
+  --shadow:0 0 0 1px rgba(255,255,255,.06); --shadow-sm:0 0 0 1px rgba(255,255,255,.05);
+  --k-travail:#7FA3CF; --k-tele:#B497D6; --k-pause:#E0B84A; --k-crossfit:#E88A73; --k-fils:#79C394; --k-libre:#5FC0CD;
+  color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size:1rem; line-height:1.5;
-}
-.wrap{max-width:40rem; margin:0 auto; padding:1.5rem 1.25rem 3rem}
-header{margin-bottom:.5rem}
-.hrow{display:flex; justify-content:space-between; align-items:center; gap:.75rem}
-header h1{font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.375rem; line-height:1.2; margin:0; color:var(--green); white-space:nowrap}
-header .stats{font-size:.875rem; color:var(--soft); font-variant-numeric:tabular-nums; margin-top:.35rem}
-header .stats b{color:var(--ink); font-weight:600}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:1rem; line-height:1.5; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent}
+body.locked{position:fixed; left:0; right:0; overflow:hidden}
+button{font:inherit; cursor:pointer; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.wrap{max-width:34rem; margin:0 auto; padding:.75rem 1.25rem calc(6rem + env(safe-area-inset-bottom,0px))}
 
-/* Le viseur : l'élément marquant */
-.viewfinder{position:relative; background:var(--card); padding:2.25rem 1.75rem 1.5rem; margin-bottom:1.25rem}
-.viewfinder::before,.viewfinder::after,.vf-b::before,.vf-b::after{
-  content:""; position:absolute; width:1.5rem; height:1.5rem; border-color:var(--gilt); border-style:solid;
-}
-.viewfinder::before{top:.6rem; left:.6rem; border-width:2px 0 0 2px}
-.viewfinder::after{top:.6rem; right:.6rem; border-width:2px 2px 0 0}
-.vf-b::before{bottom:.6rem; left:.6rem; border-width:0 0 2px 2px}
-.vf-b::after{bottom:.6rem; right:.6rem; border-width:0 2px 2px 0}
-.kind{display:flex; gap:.75rem; align-items:center; font-size:.875rem; color:var(--soft); margin-bottom:.5rem}
+/* ---------- En-tête ---------- */
+.top{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.5rem 0 1rem}
+.brand{display:grid; gap:.15rem; color:var(--ink); min-width:0}
+.logo{height:46px; width:auto; display:block; max-width:100%}
+.app-name{font-size:.625rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--soft); padding-left:.15rem}
+.stats{flex:none; border:0; background:var(--surface); box-shadow:inset 0 0 0 1px var(--line); border-radius:999px; padding:.4rem .8rem;
+  font-size:.8125rem; color:var(--soft); font-variant-numeric:tabular-nums; white-space:nowrap}
+.stats b{color:var(--ink); font-weight:600}
+
+/* ---------- Contexte (pastilles) ---------- */
+.ctx{display:flex; flex-wrap:wrap; gap:.4rem; margin:0 0 1rem}
+.pill{display:inline-flex; align-items:center; border:0; font-size:.8125rem; font-weight:500; line-height:1.3; padding:.35rem .7rem; border-radius:999px;
+  background:var(--surface); color:var(--soft); box-shadow:inset 0 0 0 1px var(--line); white-space:nowrap}
+.pill b{color:var(--ink); font-weight:600}
+.pill.moment{background:var(--accent-soft); color:var(--accent-ink); box-shadow:none; font-weight:600}
+.pill.ghost{background:none; box-shadow:none; text-decoration:underline; text-underline-offset:2px; padding-inline:.35rem}
+
+/* ---------- Carte du défi (le viseur) ---------- */
+.card{position:relative; background:var(--surface); border-radius:24px; padding:1.9rem 1.5rem 1.5rem; box-shadow:var(--shadow); margin-bottom:1rem}
+.viewfinder::before,.viewfinder::after,.vf-b::before,.vf-b::after{content:""; position:absolute; width:14px; height:14px; border:0 solid var(--accent)}
+.viewfinder::before{top:12px; left:12px; border-width:1.5px 0 0 1.5px}
+.viewfinder::after{top:12px; right:12px; border-width:1.5px 1.5px 0 0}
+.vf-b::before{bottom:12px; left:12px; border-width:0 0 1.5px 1.5px}
+.vf-b::after{bottom:12px; right:12px; border-width:0 1.5px 1.5px 0}
+.kind{display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; font-size:.6875rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); margin-bottom:.65rem}
 .dots{display:inline-flex; gap:3px}
-.dots i{width:.5rem; height:.5rem; border-radius:50%; border:1.5px solid var(--gilt)}
-.dots i.on{background:var(--gilt)}
-.challenge h2{font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:clamp(1.75rem,6vw,2.5rem); line-height:1.1; margin:0 0 1rem; color:var(--green)}
+.dots i{width:6px; height:6px; border-radius:50%; box-shadow:inset 0 0 0 1.2px var(--accent)}
+.dots i.on{background:var(--accent)}
+.badge-ia{letter-spacing:0; text-transform:none; font-size:.75rem; font-weight:600; color:var(--accent-ink); background:var(--accent-soft); border-radius:999px; padding:.1rem .55rem}
+.challenge h2{font-weight:700; font-size:clamp(1.6rem,6.4vw,2.15rem); line-height:1.12; letter-spacing:-.025em; margin:0 0 .7rem}
 .challenge.enter h2{animation:focus .5s ease-out}
 @keyframes focus{from{filter:blur(6px); opacity:.3}to{filter:blur(0); opacity:1}}
-@media (prefers-reduced-motion: reduce){.challenge.enter h2{animation:none}}
-.brief{font-size:1.0625rem; margin:0 0 1.25rem; max-width:34em}
-.block{border-top:1px solid var(--line); padding-top:.75rem; margin-top:.75rem}
-.block h3{font-size:.875rem; font-weight:600; margin:0 0 .15rem; color:var(--soft)}
-.block p{margin:0}
-.exif{display:flex; flex-wrap:wrap; gap:.4rem; margin-top:1.25rem}
-.exif span{font-size:.8125rem; font-variant-numeric:tabular-nums; padding:.2rem .55rem; border:1px solid var(--line); border-radius:3px}
+.brief{font-size:1.0625rem; line-height:1.55; margin:0 0 1.1rem}
+.why{background:var(--accent-soft); border-radius:14px; padding:.7rem .9rem; font-size:.9375rem; margin:0 0 1.1rem}
+.why span{display:block; font-size:.6875rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-ink); margin-bottom:.15rem}
+.facts{margin:0; display:grid; gap:.9rem}
+.facts dt{font-size:.6875rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); margin-bottom:.15rem}
+.facts dd{margin:0; font-size:.9375rem; line-height:1.5}
+.facts dd b{font-weight:600}
+.exif{display:flex; flex-wrap:wrap; gap:.35rem; margin-top:1.2rem}
+.exif span{font-size:.78rem; font-weight:500; padding:.28rem .6rem; border-radius:8px; background:var(--surface-2); font-variant-numeric:tabular-nums}
 
-.actions{display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:2rem}
-button{font:inherit; cursor:pointer}
-.btn{padding:.75rem 1.2rem; border-radius:999px; border:1.5px solid var(--green); background:transparent; color:var(--green); font-weight:600}
-.btn.primary{background:var(--green); color:var(--card)}
-.btn:disabled{opacity:.5; cursor:default}
-:focus-visible{outline:3px solid var(--gilt); outline-offset:2px}
+/* ---------- Boutons ---------- */
+.btn{border:0; border-radius:14px; padding:.8rem 1rem; font-weight:600; font-size:.9375rem; background:var(--surface); color:var(--ink);
+  box-shadow:inset 0 0 0 1px var(--line); transition:transform .1s, opacity .2s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45; cursor:default; transform:none}
+.btn.primary{display:block; width:100%; padding:1rem; font-size:1rem; background:var(--ink); color:var(--bg); box-shadow:none}
+.alt{display:flex; gap:.5rem; margin-top:.5rem}
+.alt .btn{flex:1; padding:.75rem .4rem; white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis}
+.alt .ia{color:var(--accent-ink)}
+.linkbtn{background:none; border:0; color:var(--soft); text-decoration:underline; text-underline-offset:2px; padding:0; font-size:.8125rem}
+.foot{text-align:center; font-size:.75rem; color:var(--soft); margin:1.5rem 0 0}
 
-details{border-top:1px solid var(--line); padding:.9rem 0}
-summary{cursor:pointer; font-weight:600}
-.group{margin:.9rem 0 .4rem}
-.group > span{display:block; font-size:.875rem; color:var(--soft); margin-bottom:.35rem}
+/* ---------- Barre d'onglets ---------- */
+.tabbar{position:fixed; left:0; right:0; bottom:0; z-index:5; display:flex; justify-content:center; gap:.25rem;
+  background:var(--bg); background:color-mix(in srgb, var(--bg) 85%, transparent);
+  -webkit-backdrop-filter:saturate(1.5) blur(18px); backdrop-filter:saturate(1.5) blur(18px);
+  border-top:1px solid var(--line); padding:.3rem .5rem calc(.3rem + env(safe-area-inset-bottom,0px))}
+.tabbar button{flex:1; max-width:6.5rem; display:grid; justify-items:center; gap:.1rem; background:none; border:0; color:var(--soft);
+  font-size:.6875rem; font-weight:600; padding:.35rem 0}
+.tabbar svg{width:23px; height:23px}
+.tabbar [aria-current="page"]{color:var(--ink)}
+
+/* ---------- Tiroirs (fenêtres qui montent du bas) ---------- */
+dialog.sheet{border:0; padding:0; margin:auto auto 0; width:100%; max-width:min(36rem,100%); max-height:92dvh; border-radius:24px 24px 0 0;
+  background:var(--bg); color:var(--ink); overflow-y:auto; overscroll-behavior:contain; padding-bottom:env(safe-area-inset-bottom,0px)}
+dialog.sheet[open]{animation:sheetIn .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes sheetIn{from{transform:translateY(40px); opacity:0}}
+dialog.sheet::backdrop{background:rgba(0,0,0,.4)}
+@media (min-width:640px){ dialog.sheet{margin:auto; border-radius:24px; max-height:86dvh} }
+@media (prefers-reduced-motion: reduce){ dialog.sheet[open], .challenge.enter h2{animation:none} }
+.sheet-head{position:sticky; top:0; z-index:2; background:var(--bg); padding:.5rem 1.25rem .75rem}
+.sheet-head::before{content:""; display:block; width:36px; height:4px; border-radius:2px; background:var(--line); margin:0 auto .6rem}
+.sheet-title{display:flex; align-items:center; justify-content:space-between; gap:1rem}
+.sheet-head h2{font-size:1.25rem; font-weight:700; letter-spacing:-.015em; margin:0}
+.x-btn{width:34px; height:34px; flex:none; border-radius:50%; border:0; background:var(--surface-2); color:var(--soft); font-size:1.3rem; line-height:1; display:grid; place-items:center}
+.sheet-body{padding:0 1.25rem 1.75rem}
+.sec{margin:0 0 1.6rem}
+.sec h3{font-size:.6875rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); margin:0 0 .55rem}
+.hint{font-size:.875rem; color:var(--soft); margin:.5rem 0}
+.hint.center{text-align:center}
+
+/* Pastilles de choix et contrôle segmenté */
 .chips{display:flex; flex-wrap:wrap; gap:.4rem}
-.chip{padding:.4rem .8rem; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:.9375rem}
-.chip[aria-pressed="true"]{background:var(--sage); border-color:var(--green); color:var(--ink)}
-.times{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; font-size:.9375rem}
-.times input{font:inherit; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:6px; padding:.35rem .5rem}
-.group .sub{display:block; font-size:.8125rem; color:var(--soft); margin-top:.3rem}
-.week{display:grid; gap:.35rem; margin:.25rem 0 .5rem}
-.wrow{display:grid; grid-template-columns:2.6rem 1fr; align-items:center; gap:.5rem; background:none; border:0; padding:.15rem 0; color:var(--ink); text-align:left; font-size:.8125rem}
-.wrow[aria-current="true"] .wday{color:var(--green); font-weight:700}
-.wbar{position:relative; height:1.1rem; background:var(--card); border:1px solid var(--line); border-radius:4px; overflow:hidden}
-.wbar i{position:absolute; top:0; bottom:0; opacity:.9}
-.wbar i.haut{bottom:50%}
-.wbar i.bas{top:50%}
-.wscale{display:flex; justify-content:space-between; margin-left:3.1rem; font-size:.6875rem; color:var(--soft)}
-.legend{display:flex; flex-wrap:wrap; gap:.3rem .8rem; font-size:.8125rem; color:var(--soft); margin:.4rem 0 .2rem}
-.legend span::before{content:""; display:inline-block; width:.7rem; height:.7rem; border-radius:2px; margin-right:.3rem; vertical-align:-1px; background:var(--k)}
-.slot{display:grid; gap:.45rem; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--k); border-radius:8px; padding:.55rem .6rem; margin-bottom:.5rem; font-size:.9375rem}
-.slot select,.slot input{font:inherit; font-size:1rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.35rem .45rem}
-.slot .srow{display:flex; align-items:center; gap:.4rem}
-.slot select{flex:1; min-width:0}
-.slot input{flex:1 1 0; width:0; min-width:0; padding:.35rem .3rem}
-.slot .x{background:none; border:0; color:var(--soft); font-size:1.4rem; line-height:1; padding:.1rem .45rem}
-#planDays{flex-wrap:nowrap; gap:.25rem}
-#planDays .chip{flex:1; padding:.4rem 0; font-size:.875rem; text-align:center; min-width:0}
-.today-plan{list-style:none; padding:0; margin:.6rem 0 .8rem; font-size:.9375rem}
-.today-plan li{display:flex; gap:.5rem; align-items:center; padding:.2rem 0}
-.today-plan li.head{font-weight:600}
-.today-plan li.head::before{display:none}
-.today-plan li::before{content:""; width:.7rem; height:.7rem; border-radius:2px; background:var(--k); flex:none}
-.copied{font-size:.8125rem; color:var(--green); min-height:1.2em; margin:.3rem 0 0}
-.badge-ia{display:inline-block; font-size:.75rem; font-weight:600; color:var(--card); background:var(--gilt); border-radius:999px; padding:.05rem .5rem}
-.ia-key{display:flex; gap:.4rem; flex-wrap:wrap; margin:.4rem 0}
-.ia-key input,.ia-key select{font:inherit; font-size:1rem; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:6px; padding:.45rem .55rem; flex:1 1 12rem; min-width:0}
-.ia-status{font-size:.875rem; margin:.3rem 0; color:var(--soft)}
-.ia-status.ok{color:var(--green)} .ia-status.err{color:#B3261E}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ia-status.err{color:#F2B8B5} }
-:root[data-theme="dark"] .ia-status.err{color:#F2B8B5}
-.history{list-style:none; padding:0; margin:.75rem 0 0}
-.history li{display:flex; justify-content:space-between; gap:1rem; padding:.45rem 0; border-bottom:1px solid var(--line); font-size:.9375rem}
-.history time{color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums}
-.empty{color:var(--soft); font-size:.9375rem}
-.note{font-size:.8125rem; color:var(--soft); margin-top:2rem}
-.ctx{display:flex; flex-wrap:wrap; align-items:baseline; gap:.25rem .75rem; font-size:.875rem; color:var(--soft); margin:0 0 1.25rem}
-.ctx b{color:var(--ink); font-weight:600}
-.why{color:var(--green); font-weight:500}
-.gearbtn{display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--green); font-size:.875rem; font-weight:600; white-space:nowrap}
-.gearbtn svg{width:1.05rem; height:1.05rem}
-dialog{border:0; padding:0; background:var(--paper); color:var(--ink); width:min(36rem, calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); border-radius:12px;
-  overflow-y:auto; overscroll-behavior:contain}
-dialog::backdrop{background:rgba(0,0,0,.45)}
-.dlg{padding:0 1.25rem 1.5rem}
-.dlg-top{position:sticky; top:0; z-index:1; background:var(--paper); padding:1.25rem 0 .75rem; border-bottom:1px solid var(--line); margin-bottom:.75rem}
-.dlg-head{display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-bottom:.75rem}
-.dlg-top .btn{padding:.55rem 1rem}
-#gotoSearch{display:inline-flex; align-items:center; gap:.45rem}
-#gotoSearch svg{width:1.05rem; height:1.05rem}
-#lensTitle{scroll-margin-top:9rem}
-body.locked{position:fixed; left:0; right:0; overflow:hidden}
-.dlg h2{font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.375rem; color:var(--green); margin:0}
-.dlg h3{font-size:1rem; margin:1.25rem 0 .25rem}
-.dlg .hint{font-size:.875rem; color:var(--soft); margin:0 0 .6rem}
-.item{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:.8rem; margin-bottom:.6rem}
-.item .row{display:flex; flex-wrap:wrap; gap:.6rem}
-.item label{display:flex; flex-direction:column; gap:.2rem; font-size:.8125rem; color:var(--soft); flex:1 1 7rem; min-width:0}
-.item label.wide{flex-basis:100%}
-.item label.check{flex-direction:row; align-items:center; gap:.4rem; flex:0 0 auto; color:var(--ink); font-size:.9375rem}
-.item input[type=text],.item input[type=number],.item select{font:inherit; font-size:1rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.45rem .55rem; width:100%}
-.item input[type=checkbox]{width:1.1rem; height:1.1rem; accent-color:var(--green)}
-.item .compat{margin-top:.6rem; font-size:.8125rem; color:var(--soft)}
-.item .compat div{display:flex; flex-wrap:wrap; gap:.3rem 1rem; margin-top:.25rem}
-.item .del{margin-top:.6rem}
-.search{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:.8rem; margin-bottom:.9rem}
-.search .row{display:flex; flex-wrap:wrap; gap:.6rem}
-.search label{display:flex; flex-direction:column; gap:.2rem; font-size:.8125rem; color:var(--soft); flex:1 1 10rem; min-width:0}
-.search input,.search select{font:inherit; font-size:1rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:.45rem .55rem; width:100%}
-.results{list-style:none; margin:.6rem 0 0; padding:0}
-.results li{display:flex; justify-content:space-between; align-items:center; gap:.75rem; padding:.5rem 0; border-top:1px solid var(--line)}
-.results li > div{min-width:0}
+.chip{border:0; padding:.45rem .85rem; border-radius:999px; background:var(--surface); color:var(--ink); font-size:.9rem; font-weight:500; box-shadow:inset 0 0 0 1px var(--line)}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--bg); box-shadow:none}
+.seg{flex-wrap:nowrap; gap:2px; background:var(--surface-2); padding:3px; border-radius:12px}
+.seg .chip{flex:1; min-width:0; background:transparent; box-shadow:none; border-radius:9px; padding:.45rem .3rem; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--soft)}
+.seg .chip[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* Listes groupées (matériel, historique) */
+.list{background:var(--surface); border-radius:16px; box-shadow:var(--shadow-sm); overflow:hidden}
+.list:empty{display:none}
+.item + .item{border-top:1px solid var(--line)}
+.row-head{display:flex; align-items:center; gap:.75rem; width:100%; padding:.8rem 1rem; background:none; border:0; text-align:left}
+.rh-text{flex:1; min-width:0; display:grid}
+.rh-name,.rh-meta{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rh-name{font-weight:600}
+.rh-meta{font-size:.8125rem; color:var(--soft)}
+.chev{width:18px; height:18px; flex:none; color:var(--soft); transition:transform .2s}
+.item.open .chev{transform:rotate(90deg)}
+.row-edit{display:grid; gap:.8rem; padding:0 1rem 1rem}
+.row-edit[hidden]{display:none}
+.fields{display:grid; grid-template-columns:1fr 1fr; gap:.6rem}
+.f{display:grid; gap:.25rem; font-size:.75rem; font-weight:500; color:var(--soft); min-width:0}
+.f.wide{grid-column:1/-1}
+.f input,.f select,.ia-key input,.ia-key select{font:inherit; font-size:1rem; color:var(--ink); background:var(--surface-2); border:1px solid transparent; border-radius:10px; padding:.55rem .65rem; width:100%; min-width:0}
+.f input:focus,.f select:focus,.ia-key input:focus{border-color:var(--accent); outline:none}
+.togs{display:flex; flex-wrap:wrap; gap:.4rem; align-items:center}
+.togs > span{font-size:.75rem; font-weight:500; color:var(--soft); width:100%}
+.tog{position:relative; display:inline-flex; align-items:center; padding:.4rem .8rem; border-radius:999px; background:var(--surface-2); font-size:.875rem; cursor:pointer}
+.tog input{position:absolute; opacity:0; width:1px; height:1px}
+.tog:has(input:checked){background:var(--ink); color:var(--bg)}
+.tog:has(input:focus-visible){outline:2px solid var(--accent); outline-offset:2px}
+.danger{justify-self:start; background:none; border:0; padding:0; color:var(--danger); font-size:.875rem; font-weight:500}
+.add{display:inline-block; margin-top:.5rem; background:none; border:0; padding:.35rem 0; color:var(--accent-ink); font-weight:600; font-size:.9375rem}
+
+/* Recherche d'objectifs */
+.searchbar{display:flex; align-items:center; gap:.5rem; background:var(--surface); border-radius:12px; padding:0 .8rem; box-shadow:inset 0 0 0 1px var(--line)}
+.searchbar svg{width:18px; height:18px; flex:none; color:var(--soft)}
+.searchbar input{flex:1; min-width:0; border:0; background:none; font:inherit; font-size:1rem; color:var(--ink); padding:.7rem 0; outline:none}
+.searchbar:focus-within{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.search-for[hidden]{display:none}
+.search-for{display:flex; align-items:center; gap:.3rem; font-size:.8125rem; color:var(--soft); margin:.45rem 0 .6rem .2rem}
+.search-for select{font:inherit; font-weight:600; color:var(--ink); background:none; border:0; padding:0 .1rem}
+.results{list-style:none; margin:0 0 .9rem; padding:0; background:var(--surface); border-radius:16px; box-shadow:var(--shadow-sm); overflow:hidden}
+.results:empty{display:none}
+.results li{display:flex; align-items:center; gap:.75rem; padding:.65rem 1rem}
+.results li + li{border-top:1px solid var(--line)}
+.results li > div{flex:1; min-width:0}
 .results b{display:block; font-weight:600; font-size:.9375rem}
 .results small{color:var(--soft); font-size:.8125rem}
-.results .adapt{color:var(--gilt)}
-.results .btn{padding:.35rem .8rem; font-size:.875rem; flex:none}
-.results .more{display:block; color:var(--soft); font-size:.8125rem; border-top:1px solid var(--line); padding-top:.5rem}
-.addbtn{padding:.5rem 1rem; font-size:.9375rem}
-.linkbtn{background:none; border:0; color:var(--soft); text-decoration:underline; padding:0; font-size:.8125rem}
+.results .adapt{color:var(--accent-ink)}
+.results .more{display:block; color:var(--soft); font-size:.8125rem}
+.plus{width:32px; height:32px; flex:none; border:0; border-radius:50%; background:var(--ink); color:var(--bg); font-size:1.25rem; line-height:1; display:grid; place-items:center}
+.added{flex:none; font-size:.8125rem; font-weight:600; color:var(--ok)}
+
+/* Planning */
+.week{display:grid; gap:.4rem}
+.wrow{display:grid; grid-template-columns:2.4rem 1fr; align-items:center; gap:.5rem; background:none; border:0; padding:.1rem 0; text-align:left; font-size:.8125rem; color:var(--soft)}
+.wrow[aria-current="true"] .wday{color:var(--ink); font-weight:700}
+.wbar{position:relative; height:14px; background:var(--surface-2); border-radius:7px; overflow:hidden}
+.wbar i{position:absolute; top:0; bottom:0}
+.wbar i.haut{bottom:50%}
+.wbar i.bas{top:50%}
+.wscale{display:flex; justify-content:space-between; margin:.3rem 0 0 2.9rem; font-size:.6875rem; color:var(--soft)}
+.legend{display:flex; flex-wrap:wrap; gap:.3rem .9rem; font-size:.8125rem; color:var(--soft); margin-top:.6rem}
+.legend span::before{content:""; display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.35rem; vertical-align:1px; background:var(--k)}
+.slot{position:relative; display:grid; gap:.5rem; background:var(--surface); border-radius:16px; box-shadow:var(--shadow-sm); padding:.7rem .8rem .75rem 1.6rem; margin-bottom:.5rem; font-size:.9375rem; color:var(--soft)}
+.slot::before{content:""; position:absolute; left:.8rem; top:1.2rem; width:8px; height:8px; border-radius:50%; background:var(--k)}
+.slot .srow{display:flex; align-items:center; gap:.45rem}
+.slot select,.slot input{font:inherit; font-size:1rem; color:var(--ink); background:var(--surface-2); border:0; border-radius:10px; padding:.45rem .5rem}
+.slot select{flex:1; min-width:0; font-weight:600}
+.slot input{flex:1 1 0; width:0; min-width:0; padding:.45rem .35rem}
+.slot .x{width:30px; height:30px; flex:none; border:0; border-radius:50%; background:none; color:var(--soft); font-size:1.3rem; line-height:1}
+.copied{font-size:.8125rem; color:var(--ok); min-height:1.2em; margin:.4rem 0 0}
+
+/* Réglages, IA, historique */
+.ia-key{display:flex; gap:.5rem; flex-wrap:wrap; margin:.5rem 0}
+.ia-key[hidden]{display:none}
+a{color:var(--accent-ink); text-underline-offset:2px}
+.ia-key input,.ia-key select{flex:1 1 12rem; background:var(--surface); box-shadow:inset 0 0 0 1px var(--line)}
+.ia-status{font-size:.875rem; margin:.4rem 0; color:var(--soft)}
+.ia-status.ok{color:var(--ok)} .ia-status.err{color:var(--danger)}
+.history{list-style:none; margin:0; padding:0}
+.history li{display:flex; justify-content:space-between; gap:1rem; padding:.7rem 1rem; font-size:.9375rem}
+.history li + li{border-top:1px solid var(--line)}
+.history time{color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums}
+.empty{color:var(--soft)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="hrow">
-      <h1>Défis photo</h1>
-      <button class="gearbtn" id="gear" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>Mon matériel</button>
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 300 76" role="img" aria-label="Point of Nabil">
+        <g fill="none" stroke="currentColor" stroke-width="2.2"><path d="M129 9H118V29M118 47V67H129M171 9H182V29M182 47V67H171"/><path d="M136.1 28.3A17 17 0 0 1 163.9 28.3M163.9 47.7A17 17 0 0 1 136.1 47.7"/></g>
+        <g fill="currentColor" font-family="Cinzel, 'Trajan Pro', Georgia, serif" font-weight="500">
+          <text x="110" y="45" text-anchor="end" font-size="19" letter-spacing="3">POINT</text>
+          <text x="150.5" y="42.5" text-anchor="middle" font-size="11.5" letter-spacing="1">OF</text>
+          <text x="191" y="45" font-size="19" letter-spacing="3">NABIL</text>
+        </g>
+      </svg>
+      <span class="app-name">Défis photo</span>
     </div>
-    <div class="stats" id="stats"></div>
+    <button class="stats" id="stats" aria-label="Voir mes défis réalisés"></button>
   </header>
   <div class="ctx" id="ctx" aria-live="polite"></div>
 
-  <section class="viewfinder" aria-live="polite">
+  <section class="card viewfinder" aria-live="polite">
     <div class="vf-b"></div>
     <article class="challenge" id="challenge"></article>
   </section>
 
   <div class="actions">
     <button class="btn primary" id="done">Je l’ai fait</button>
-    <button class="btn" id="next">Défi pour maintenant</button>
-    <button class="btn" id="today">Défi du jour</button>
-    <button class="btn" id="iaBtn" hidden>✨ Défi IA</button>
+    <div class="alt">
+      <button class="btn" id="next">Maintenant</button>
+      <button class="btn" id="today">Défi du jour</button>
+      <button class="btn ia" id="iaBtn" hidden>✨ IA</button>
+    </div>
   </div>
   <p class="ia-status err" id="iaErr" aria-live="polite" hidden></p>
-
-  <details open>
-    <summary>Mes réglages</summary>
-    <div class="group"><span>Thèmes</span><div class="chips" id="themes"></div></div>
-    <div class="group"><span>Difficulté</span><div class="chips" id="levels"></div></div>
-    <div class="group"><span>Appareil du jour</span><div class="chips" id="cams"></div></div>
-    <button class="linkbtn" id="gear2">Modifier mes appareils et objectifs</button>
-  </details>
-
-  <details>
-    <summary>Mon planning</summary>
-    <p class="empty" style="margin:.6rem 0 0">L’app ne propose que des défis faisables selon ton planning : au travail, en télétravail, au CrossFit, avec ton fils ou quand tu as du temps pour sortir.</p>
-    <ul class="today-plan" id="todayPlan"></ul>
-    <button class="btn" id="openPlan">Ouvrir mon planning</button>
-  </details>
-
-  <details>
-    <summary>Défis inventés par l’IA</summary>
-    <p class="empty" style="margin:.6rem 0 0">Avec une clé API Gemini, le bouton « ✨ Défi IA » fait inventer un défi neuf, adapté à ton planning, à la météo, à la lumière et à ton matériel.</p>
-    <div class="ia-key">
-      <input type="password" id="iaKey" placeholder="Colle ta clé API Gemini" autocomplete="off" spellcheck="false" aria-label="Clé API Gemini">
-      <button class="btn" id="iaSave">Enregistrer et tester</button>
-    </div>
-    <div class="ia-key" id="iaModelRow" hidden><select id="iaModel" aria-label="Modèle Gemini"></select></div>
-    <p class="ia-status" id="iaStatus" aria-live="polite"></p>
-    <p class="note" style="margin-top:.5rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Pour une clé gratuite : <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom, seulement le contexte du défi. <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
-  </details>
-
-  <details>
-    <summary>Défis réalisés</summary>
-    <ul class="history" id="history"></ul>
-  </details>
-
-  <p class="note">Ta position reste sur ton appareil : seules des coordonnées arrondies (à environ 1 km) sont envoyées au service météo gratuit Open-Meteo.</p>
-  <p class="note">Pour les photos au travail ou de passants, demande toujours l’accord des personnes reconnaissables. <button class="linkbtn" id="reset">Effacer mon historique</button></p>
-  <p class="note" id="version"></p>
+  <p class="foot" id="version"></p>
 </div>
 
-<dialog id="gearDlg" aria-labelledby="gearTitle">
-  <div class="dlg">
-    <div class="dlg-top">
-      <div class="dlg-head"><h2 id="gearTitle">Mon matériel</h2><button class="btn" id="gearClose">Fermer</button></div>
-      <button class="btn primary" id="gotoSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>Rechercher un objectif</button>
-    </div>
-    <p class="hint">Les modifications sont enregistrées automatiquement sur cet appareil.</p>
-    <h3>Appareils photo</h3>
-    <div id="camList"></div>
-    <button class="btn addbtn" id="addCam">+ Ajouter un appareil</button>
-    <h3 id="lensTitle">Objectifs</h3>
-    <div class="search" id="lensSearch">
-      <div class="row">
-        <label>Pour l’appareil<select id="lsCam"></select></label>
-        <label>Rechercher un objectif<input type="search" id="lsQ" placeholder="ex. 50, 24-105, macro, sigma" autocomplete="off"></label>
-      </div>
+<nav class="tabbar" aria-label="Navigation">
+  <button id="tabDefi" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4"/><circle cx="12" cy="12" r="3.5"/></svg><span>Défi</span></button>
+  <button id="openPlan" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Planning</span></button>
+  <button id="gear" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5a2 2 0 0 1 2-2h2.3L9.3 4.5h5.4l1.5 2h2.3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.6"/></svg><span>Matériel</span></button>
+  <button id="openSet" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Réglages</span></button>
+</nav>
+
+<dialog id="gearDlg" class="sheet" aria-labelledby="gearTitle">
+  <div class="sheet-head"><div class="sheet-title"><h2 id="gearTitle">Mon matériel</h2><button class="x-btn" id="gearClose" data-close aria-label="Fermer">×</button></div></div>
+  <div class="sheet-body">
+    <section class="sec"><h3>Aujourd’hui j’emporte</h3><div class="chips seg" id="cams"></div></section>
+    <section class="sec"><h3>Appareils</h3><div class="list" id="camList"></div><button class="add" id="addCam">+ Ajouter un appareil</button></section>
+    <section class="sec" id="lensSec">
+      <h3 id="lensTitle">Objectifs</h3>
+      <div class="searchbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input type="search" id="lsQ" placeholder="Ajouter : 50, 24-105, macro, sigma…" autocomplete="off" aria-label="Rechercher un objectif à ajouter"></div>
+      <label class="search-for" id="lsFor" hidden>Compatible avec <select id="lsCam" aria-label="Pour l’appareil"></select></label>
       <ul class="results" id="lsRes"></ul>
-    </div>
-    <p class="hint">Pas dans la liste ? Ajoute-le à la main. Pour une focale fixe, mets la même valeur en min et max.</p>
-    <div id="lensList"></div>
-    <button class="btn addbtn" id="addLens">+ Ajouter un objectif</button>
+      <div class="list" id="lensList"></div>
+      <button class="add" id="addLens">+ Saisir un objectif à la main</button>
+    </section>
+    <p class="hint center">Tes modifications sont enregistrées automatiquement.</p>
   </div>
 </dialog>
 
-<dialog id="planDlg" aria-labelledby="planTitle">
-  <div class="dlg">
-    <div class="dlg-top">
-      <div class="dlg-head"><h2 id="planTitle">Mon planning</h2><button class="btn" id="planClose">Fermer</button></div>
-      <div class="chips" id="planDays"></div>
-    </div>
-    <p class="hint">En dehors de tes créneaux, l’app considère que tu es chez toi, sans sortie prévue. Les créneaux peuvent se chevaucher (par exemple « Sortie possible » et « Avec mon fils »).</p>
-    <div class="week" id="planWeek"></div>
-    <div class="wscale"><span>6 h</span><span>12 h</span><span>18 h</span><span>24 h</span></div>
-    <div class="legend" id="planLegend"></div>
-    <h3 id="planDayTitle"></h3>
-    <div id="planSlots"></div>
-    <button class="btn addbtn" id="addSlot">+ Ajouter un créneau</button>
-    <div class="group"><span>Copier cette journée vers</span><div class="chips" id="planCopy"></div><p class="copied" id="copied" aria-live="polite"></p></div>
+<dialog id="planDlg" class="sheet" aria-labelledby="planTitle">
+  <div class="sheet-head">
+    <div class="sheet-title"><h2 id="planTitle">Mon planning</h2><button class="x-btn" id="planClose" data-close aria-label="Fermer">×</button></div>
+    <div class="chips seg" id="planDays" style="margin-top:.75rem"></div>
+  </div>
+  <div class="sheet-body">
+    <section class="sec">
+      <h3>Ma semaine</h3>
+      <div class="week" id="planWeek"></div>
+      <div class="wscale"><span>6 h</span><span>12 h</span><span>18 h</span><span>24 h</span></div>
+      <div class="legend" id="planLegend"></div>
+    </section>
+    <section class="sec">
+      <h3 id="planDayTitle"></h3>
+      <div id="planSlots"></div>
+      <button class="add" id="addSlot">+ Ajouter un créneau</button>
+    </section>
+    <section class="sec">
+      <h3>Copier cette journée vers</h3>
+      <div class="chips" id="planCopy"></div>
+      <p class="copied" id="copied" aria-live="polite"></p>
+    </section>
+    <p class="hint">En dehors de tes créneaux, l’app considère que tu es chez toi, sans sortie prévue. « Sortie possible » et « Avec mon fils » peuvent se chevaucher.</p>
+  </div>
+</dialog>
+
+<dialog id="setDlg" class="sheet" aria-labelledby="setTitle">
+  <div class="sheet-head"><div class="sheet-title"><h2 id="setTitle">Réglages</h2><button class="x-btn" data-close aria-label="Fermer">×</button></div></div>
+  <div class="sheet-body">
+    <section class="sec"><h3>Thèmes</h3><div class="chips" id="themes"></div></section>
+    <section class="sec"><h3>Difficulté</h3><div class="chips" id="levels"></div></section>
+    <section class="sec">
+      <h3>Défis inventés par l’IA</h3>
+      <p class="hint">Avec une clé API Gemini, le bouton « ✨ IA » fait inventer un défi neuf, adapté à ton planning, à la météo, à la lumière et à ton matériel.</p>
+      <div class="ia-key">
+        <input type="password" id="iaKey" placeholder="Colle ta clé API Gemini" autocomplete="off" spellcheck="false" aria-label="Clé API Gemini">
+        <button class="btn" id="iaSave">Enregistrer et tester</button>
+      </div>
+      <div class="ia-key" id="iaModelRow" hidden><select id="iaModel" aria-label="Modèle Gemini"></select></div>
+      <p class="ia-status" id="iaStatus" aria-live="polite"></p>
+      <p class="hint" style="font-size:.8125rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom. <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
+    </section>
+    <section class="sec" id="histSec">
+      <h3>Défis réalisés</h3>
+      <div class="list"><ul class="history" id="history"></ul></div>
+      <button class="linkbtn" id="reset" style="margin-top:.6rem">Effacer mon historique</button>
+    </section>
+    <section class="sec">
+      <h3>À propos</h3>
+      <p class="hint">Ta position reste sur ton appareil : seules des coordonnées arrondies (à environ 1 km) sont envoyées au service météo gratuit Open-Meteo.</p>
+      <p class="hint">Pour les photos au travail ou de passants, demande toujours l’accord des personnes reconnaissables.</p>
+    </section>
   </div>
 </dialog>
 
 <script>
-const VERSION = "12 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
+const VERSION = "13 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -504,30 +567,45 @@ function gearAdvice(c, nuit){
 /* ---------- Écran « Mon matériel » ---------- */
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
 function gearChanged(){ save(); renderChips(); render(); }
+let gearOpen = null; // fiche ouverte dans « Mon matériel »
+const CHEV = `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+const camMeta = c => [CAPTEURS[c.capteur]?.label, c.monture && c.monture!=="autre" ? c.monture : "monture ?", `ISO ${c.isoMax}`].filter(Boolean).join(" · ");
+function lensMeta(l){
+  const foc = l.fmin===l.fmax ? `${l.fmin} mm` : `${l.fmin}–${l.fmax} mm`;
+  const sur = state.gear.cams.filter(c=>l.cams.includes(c.id)).map(c=>c.nom);
+  return [foc, `f/${fmt(l.ouv)}`, l.macro ? "macro" : "", sur.length ? sur.join(", ") : "aucun appareil"].filter(Boolean).join(" · ");
+}
 function renderGear(){
   const g = state.gear;
+  const head = (id, nom, meta) => `<button class="row-head" data-toggle aria-expanded="${gearOpen===id}"><span class="rh-text"><span class="rh-name">${esc(nom)}</span><span class="rh-meta">${esc(meta)}</span></span>${CHEV}</button>`;
   document.getElementById("camList").innerHTML = g.cams.map(c=>`
-    <div class="item" data-cam="${c.id}">
-      <div class="row">
-        <label class="wide">Nom<input type="text" data-f="nom" value="${esc(c.nom)}" maxlength="40"></label>
-        <label style="flex-basis:11rem">Capteur<select data-f="capteur">${Object.entries(CAPTEURS).map(([k,v])=>`<option value="${k}"${k===c.capteur?" selected":""}>${v.label}</option>`).join("")}</select></label>
-        <label style="flex-basis:11rem">Monture<select data-f="monture">${Object.entries(MONTURES).map(([k,v])=>`<option value="${k}"${k===c.monture?" selected":""}>${v}</option>`).join("")}</select></label>
-        <label>ISO max confortable<input type="number" data-f="isoMax" value="${c.isoMax}" min="100" step="100" inputmode="numeric"></label>
+    <div class="item${gearOpen===c.id?" open":""}" data-cam="${c.id}">
+      ${head(c.id, c.nom, camMeta(c))}
+      <div class="row-edit"${gearOpen===c.id?"":" hidden"}>
+        <div class="fields">
+          <label class="f wide">Nom<input type="text" data-f="nom" value="${esc(c.nom)}" maxlength="40"></label>
+          <label class="f">Capteur<select data-f="capteur">${Object.entries(CAPTEURS).map(([k,v])=>`<option value="${k}"${k===c.capteur?" selected":""}>${v.label}</option>`).join("")}</select></label>
+          <label class="f">Monture<select data-f="monture">${Object.entries(MONTURES).map(([k,v])=>`<option value="${k}"${k===c.monture?" selected":""}>${v}</option>`).join("")}</select></label>
+          <label class="f wide">ISO maximum confortable<input type="number" data-f="isoMax" value="${c.isoMax}" min="100" step="100" inputmode="numeric"></label>
+        </div>
+        ${g.cams.length>1 ? `<button class="danger" data-del>Supprimer cet appareil</button>` : ""}
       </div>
-      ${g.cams.length>1 ? `<button class="linkbtn del" data-del>Supprimer cet appareil</button>` : ""}
     </div>`).join("");
-  document.getElementById("lensList").innerHTML = g.lenses.length ? g.lenses.map(l=>`
-    <div class="item" data-lens="${l.id}">
-      <div class="row">
-        <label class="wide">Nom<input type="text" data-f="nom" value="${esc(l.nom)}" maxlength="40" placeholder="ex. RF 24-105 mm f/4"></label>
-        <label>Focale min (mm)<input type="number" data-f="fmin" value="${l.fmin}" min="1" inputmode="numeric"></label>
-        <label>Focale max (mm)<input type="number" data-f="fmax" value="${l.fmax}" min="1" inputmode="numeric"></label>
-        <label>Ouverture max (f/)<input type="number" data-f="ouv" value="${l.ouv}" min="0.7" step="0.1" inputmode="decimal"></label>
-        <label class="check"><input type="checkbox" data-f="macro"${l.macro?" checked":""}>Macro</label>
+  document.getElementById("lensList").innerHTML = g.lenses.map(l=>`
+    <div class="item${gearOpen===l.id?" open":""}" data-lens="${l.id}">
+      ${head(l.id, l.nom, lensMeta(l))}
+      <div class="row-edit"${gearOpen===l.id?"":" hidden"}>
+        <div class="fields">
+          <label class="f wide">Nom<input type="text" data-f="nom" value="${esc(l.nom)}" maxlength="60" placeholder="ex. RF 24-105 mm f/4"></label>
+          <label class="f">Focale min (mm)<input type="number" data-f="fmin" value="${l.fmin}" min="1" inputmode="numeric"></label>
+          <label class="f">Focale max (mm)<input type="number" data-f="fmax" value="${l.fmax}" min="1" inputmode="numeric"></label>
+          <label class="f">Ouverture max (f/)<input type="number" data-f="ouv" value="${l.ouv}" min="0.7" step="0.1" inputmode="decimal"></label>
+          <div class="togs" style="align-self:end"><label class="tog"><input type="checkbox" data-f="macro"${l.macro?" checked":""}><span>Macro</span></label></div>
+        </div>
+        <div class="togs"><span>Se monte sur</span>${g.cams.map(c=>`<label class="tog"><input type="checkbox" data-compat="${c.id}"${l.cams.includes(c.id)?" checked":""}><span>${esc(c.nom)}</span></label>`).join("")}</div>
+        <button class="danger" data-del>Supprimer cet objectif</button>
       </div>
-      <div class="compat">Compatible avec :<div>${g.cams.map(c=>`<label class="check"><input type="checkbox" data-compat="${c.id}"${l.cams.includes(c.id)?" checked":""}><span>${esc(c.nom)}</span></label>`).join("")}</div></div>
-      <button class="linkbtn del" data-del>Supprimer cet objectif</button>
-    </div>`).join("") : `<p class="hint">Aucun objectif pour l’instant.</p>`;
+    </div>`).join("");
   renderSearch();
 }
 function onGearInput(e){
@@ -549,10 +627,16 @@ function onGearInput(e){
   }
   if(isCam && f==="nom"){ document.querySelectorAll(`[data-compat="${it.id}"]`).forEach(cb=>{ cb.nextSibling.textContent = it.nom; });
     const o = document.querySelector(`#lsCam option[value="${it.id}"]`); if(o) o.textContent = it.nom; }
+  // Met à jour le résumé de la ligne sans redessiner la fiche (la saisie en cours est conservée)
+  box.querySelector(".rh-name").textContent = it.nom;
+  box.querySelector(".rh-meta").textContent = isCam ? camMeta(it) : lensMeta(it);
+  if(isCam) document.querySelectorAll("#lensList [data-lens]").forEach(b=>{ const l = state.gear.lenses.find(x=>x.id===b.dataset.lens); if(l) b.querySelector(".rh-meta").textContent = lensMeta(l); });
   gearChanged();
 }
 function onGearClick(e){
-  if(e.target.matches("[data-add-cat]")){ addFromCatalogue(+e.target.dataset.addCat); return; }
+  if(e.target.closest("[data-add-cat]")){ addFromCatalogue(+e.target.closest("[data-add-cat]").dataset.addCat); return; }
+  const tg = e.target.closest("[data-toggle]");
+  if(tg){ const id = tg.parentElement.dataset.cam || tg.parentElement.dataset.lens; gearOpen = gearOpen===id ? null : id; renderGear(); return; }
   if(!e.target.matches("[data-del]")) return;
   const box = e.target.closest("[data-cam],[data-lens]");
   if(box.dataset.cam){
@@ -579,8 +663,11 @@ function renderSearch(){
   sel.innerHTML = state.gear.cams.map(c=>`<option value="${c.id}">${esc(c.nom)}</option>`).join("");
   sel.value = state.gear.cams.some(c=>c.id===prev) ? prev : state.gear.cams[0].id;
   const cam = state.gear.cams.find(c=>c.id===sel.value), res = document.getElementById("lsRes");
+  const tape = !!document.getElementById("lsQ").value.trim();
+  document.getElementById("lsFor").hidden = !tape;
+  if(!tape){ res.innerHTML = ""; return; } // liste légère : rien tant qu'on ne tape pas
   if(!COMPAT[cam.monture]){
-    res.innerHTML = `<li><small>Indique la monture de ton ${esc(cam.nom)} (dans « Appareils photo » ci-dessus) pour voir les objectifs compatibles. Le catalogue couvre les montures Canon.</small></li>`;
+    res.innerHTML = `<li><small>Indique la monture de ton ${esc(cam.nom)} dans « Appareils » pour voir les objectifs compatibles. Le catalogue couvre les montures Canon.</small></li>`;
     return;
   }
   const brut = document.getElementById("lsQ").value.replace(/\bcanon\b/gi, " ");
@@ -593,9 +680,9 @@ function renderSearch(){
     const i = CATALOGUE.indexOf(l), c = compatFor(cam, l.monture), has = owned.has(norm(l.nom));
     const foc = l.fmin===l.fmax ? `${l.fmin} mm` : `${l.fmin}–${l.fmax} mm`;
     return `<li><div><b>${esc(l.nom)}</b><small>${foc} · f/${fmt(l.ouv)}${l.macro?" · macro":""} · ${c==="natif" ? "natif" : `<span class="adapt">avec ${c}</span>`}${recadre(cam,l) ? ` · <span class="adapt">mode recadrage APS-C</span>` : ""}</small></div>
-      <button class="btn" data-add-cat="${i}"${has?" disabled":""}>${has?"Ajouté":"Ajouter"}</button></li>`;
+      ${has ? `<span class="added">✓ Ajouté</span>` : `<button class="plus" data-add-cat="${i}" aria-label="Ajouter ${esc(l.nom)}">+</button>`}</li>`;
   }).join("") + (list.length>MAX ? `<li class="more">${list.length} objectifs compatibles : précise ta recherche pour voir les autres.</li>` : "")
-  : `<li><small>Aucun objectif du catalogue ne correspond. Tu peux l’ajouter à la main ci-dessous.</small></li>`;
+  : `<li><small>Aucun objectif du catalogue ne correspond. Tu peux le saisir à la main.</small></li>`;
 }
 function addFromCatalogue(i){
   const l = CATALOGUE[i];
@@ -607,11 +694,11 @@ function addFromCatalogue(i){
 let lockedY = 0;
 function lockPage(){ lockedY = scrollY; document.body.style.top = `-${lockedY}px`; document.body.classList.add("locked"); }
 function unlockPage(){ document.body.classList.remove("locked"); document.body.style.top = ""; scrollTo(0, lockedY); }
-function openGear(){ renderGear(); lockPage(); document.getElementById("gearDlg").showModal(); }
-function gotoSearch(){
-  const q = document.getElementById("lsQ");
-  q.focus({preventScroll:true});
-  document.getElementById("lensTitle").scrollIntoView({block:"start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+function openSheet(dlg){ if(dlg.open) return; lockPage(); dlg.showModal(); dlg.scrollTop = 0; }
+function openGear(){ gearOpen = null; renderGear(); openSheet(document.getElementById("gearDlg")); }
+function openSet(versHistorique){
+  const d = document.getElementById("setDlg"); openSheet(d);
+  if(versHistorique) document.getElementById("histSec").scrollIntoView({block:"start"});
 }
 
 /* ---------- Contexte : position, météo, lumière ---------- */
@@ -682,16 +769,14 @@ function sunHint(){
 }
 function renderCtx(){
   const el = document.getElementById("ctx");
-  const btn = ctxSource==="gps" ? "" : ` <button class="linkbtn" id="locate">Utiliser ma position</button>`;
-  const mom = `<button class="linkbtn" id="momentBtn" style="font-size:.875rem; color:var(--ink); font-weight:600">${momentLabel()}</button>`;
-  if(ctxStatus==="chargement"){ el.innerHTML = mom + `<span>Météo en cours de chargement…</span>`; bindLocate(); return; }
-  if(ctxStatus==="erreur"){ el.innerHTML = mom + `<span>Météo indisponible.</span> <button class="linkbtn" id="locate">Réessayer</button>`; bindLocate(); return; }
-  const lieu = ctxSource==="gps" ? (ctx.nancy ? "Nancy" : "Ta position") : (ctxSource==="refus" ? "Nancy (position refusée)" : "Nancy (par défaut)");
-  const bits = [`<b>${lieu}</b>`, `${ctx.temp}°`, CTX_LABEL[ctx.cat]];
-  if(ctx.vent) bits.push(CTX_LABEL.vent);
-  bits.push(CTX_LABEL[ctx.light]);
-  const h = sunHint(); if(h) bits.push(h);
-  el.innerHTML = bits.map(b=>`<span>${b}</span>`).join("") + mom + btn;
+  const mom = `<button class="pill moment" id="momentBtn" aria-label="Ouvrir mon planning">${momentLabel()}</button>`;
+  const loc = ctxSource==="gps" ? "" : `<button class="pill ghost" id="locate">Utiliser ma position</button>`;
+  if(ctxStatus==="chargement"){ el.innerHTML = mom + `<span class="pill">Météo…</span>`; bindLocate(); return; }
+  if(ctxStatus==="erreur"){ el.innerHTML = mom + `<span class="pill">Météo indisponible</span><button class="pill ghost" id="locate">Réessayer</button>`; bindLocate(); return; }
+  const lieu = ctxSource==="gps" ? (ctx.nancy ? "Nancy" : "Ta position") : "Nancy";
+  const h = sunHint();
+  const pills = [`<b>${lieu}</b>`, `${ctx.temp}° · ${CTX_LABEL[ctx.cat]}${ctx.vent ? " · vent" : ""}`, CTX_LABEL[ctx.light] + (h ? ` · ${h}` : "")];
+  el.innerHTML = mom + pills.map(p=>`<span class="pill">${p}</span>`).join("") + loc;
   bindLocate();
 }
 function bindLocate(){ const b=document.getElementById("locate"); if(b) b.onclick = locate; const m=document.getElementById("momentBtn"); if(m) m.onclick = openPlan; }
@@ -812,7 +897,7 @@ function render(){
   const el = document.getElementById("challenge");
   el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
   if(!current){
-    el.innerHTML = `<h2>Aucun défi ne correspond</h2><p class="brief">${pool().length ? "Aucun défi de tes réglages ne colle au lieu ou à la météo actuels : active d’autres thèmes ci-dessous." : "Active au moins un thème et une difficulté dans tes réglages ci-dessous."}</p>`;
+    el.innerHTML = `<h2>Aucun défi ne correspond</h2><p class="brief">${pool().length ? "Aucun défi de tes réglages ne colle au lieu ou à la météo actuels : active d’autres thèmes dans « Réglages »." : "Active au moins un thème et une difficulté dans « Réglages »."}</p>`;
     document.getElementById("done").disabled = true; return;
   }
   const c = current;
@@ -820,16 +905,18 @@ function render(){
   const gear = gearAdvice(c, c.nuit || ctx?.light==="nuit");
   const E = c.ia ? esc : (x=>x); // texte venant de l'IA : toujours échappé
   const why = c.ia ? (c.pourquoi ? [c.pourquoi.replace(/[.!\s]+$/,"")] : []) : reasons(c);
-  const whyHtml = why.length ? `<div class="block"><h3>Pourquoi maintenant</h3><p class="why">${E(why.join(", ").replace(/^./, m=>m.toUpperCase()))}.</p></div>` : "";
+  const whyHtml = why.length ? `<p class="why"><span>Pourquoi maintenant</span>${E(why.join(", ").replace(/^./, m=>m.toUpperCase()))}.</p>` : "";
   const doneToday = state.history.some(h=>h.id===c.id && h.date===dayKey());
   el.innerHTML = `
-    <div class="kind"><span>${THEMES[c.t]}</span><span class="dots" aria-label="Difficulté ${LEVELS[c.n]}">${dots}</span><span>${LEVELS[c.n]}</span>${c.ia ? `<span class="badge-ia">Inventé par l’IA</span>` : ""}</div>
+    <div class="kind"><span>${THEMES[c.t]}</span><span aria-hidden="true">·</span><span class="dots" aria-label="Difficulté ${LEVELS[c.n]}">${dots}</span><span>${LEVELS[c.n]}</span>${c.ia ? `<span class="badge-ia">Inventé par l’IA</span>` : ""}</div>
     <h2>${E(c.titre)}</h2>
     <p class="brief">${E(c.brief)}</p>
     ${whyHtml}
-    <div class="block"><h3>Astuce</h3><p>${E(c.astuce)}</p></div>
-    <div class="block"><h3>${gear.titre}</h3><p>${gear.texte}</p></div>
-    <div class="block"><h3>Contrainte bonus, si tu veux corser</h3><p>${currentBonus}</p></div>
+    <dl class="facts">
+      <div><dt>Astuce</dt><dd>${E(c.astuce)}</dd></div>
+      <div><dt>Matériel</dt><dd><b>${gear.titre}</b> · ${gear.texte}</dd></div>
+      <div><dt>Bonus, si tu veux corser</dt><dd>${currentBonus}</dd></div>
+    </dl>
     <div class="exif">${c.reg.map(r=>`<span>${E(r)}</span>`).join("")}</div>`;
   const b = document.getElementById("done");
   b.disabled = doneToday; b.textContent = doneToday ? "Réalisé aujourd’hui" : "Je l’ai fait";
@@ -844,7 +931,7 @@ function streak(){
 }
 function renderMeta(){
   const total = state.history.length, s = streak();
-  document.getElementById("stats").innerHTML = `<b>${total}</b> défi${total>1?"s":""} réalisé${total>1?"s":""} · <b>${s}</b> jour${s>1?"s":""} d’affilée`;
+  document.getElementById("stats").innerHTML = `<b>${total}</b> réalisé${total>1?"s":""} · <b>${s}</b> j d’affilée`;
   const ul = document.getElementById("history");
   ul.innerHTML = total ? state.history.slice().reverse().map(h=>{
     const d = new Date(h.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
@@ -880,6 +967,7 @@ const kVar = t => `--k:var(--k-${t})`;
 const pct = hm => Math.max(0, Math.min(100, (minutes(hm) - 360) / (1440 - 360) * 100));
 function planChanged(){ save(); renderWeek(); renderTodayPlan(); renderCtx(); render(); }
 function renderTodayPlan(){
+  if(!document.getElementById("todayPlan")) return;
   const l = slotsDu(new Date()).slice().sort((a,b)=>minutes(a.debut)-minutes(b.debut));
   document.getElementById("todayPlan").innerHTML = l.length
     ? `<li class="head">Aujourd’hui</li>` + l.map(x=>`<li style="${kVar(x.type)}">${x.debut}–${x.fin} · ${TYPES[x.type].label}</li>`).join("")
@@ -914,12 +1002,11 @@ function renderPlanDay(){
 function openPlan(){
   document.getElementById("planLegend").innerHTML = Object.entries(TYPES).map(([k,v])=>`<span style="${kVar(k)}">${v.label}</span>`).join("");
   document.getElementById("copied").textContent = "";
-  renderPlanDay(); lockPage(); document.getElementById("planDlg").showModal();
+  renderPlanDay(); openSheet(document.getElementById("planDlg"));
 }
 const planDlg = document.getElementById("planDlg");
 document.getElementById("openPlan").onclick = openPlan;
 document.getElementById("planClose").onclick = ()=>planDlg.close();
-planDlg.addEventListener("close", unlockPage);
 planDlg.addEventListener("change", e=>{
   const box = e.target.closest(".slot"); if(!box) return;
   const x = state.planning[planJour][+box.dataset.i], f = e.target.dataset.f;
@@ -928,7 +1015,6 @@ planDlg.addEventListener("change", e=>{
   planChanged();
 });
 planDlg.addEventListener("click", e=>{
-  if(e.target===planDlg){ planDlg.close(); return; }
   const row = e.target.closest(".wrow"); if(row){ planJour = +row.dataset.jour; renderPlanDay(); return; }
   if(e.target.matches("[data-del]")){ state.planning[planJour].splice(+e.target.closest(".slot").dataset.i, 1); planChanged(); renderPlanDay(); }
 });
@@ -948,23 +1034,27 @@ document.addEventListener("visibilitychange", ()=>{
 
 document.getElementById("next").onclick = pickRandom;
 document.getElementById("gear").onclick = openGear;
-document.getElementById("gear2").onclick = openGear;
-document.getElementById("gearClose").onclick = ()=>document.getElementById("gearDlg").close();
-document.getElementById("gotoSearch").onclick = gotoSearch;
-document.getElementById("gearDlg").addEventListener("close", unlockPage);
+document.getElementById("openSet").onclick = ()=>openSet(false);
+document.getElementById("stats").onclick = ()=>openSet(true);
+document.getElementById("tabDefi").onclick = ()=>scrollTo({top:0, behavior:"smooth"});
+// Tous les tiroirs : croix, clic à côté, page débloquée à la fermeture
+document.querySelectorAll("dialog.sheet").forEach(d=>{
+  d.addEventListener("close", unlockPage);
+  d.addEventListener("click", e=>{ if(e.target===d || e.target.closest("[data-close]")) d.close(); });
+});
 const gearDlg = document.getElementById("gearDlg");
 gearDlg.addEventListener("input", onGearInput);
 gearDlg.addEventListener("change", onGearInput);
-gearDlg.addEventListener("click", e=>{ if(e.target===gearDlg) gearDlg.close(); else onGearClick(e); });
+gearDlg.addEventListener("click", onGearClick);
 document.getElementById("lsQ").addEventListener("input", renderSearch);
 document.getElementById("lsCam").addEventListener("change", renderSearch);
 document.getElementById("addCam").onclick = ()=>{
   const id = uid("c"); state.gear.cams.push({id, nom:"Nouvel appareil", capteur:"ff", isoMax:6400, monture:"autre"});
-  gearChanged(); renderGear(); document.querySelector(`[data-cam="${id}"] input`).select();
+  gearOpen = id; gearChanged(); renderGear(); document.querySelector(`[data-cam="${id}"] input`).select();
 };
 document.getElementById("addLens").onclick = ()=>{
   const id = uid("o"); state.gear.lenses.push({id, nom:"Nouvel objectif", fmin:50, fmax:50, ouv:1.8, macro:false, cams:state.gear.cams.map(c=>c.id)});
-  gearChanged(); renderGear(); document.querySelector(`[data-lens="${id}"] input`).select();
+  gearOpen = id; gearChanged(); renderGear(); document.querySelector(`[data-lens="${id}"] input`).select();
 };
 document.getElementById("today").onclick = pickToday;
 
@@ -1023,7 +1113,7 @@ async function iaTester(){
     sel.innerHTML = modeles.map(m=>`<option value="${esc(m.name)}"${m.name===ia.modele?" selected":""}>${esc(m.displayName || m.name)}</option>`).join("");
     document.getElementById("iaModelRow").hidden = false;
     document.getElementById("iaKey").value = "";
-    iaSave(); iaStatus(`Clé valide · modèle ${ia.modele.replace("models/","")}. Le bouton « ✨ Défi IA » est disponible.`, "ok");
+    iaSave(); iaStatus(`Clé valide · modèle ${ia.modele.replace("models/","")}. Le bouton « ✨ IA » est disponible.`, "ok");
   }catch(e){ iaStatus(e.message, "err"); if(saisie){ ia.cle = ""; } }
   iaRender();
 }
@@ -1069,7 +1159,7 @@ async function genererAvecSecours(consigne, btn){
   let derniere;
   for(const [i, modele] of essais.entries()){
     for(let tentative = 0; tentative < 2; tentative++){
-      if(i || tentative) btn.textContent = "L’IA réfléchit… (nouvel essai)";
+      if(i || tentative) btn.textContent = "Nouvel essai…";
       try{ return await geminiFetch(`${modele}:generateContent`, {method:"POST", body:corps}); }
       catch(e){
         derniere = e;
@@ -1083,7 +1173,7 @@ async function genererAvecSecours(consigne, btn){
 }
 async function defiIA(){
   const btn = document.getElementById("iaBtn"), err = document.getElementById("iaErr");
-  btn.disabled = true; btn.textContent = "L’IA réfléchit…"; err.hidden = true;
+  btn.disabled = true; btn.textContent = "Réflexion…"; err.hidden = true;
   const consigne = `Tu es un coach photo bienveillant. Invente UN défi photo original pour un photographe amateur, en français, en le tutoyant.
 Il doit être concret, faisable tout de suite dans la situation décrite, et différent des défis classiques et des défis récents.
 Respecte les thèmes et difficultés autorisés. Donne des réglages adaptés à l’appareil, au capteur et à la lumière.
@@ -1106,7 +1196,7 @@ ${iaContexte()}`;
     currentBonus = BONUS[Math.floor(Math.random()*BONUS.length)];
     render();
   }catch(e){ err.textContent = e.message; err.hidden = false; }
-  btn.disabled = false; btn.textContent = "✨ Défi IA";
+  btn.disabled = false; btn.textContent = "✨ IA";
 }
 document.getElementById("iaBtn").onclick = defiIA;
 document.getElementById("iaSave").onclick = iaTester;
