@@ -4,14 +4,27 @@ Une petite application web, en un seul fichier, qui propose chaque jour un défi
 
 ## L'interface
 
-- **Écran principal** : le logo, tes statistiques (touche-les pour voir ton historique), le contexte en pastilles (créneau du planning, lieu, météo, lumière), la carte du défi, puis « Je l'ai fait » et trois choix : « Maintenant », « Défi du jour », « ✨ IA ».
+- **Écran principal** : le logo, tes statistiques (touche-les pour voir ton historique), le contexte en pastilles (créneau du planning, lieu, météo, lumière), la carte du défi, puis « Je l'ai fait » (ou « Défi suivant ») et « Changer de défi ».
 - **Barre d'onglets en bas** : Défi, Planning, Matériel, Réglages. Chaque écran s'ouvre dans un tiroir qui monte du bas ; la croix, un geste à côté ou Échap le referment.
 - Style noir, blanc et or, comme le logo, en mode clair ou sombre selon le téléphone.
+
+## Changer de défi
+
+Le défi affiché est ton **défi en cours** : il reste le même tant que tu ne l'as pas réalisé (un nouveau jour en apporte un nouveau). Une fois réalisé, « Défi suivant » t'en propose un autre, offert.
+
+**Changer de défi** demande une raison :
+
+| Raison | Coût |
+|---|---|
+| 🎒 Pas le matériel · 📍 Pas possible ici ou maintenant · 🌧️ Météo · 😰 Trop difficile | Gratuit, 3 fois par jour (sinon un joker) |
+| 😐 Pas envie | 1 joker (2 par semaine, renouvelés le lundi) |
+
+Le défi écarté ne revient pas tout de suite (aujourd'hui pour le lieu et la météo, tant que ton matériel ne change pas pour le matériel). « Trop difficile » propose un défi plus facile. Le remplaçant peut venir de la liste ou être **inventé par l'IA**, après **3 questions rapides** pré-remplies (lumière : soleil direct, voilé ou nuit ; temps disponible ; envie technique, créative ou surprise), pour un défi qui tombe juste du premier coup.
 
 ## Ce que fait l'app
 
 - **Défi du jour** : le même défi pour toute la journée, choisi automatiquement selon la date.
-- **Maintenant** : choisit un défi adapté à l'endroit où tu es, à la météo et à la lumière du moment, en évitant ceux faits récemment.
+- **Changer de défi / Défi suivant** : choisit un défi adapté à l'endroit où tu es, à la météo et à la lumière du moment, en évitant ceux faits récemment.
 - **Je l'ai fait** : enregistre le défi dans ton historique et fait avancer ta série de jours d'affilée.
 - **Contrainte bonus** : une règle en plus (format vertical, noir et blanc, mise au point manuelle…) pour corser le défi.
 
