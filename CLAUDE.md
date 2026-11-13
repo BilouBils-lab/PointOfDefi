@@ -10,7 +10,8 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 ## Code (dans le `<script>`)
 
-- `THEMES`, `LEVELS`, `CAMS` : libellés des thèmes, difficultés et appareils.
+- `THEMES`, `LEVELS` : libellés des thèmes et difficultés (les appareils sont dans `state.gear`).
+- En-tête : ligne titre + bouton « Mon matériel » (`.hrow`), puis statistiques sur une ligne, puis ligne météo (`#ctx`). À vérifier sur un écran de téléphone étroit (320 à 390 px).
 - `D` : la liste des défis. Champs : `id` (préfixe du thème + numéro, ex. `n3`), `t` (thème), `n` (difficulté 1–3), `titre`, `brief`, `astuce`, `reg` (réglages affichés en étiquettes), et en option `nuit: true` (choisit la note appareil « nuit ») et `mois: [...]` (mois où le défi est disponible).
 - Champs de contexte des défis : `ou` (`"in"`, `"out"` ou `"any"`), `pref` (conditions où le défi brille : `clair`, `nuageux`, `brouillard`, `pluie`, `neige`, `vent`, `jour`, `doree`, `bleue`, `nuit`), `req` (conditions obligatoires : le défi n'est proposé que si elles sont réunies, et jamais en « Défi du jour »).
 - `BONUS` : contraintes bonus tirées au hasard.

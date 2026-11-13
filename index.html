@@ -36,9 +36,10 @@ body{
   font-size:1rem; line-height:1.5;
 }
 .wrap{max-width:40rem; margin:0 auto; padding:1.5rem 1.25rem 3rem}
-header{display:flex; justify-content:space-between; align-items:baseline; gap:1rem; margin-bottom:1.25rem}
-header h1{font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.25rem; margin:0; color:var(--green)}
-header .stats{font-size:.875rem; color:var(--soft); font-variant-numeric:tabular-nums; text-align:right}
+header{margin-bottom:.5rem}
+.hrow{display:flex; justify-content:space-between; align-items:center; gap:.75rem}
+header h1{font-family:"Young Serif",Georgia,serif; font-weight:400; font-size:1.375rem; line-height:1.2; margin:0; color:var(--green); white-space:nowrap}
+header .stats{font-size:.875rem; color:var(--soft); font-variant-numeric:tabular-nums; margin-top:.35rem}
 header .stats b{color:var(--ink); font-weight:600}
 
 /* Le viseur : l'élément marquant */
@@ -84,10 +85,9 @@ summary{cursor:pointer; font-weight:600}
 .history time{color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums}
 .empty{color:var(--soft); font-size:.9375rem}
 .note{font-size:.8125rem; color:var(--soft); margin-top:2rem}
-.ctx{display:flex; flex-wrap:wrap; align-items:baseline; gap:.25rem .75rem; font-size:.875rem; color:var(--soft); margin:-.5rem 0 1rem}
+.ctx{display:flex; flex-wrap:wrap; align-items:baseline; gap:.25rem .75rem; font-size:.875rem; color:var(--soft); margin:0 0 1.25rem}
 .ctx b{color:var(--ink); font-weight:600}
 .why{color:var(--green); font-weight:500}
-.hright{display:flex; align-items:flex-start; gap:.75rem}
 .gearbtn{display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--green); font-size:.875rem; font-weight:600; white-space:nowrap}
 .gearbtn svg{width:1.05rem; height:1.05rem}
 dialog{border:0; padding:0; background:var(--paper); color:var(--ink); width:min(36rem, calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); border-radius:12px;
@@ -133,11 +133,11 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
 <body>
 <div class="wrap">
   <header>
-    <h1>Défis photo</h1>
-    <div class="hright">
-      <div class="stats" id="stats"></div>
+    <div class="hrow">
+      <h1>Défis photo</h1>
       <button class="gearbtn" id="gear" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>Mon matériel</button>
     </div>
+    <div class="stats" id="stats"></div>
   </header>
   <div class="ctx" id="ctx" aria-live="polite"></div>
 
@@ -195,7 +195,7 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
 </dialog>
 
 <script>
-const VERSION = "6 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
+const VERSION = "7 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -668,7 +668,7 @@ function streak(){
 }
 function renderMeta(){
   const total = state.history.length, s = streak();
-  document.getElementById("stats").innerHTML = `<b>${total}</b> défi${total>1?"s":""} réalisé${total>1?"s":""}<br><b>${s}</b> jour${s>1?"s":""} d’affilée`;
+  document.getElementById("stats").innerHTML = `<b>${total}</b> défi${total>1?"s":""} réalisé${total>1?"s":""} · <b>${s}</b> jour${s>1?"s":""} d’affilée`;
   const ul = document.getElementById("history");
   ul.innerHTML = total ? state.history.slice().reverse().map(h=>{
     const d = new Date(h.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
