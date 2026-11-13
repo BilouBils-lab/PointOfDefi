@@ -69,6 +69,13 @@ Avec la clé Gemini, le bouton **📷 Faire analyser ma photo** (sous la carte d
 
 C'est un avis, pas un juge : tu valides le défi toi-même, et la note est gardée dans ton historique. Photos acceptées : JPEG (sorti de l'appareil ou exporté de Lightroom, la case « Photo retouchée » se coche alors toute seule), PNG ; pas de fichiers RAW. La photo est réduite et ses métadonnées (dont le GPS) sont retirées avant l'envoi. Avec l'offre gratuite, Google peut utiliser les photos envoyées : évite celles où ton fils ou d'autres personnes sont reconnaissables.
 
+## Installer l'app sur le téléphone
+
+L'app s'installe sur l'écran d'accueil, sans App Store (application web progressive) : icône du viseur, ouverture en plein écran, fonctionnement hors connexion (sauf la météo et l'IA). Quand une nouvelle version est publiée, un bandeau « Nouvelle version disponible » propose de la charger.
+
+- **iPhone** : ouvre l'app dans Safari, bouton **Partager**, puis **« Sur l'écran d'accueil »**. ⚠️ L'app installée ne voit pas les données de Safari : fais une sauvegarde dans Safari, puis restaure-la dans l'app (un message le rappelle à la première ouverture).
+- **Android / ordinateur** : bouton « Installer l'app » dans Réglages, ou menu du navigateur → « Installer l'application ».
+
 ## Sauvegarde
 
 Toutes tes données (historique et notes, matériel, planning) sont enregistrées **dans le navigateur de l'appareil uniquement**. Dans **Réglages → Sauvegarde** :
@@ -97,7 +104,7 @@ Certains défis sont saisonniers (brume d'automne, Saint-Nicolas) et n'apparaiss
 
 ## Utilisation
 
-Aucune installation : ouvre `index.html` dans un navigateur, sur ordinateur ou téléphone.
+Ouvre l'adresse du site dans un navigateur, ou installe l'app sur l'écran d'accueil (voir plus haut).
 
 L'historique et les réglages sont enregistrés dans le navigateur (`localStorage`) : ils restent sur l'appareil utilisé et ne sont envoyés nulle part. Le lien « Effacer mon historique » remet tout à zéro.
 

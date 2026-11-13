@@ -6,7 +6,13 @@
 
 ## Structure
 
-Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dépendance (hors polices Google Fonts : Instrument Sans pour l'interface, Cinzel pour le logo).
+L'app tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dépendance (hors polices Google Fonts : Instrument Sans pour l'interface, Cinzel pour le logo). S'y ajoutent les fichiers de l'app installable : `manifest.webmanifest`, `sw.js` (service worker) et `icons/` (192, 512, maskable 512, apple-touch-icon 180 : crochets et cercle du viseur, point doré).
+
+## App installable (PWA)
+
+- `sw.js` : la page est chargée d'abord depuis le réseau sans cache HTTP (toujours la dernière version), sinon depuis le cache (hors connexion) ; icônes et manifeste depuis le cache ; polices Google en cache mis à jour en arrière-plan ; météo, Gemini et `?maj=` passent directement par le réseau. **Changer `CACHE` dans `sw.js` en même temps que `VERSION`.**
+- `index.html` : enregistre `sw.js` (https ou localhost), `verifierMaj()` compare la `VERSION` publiée (au plus toutes les 10 min, au retour sur l'app) et affiche la bannière `#maj` ; Réglages → « Installer l'app » (`instRender()`, invite `beforeinstallprompt` ou étapes iPhone/Android) ; première ouverture de l'app installée sans données : astuce `#tipRestore` vers la sauvegarde (sur iPhone, l'app installée ne partage pas son stockage avec Safari).
+- Tester avec un serveur local (`python3 -m http.server`), pas en `file://` (pas de service worker).
 
 ## Interface
 
@@ -77,7 +83,7 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 ## Workflow Git
 
-- Augmenter `VERSION` (numéro seul, sans date ; en haut du script, affiché en bas de l'app) dans chaque PR qui modifie `index.html` : c'est le seul moyen pour le propriétaire de vérifier que son navigateur n'affiche pas une ancienne version gardée en mémoire.
+- Augmenter `VERSION` (numéro seul, sans date ; en haut du script, affiché en bas de l'app) et `CACHE` dans `sw.js` dans chaque PR qui modifie `index.html` : c'est le seul moyen pour le propriétaire de vérifier que son navigateur n'affiche pas une ancienne version gardée en mémoire.
 
 - Ne jamais pousser directement sur `main` : `main` est publiée telle quelle sur GitHub Pages (https://biloubils-lab.github.io/PointOfDefi/).
 - Travailler sur une branche, la pousser, puis ouvrir une pull request vers `main`, avec une description en français (quoi, pourquoi, comment c'est testé).
