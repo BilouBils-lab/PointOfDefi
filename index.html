@@ -46,13 +46,15 @@ button{font:inherit; cursor:pointer; color:inherit}
 .wrap{max-width:34rem; margin:0 auto; padding:.75rem 1.25rem calc(6rem + env(safe-area-inset-bottom,0px))}
 
 /* ---------- En-tête ---------- */
-.top{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.5rem 0 1rem}
-.brand{display:grid; gap:.15rem; color:var(--ink); min-width:0}
-.logo{height:46px; width:auto; display:block; max-width:100%}
-.app-name{font-size:.625rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--soft); padding-left:.15rem}
-.stats{flex:none; border:0; background:var(--surface); box-shadow:inset 0 0 0 1px var(--line); border-radius:999px; padding:.4rem .8rem;
-  font-size:.8125rem; color:var(--soft); font-variant-numeric:tabular-nums; white-space:nowrap}
-.stats b{color:var(--ink); font-weight:600}
+/* Logo et statistiques sur la même ligne, centrés sur le texte du logo ; « Défis photo » en dessous */
+.top{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:1rem; row-gap:.15rem; padding:.5rem 0 1rem}
+.brand{grid-column:1; grid-row:1; color:var(--ink); min-width:0}
+@media (max-width:360px){ .logo{height:40px !important} }
+.logo{height:46px; width:auto; display:block; max-width:100%; overflow:visible}
+.app-name{grid-column:1 / -1; grid-row:2; font-size:.625rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--soft); padding-left:.15rem}
+.stats{grid-column:2; grid-row:1; display:grid; justify-items:end; gap:.05rem; border:0; background:none; padding:.2rem 0; line-height:1.25;
+  font-size:.6875rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); font-variant-numeric:tabular-nums; white-space:nowrap}
+.stats b{color:var(--ink); font-weight:700; font-size:.875rem; letter-spacing:.02em}
 
 /* ---------- Contexte (pastilles) ---------- */
 .ctx{display:flex; flex-wrap:wrap; gap:.4rem; margin:0 0 1rem}
@@ -220,18 +222,16 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand">
-      <svg class="logo" viewBox="0 0 300 76" role="img" aria-label="Point of Nabil">
+    <div class="brand"><svg class="logo" viewBox="31 8 236 60" role="img" aria-label="Point of Nabil">
         <g fill="none" stroke="currentColor" stroke-width="2.2"><path d="M129 9H118V29M118 47V67H129M171 9H182V29M182 47V67H171"/><path d="M136.1 28.3A17 17 0 0 1 163.9 28.3M163.9 47.7A17 17 0 0 1 136.1 47.7"/></g>
         <g fill="currentColor" font-family="Cinzel, 'Trajan Pro', Georgia, serif" font-weight="500">
           <text x="110" y="45" text-anchor="end" font-size="19" letter-spacing="3">POINT</text>
           <text x="150.5" y="42.5" text-anchor="middle" font-size="11.5" letter-spacing="1">OF</text>
           <text x="191" y="45" font-size="19" letter-spacing="3">NABIL</text>
         </g>
-      </svg>
-      <span class="app-name">Défis photo</span>
-    </div>
+      </svg></div>
     <button class="stats" id="stats" aria-label="Voir mes défis réalisés"></button>
+    <span class="app-name">Défis photo</span>
   </header>
   <div class="ctx" id="ctx" aria-live="polite"></div>
 
@@ -333,7 +333,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "13 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
+const VERSION = "14"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -931,7 +931,8 @@ function streak(){
 }
 function renderMeta(){
   const total = state.history.length, s = streak();
-  document.getElementById("stats").innerHTML = `<b>${total}</b> réalisé${total>1?"s":""} · <b>${s}</b> j d’affilée`;
+  document.getElementById("stats").innerHTML = `<span><b>${total}</b> défi${total>1?"s":""}</span><span><b>${s}</b> j d’affilée</span>`;
+  document.getElementById("stats").setAttribute("aria-label", `${total} défi${total>1?"s":""} réalisé${total>1?"s":""}, ${s} jour${s>1?"s":""} d’affilée : voir l’historique`);
   const ul = document.getElementById("history");
   ul.innerHTML = total ? state.history.slice().reverse().map(h=>{
     const d = new Date(h.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
