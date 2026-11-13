@@ -73,9 +73,18 @@ Avec une clé API Gemini (gratuite sur [aistudio.google.com/apikey](https://aist
 - L'app n'envoie ni la position précise ni le nom : seulement le contexte du défi. Avec l'offre gratuite, Google peut utiliser les échanges pour améliorer ses services.
 - Ne jamais mettre une clé API dans le code ou dans le dépôt : il est public.
 
+## Photographier à l'iPhone
+
+L'**iPhone 13 Pro** fait partie du matériel, avec ses trois objectifs : ×0,5 (13 mm, mode Macro), ×1 (26 mm, f/1,5) et ×3 (77 mm). Choisis-le comme appareil du jour pour t'entraîner au regard quand tu n'as pas le Canon :
+
+- les défis qui demandent un vrai appareil (Manuel intégral, Filé, Traînées de lumière) ne sont plus proposés ;
+- les autres sont adaptés : « Passe en ×3 », mode Portrait, mode Nuit, Live Photo avec l'effet « Pose longue », verrouillage AE/AF, curseur d'exposition, ProRAW ;
+- les défis inventés par l'IA tiennent compte du smartphone ;
+- le coach ne compare pas l'ouverture (fixe sur un téléphone) et affiche la focale équivalente.
+
 ## Coach photo
 
-Avec la clé Gemini, le bouton **📷 Faire analyser ma photo** (sous la carte du défi) envoie ta photo à un coach IA, pour progresser :
+Avec la clé Gemini, sous la carte du défi, **📷 Prendre la photo** (l'appareil photo s'ouvre directement) ou **🖼️ Galerie** envoie ta photo à un coach IA, pour progresser :
 
 - un verdict (« Défi réussi », « Presque », « Pas encore ») et une note sur 10 ;
 - ce qui marche, ce qui peut progresser, un prochain exercice ;
