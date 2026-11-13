@@ -35,6 +35,8 @@ Le bouton **Mon matériel**, en haut à droite, permet d'enregistrer tes apparei
 - **Appareil** : nom, type de capteur (plein format, APS-C…) et ISO maximal que tu juges acceptable.
 - **Objectif** : nom, focale minimale et maximale (la même valeur pour une focale fixe), ouverture maximale, macro ou non, et appareils avec lesquels il est compatible.
 
+**Recherche d'objectifs** : indique la monture de chaque appareil (Canon RF, EF-M, EF, EF-S), puis choisis un appareil et tape quelques mots (« 50 », « 24-105 », « macro », « sigma »). L'app n'affiche que les objectifs compatibles avec cet appareil et signale ceux qui demandent un adaptateur ou font passer un boîtier plein format en mode recadrage APS-C. « Ajouter » remplit automatiquement focales, ouverture et compatibilité. Le catalogue est intégré à l'app (environ 70 objectifs Canon et Sigma courants, gratuit et sans connexion) ; un objectif absent peut toujours être saisi à la main.
+
 Pour chaque défi, l'app conseille l'objectif le mieux adapté parmi ceux compatibles avec l'appareil du jour (grand-angle, focale de portrait, le plus lumineux…). Pour un zoom, elle indique la focale à utiliser. Elle précise aussi la focale « équivalente » sur un capteur APS-C (un 50 mm cadre comme un 80 mm sur un capteur Canon APS-C) et donne un conseil ISO pour les défis de nuit.
 
 Certains défis sont saisonniers (brume d'automne, Saint-Nicolas) et n'apparaissent qu'aux bons mois.
