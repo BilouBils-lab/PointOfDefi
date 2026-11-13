@@ -110,6 +110,13 @@ summary{cursor:pointer; font-weight:600}
 .today-plan li.head::before{display:none}
 .today-plan li::before{content:""; width:.7rem; height:.7rem; border-radius:2px; background:var(--k); flex:none}
 .copied{font-size:.8125rem; color:var(--green); min-height:1.2em; margin:.3rem 0 0}
+.badge-ia{display:inline-block; font-size:.75rem; font-weight:600; color:var(--card); background:var(--gilt); border-radius:999px; padding:.05rem .5rem}
+.ia-key{display:flex; gap:.4rem; flex-wrap:wrap; margin:.4rem 0}
+.ia-key input,.ia-key select{font:inherit; font-size:1rem; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:6px; padding:.45rem .55rem; flex:1 1 12rem; min-width:0}
+.ia-status{font-size:.875rem; margin:.3rem 0; color:var(--soft)}
+.ia-status.ok{color:var(--green)} .ia-status.err{color:#B3261E}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ia-status.err{color:#F2B8B5} }
+:root[data-theme="dark"] .ia-status.err{color:#F2B8B5}
 .history{list-style:none; padding:0; margin:.75rem 0 0}
 .history li{display:flex; justify-content:space-between; gap:1rem; padding:.45rem 0; border-bottom:1px solid var(--line); font-size:.9375rem}
 .history time{color:var(--soft); white-space:nowrap; font-variant-numeric:tabular-nums}
@@ -180,7 +187,9 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
     <button class="btn primary" id="done">Je l’ai fait</button>
     <button class="btn" id="next">Défi pour maintenant</button>
     <button class="btn" id="today">Défi du jour</button>
+    <button class="btn" id="iaBtn" hidden>✨ Défi IA</button>
   </div>
+  <p class="ia-status err" id="iaErr" aria-live="polite" hidden></p>
 
   <details open>
     <summary>Mes réglages</summary>
@@ -195,6 +204,18 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
     <p class="empty" style="margin:.6rem 0 0">L’app ne propose que des défis faisables selon ton planning : au travail, en télétravail, au CrossFit, avec ton fils ou quand tu as du temps pour sortir.</p>
     <ul class="today-plan" id="todayPlan"></ul>
     <button class="btn" id="openPlan">Ouvrir mon planning</button>
+  </details>
+
+  <details>
+    <summary>Défis inventés par l’IA</summary>
+    <p class="empty" style="margin:.6rem 0 0">Avec une clé API Gemini, le bouton « ✨ Défi IA » fait inventer un défi neuf, adapté à ton planning, à la météo, à la lumière et à ton matériel.</p>
+    <div class="ia-key">
+      <input type="password" id="iaKey" placeholder="Colle ta clé API Gemini" autocomplete="off" spellcheck="false" aria-label="Clé API Gemini">
+      <button class="btn" id="iaSave">Enregistrer et tester</button>
+    </div>
+    <div class="ia-key" id="iaModelRow" hidden><select id="iaModel" aria-label="Modèle Gemini"></select></div>
+    <p class="ia-status" id="iaStatus" aria-live="polite"></p>
+    <p class="note" style="margin-top:.5rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Pour une clé gratuite : <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom, seulement le contexte du défi. <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
   </details>
 
   <details>
@@ -249,7 +270,7 @@ body.locked{position:fixed; left:0; right:0; overflow:hidden}
 </dialog>
 
 <script>
-const VERSION = "10 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
+const VERSION = "11 · 13 novembre 2026"; // à augmenter à chaque PR fusionnée
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -797,18 +818,19 @@ function render(){
   const c = current;
   const dots = [1,2,3].map(i=>`<i class="${i<=c.n?"on":""}"></i>`).join("");
   const gear = gearAdvice(c, c.nuit || ctx?.light==="nuit");
-  const why = reasons(c);
-  const whyHtml = why.length ? `<div class="block"><h3>Pourquoi maintenant</h3><p class="why">${why.join(", ").replace(/^./, m=>m.toUpperCase())}.</p></div>` : "";
+  const E = c.ia ? esc : (x=>x); // texte venant de l'IA : toujours échappé
+  const why = c.ia ? (c.pourquoi ? [c.pourquoi.replace(/[.!\s]+$/,"")] : []) : reasons(c);
+  const whyHtml = why.length ? `<div class="block"><h3>Pourquoi maintenant</h3><p class="why">${E(why.join(", ").replace(/^./, m=>m.toUpperCase()))}.</p></div>` : "";
   const doneToday = state.history.some(h=>h.id===c.id && h.date===dayKey());
   el.innerHTML = `
-    <div class="kind"><span>${THEMES[c.t]}</span><span class="dots" aria-label="Difficulté ${LEVELS[c.n]}">${dots}</span><span>${LEVELS[c.n]}</span></div>
-    <h2>${c.titre}</h2>
-    <p class="brief">${c.brief}</p>
+    <div class="kind"><span>${THEMES[c.t]}</span><span class="dots" aria-label="Difficulté ${LEVELS[c.n]}">${dots}</span><span>${LEVELS[c.n]}</span>${c.ia ? `<span class="badge-ia">Inventé par l’IA</span>` : ""}</div>
+    <h2>${E(c.titre)}</h2>
+    <p class="brief">${E(c.brief)}</p>
     ${whyHtml}
-    <div class="block"><h3>Astuce</h3><p>${c.astuce}</p></div>
+    <div class="block"><h3>Astuce</h3><p>${E(c.astuce)}</p></div>
     <div class="block"><h3>${gear.titre}</h3><p>${gear.texte}</p></div>
     <div class="block"><h3>Contrainte bonus, si tu veux corser</h3><p>${currentBonus}</p></div>
-    <div class="exif">${c.reg.map(r=>`<span>${r}</span>`).join("")}</div>`;
+    <div class="exif">${c.reg.map(r=>`<span>${E(r)}</span>`).join("")}</div>`;
   const b = document.getElementById("done");
   b.disabled = doneToday; b.textContent = doneToday ? "Réalisé aujourd’hui" : "Je l’ai fait";
 }
@@ -826,7 +848,7 @@ function renderMeta(){
   const ul = document.getElementById("history");
   ul.innerHTML = total ? state.history.slice().reverse().map(h=>{
     const d = new Date(h.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
-    return `<li><span>${h.titre}</span><time datetime="${h.date}">${d}</time></li>`;
+    return `<li><span>${esc(h.titre)}</span><time datetime="${h.date}">${d}</time></li>`;
   }).join("") : `<li class="empty">Ton premier défi réalisé apparaîtra ici.</li>`;
 }
 
@@ -945,6 +967,132 @@ document.getElementById("addLens").onclick = ()=>{
   gearChanged(); renderGear(); document.querySelector(`[data-lens="${id}"] input`).select();
 };
 document.getElementById("today").onclick = pickToday;
+
+/* ---------- Défis inventés par l'IA (Gemini, clé de l'utilisateur, stockée sur l'appareil) ---------- */
+const IA_KEY = "defis-photo-gemini";
+const GEMINI = "https://generativelanguage.googleapis.com/v1beta/";
+let ia = {cle:"", modele:""};
+try{ ia = Object.assign(ia, JSON.parse(localStorage.getItem(IA_KEY))||{}); }catch(e){}
+function iaSave(){ try{ localStorage.setItem(IA_KEY, JSON.stringify(ia)); }catch(e){} }
+function iaStatus(txt, cls=""){ const el = document.getElementById("iaStatus"); el.textContent = txt; el.className = "ia-status " + cls; }
+function iaRender(){
+  document.getElementById("iaBtn").hidden = !ia.cle;
+  document.getElementById("iaKey").placeholder = ia.cle ? "Clé enregistrée (••••" + ia.cle.slice(-4) + ")" : "Colle ta clé API Gemini";
+  if(ia.cle && !document.getElementById("iaStatus").textContent) iaStatus(ia.modele ? `Clé enregistrée · modèle ${ia.modele.replace("models/","")}` : "Clé enregistrée.", "ok");
+}
+async function geminiFetch(path, opts={}){
+  const ac = new AbortController(), timer = setTimeout(()=>ac.abort(), 30000);
+  try{
+    const r = await fetch(GEMINI + path, {...opts, signal:ac.signal, headers:{"Content-Type":"application/json", "x-goog-api-key":ia.cle}});
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok){
+      const msg = data.error?.message || "";
+      if(r.status===400 && /api key/i.test(msg) || r.status===401 || r.status===403) throw new Error("Clé API refusée par Google : vérifie-la.");
+      if(r.status===429) throw new Error("Quota Gemini atteint pour le moment : réessaie un peu plus tard.");
+      if(r.status===404) throw new Error("Ce modèle n’est plus disponible : choisis-en un autre dans « Défis inventés par l’IA ».");
+      throw new Error(`Gemini a renvoyé une erreur (${r.status}).`);
+    }
+    return data;
+  } catch(e){
+    if(e.name==="AbortError") throw new Error("Gemini met trop de temps à répondre : réessaie.");
+    if(e instanceof TypeError) throw new Error("Impossible de joindre Gemini : vérifie ta connexion.");
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+// Choisit un modèle « flash » récent parmi ceux que la clé peut utiliser (évite de figer un nom de modèle)
+function classeModeles(list){
+  const ok = list.filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent") && /gemini/.test(m.name)
+    && !/(embed|tts|image|vision|live|audio|aqa|learnlm|gemma)/.test(m.name));
+  const ver = m => parseFloat((m.name.match(/gemini-(\d+(?:\.\d+)?)/)||[])[1] || 0);
+  const note = m => (/flash/.test(m.name) ? 2 : 0) - (/lite/.test(m.name) ? 1 : 0) - (/(preview|exp)/.test(m.name) ? 1.5 : 0);
+  return ok.sort((a,b)=> note(b)-note(a) || ver(b)-ver(a));
+}
+async function iaTester(){
+  const saisie = document.getElementById("iaKey").value.trim();
+  if(saisie) ia.cle = saisie;
+  if(!ia.cle){ iaStatus("Colle d’abord ta clé API.", "err"); return; }
+  iaStatus("Vérification de la clé…");
+  try{
+    const data = await geminiFetch("models?pageSize=200");
+    const modeles = classeModeles(data.models||[]);
+    if(!modeles.length) throw new Error("Aucun modèle Gemini utilisable avec cette clé.");
+    if(!modeles.some(m=>m.name===ia.modele)) ia.modele = modeles[0].name;
+    const sel = document.getElementById("iaModel");
+    sel.innerHTML = modeles.map(m=>`<option value="${esc(m.name)}"${m.name===ia.modele?" selected":""}>${esc(m.displayName || m.name)}</option>`).join("");
+    document.getElementById("iaModelRow").hidden = false;
+    document.getElementById("iaKey").value = "";
+    iaSave(); iaStatus(`Clé valide · modèle ${ia.modele.replace("models/","")}. Le bouton « ✨ Défi IA » est disponible.`, "ok");
+  }catch(e){ iaStatus(e.message, "err"); if(saisie){ ia.cle = ""; } }
+  iaRender();
+}
+function iaContexte(){
+  const now = new Date(), {types} = maintenant(), cam = curCam();
+  const situation = {travail:"au travail (au bureau ou en visite d’entreprise) : défi discret, sans quitter le travail",
+    tele:"en télétravail chez lui, à son poste : défi rapide, dans la maison", pause:"en pause déjeuner près de son travail : 30 à 60 minutes, à pied",
+    pausemaison:"en pause déjeuner chez lui, un jour de télétravail : maison ou quartier, à pied", crossfit:"à sa salle de CrossFit",
+    fils:"avec son fils (jeune enfant) : défi à faire avec ou autour de lui, adapté à un enfant", libre:"libre pour une sortie photo",
+    perso:"chez lui, sans sortie prévue"};
+  const lignes = [
+    `Date et heure : ${now.toLocaleDateString("fr-FR",{weekday:"long", day:"numeric", month:"long"})}, ${hhmm(now)}.`,
+    `Situation : ${[...types].map(t=>situation[t]||t).join(" ; ")}.`,
+    `Lieu : ${ctx ? (ctx.nancy ? "Nancy (Lorraine) : place Stanislas, Vieille Ville, Art nouveau, parc de la Pépinière, canal" : "hors de Nancy") : "Nancy (Lorraine)"}.`,
+    ctx ? `Météo : ${CTX_LABEL[ctx.cat]}${ctx.vent ? ", du vent" : ""}, ${ctx.temp} °C. Lumière : ${CTX_LABEL[ctx.light]}${sunHint() ? " (" + sunHint() + ")" : ""}.` : "Météo inconnue.",
+    `Appareil du jour : ${cam.nom} (${CAPTEURS[cam.capteur]?.label || "capteur inconnu"}, ISO confortable jusqu’à ${cam.isoMax}).`,
+    `Objectifs disponibles : ${camLenses(cam).map(l=>l.nom).join(", ") || "inconnus"}.`,
+    `Thèmes autorisés : ${state.themes.map(t=>THEMES[t]).join(", ")}. Difficultés autorisées : ${state.levels.map(n=>LEVELS[n]).join(", ")}.`,
+    `Défis récents à ne pas répéter : ${state.history.slice(-15).map(h=>h.titre).join(" ; ") || "aucun"}.`
+  ];
+  return lignes.join("\n");
+}
+const IA_SCHEMA = {type:"OBJECT", properties:{
+  titre:{type:"STRING", description:"Titre court et accrocheur, 2 à 6 mots"},
+  theme:{type:"STRING", enum:Object.keys(THEMES)},
+  difficulte:{type:"INTEGER", description:"1 facile, 2 moyen, 3 costaud"},
+  brief:{type:"STRING", description:"Consigne concrète en 1 à 3 phrases, tutoiement"},
+  astuce:{type:"STRING", description:"Une astuce technique ou de composition, 1 à 2 phrases"},
+  reglages:{type:"ARRAY", items:{type:"STRING"}, description:"2 à 4 réglages courts, ex. f/2.8, 1/250 s, ISO auto"},
+  objectif:{type:"STRING", enum:["grand","normal","portrait","tele","lumineux","macro"]},
+  pourquoi:{type:"STRING", description:"Pourquoi ce défi colle au moment présent, une phrase courte"}
+}, required:["titre","theme","difficulte","brief","astuce","reglages","objectif","pourquoi"]};
+async function defiIA(){
+  const btn = document.getElementById("iaBtn"), err = document.getElementById("iaErr");
+  btn.disabled = true; btn.textContent = "L’IA réfléchit…"; err.hidden = true;
+  const consigne = `Tu es un coach photo bienveillant. Invente UN défi photo original pour un photographe amateur, en français, en le tutoyant.
+Il doit être concret, faisable tout de suite dans la situation décrite, et différent des défis classiques et des défis récents.
+Respecte les thèmes et difficultés autorisés. Donne des réglages adaptés à l’appareil, au capteur et à la lumière.
+Personnes reconnaissables : seulement avec leur accord ; pour l’enfant, privilégie des images où son visage n’est pas reconnaissable.
+Typographie française (apostrophe ’, guillemets « »).
+
+Contexte :
+${iaContexte()}`;
+  try{
+    const data = await geminiFetch(`${ia.modele || "models/gemini-2.5-flash"}:generateContent`, {method:"POST", body:JSON.stringify({
+      contents:[{role:"user", parts:[{text:consigne}]}],
+      generationConfig:{temperature:1.1, responseMimeType:"application/json", responseSchema:IA_SCHEMA}
+    })});
+    const texte = (data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+    let d; try{ d = JSON.parse(texte); }catch(e){ throw new Error("Réponse de l’IA illisible : réessaie."); }
+    const court = (v, n) => String(v||"").trim().slice(0, n);
+    if(!court(d.titre,1) || !court(d.brief,1)) throw new Error("Réponse de l’IA incomplète : réessaie.");
+    current = {id:"ia-" + Date.now().toString(36), ia:true,
+      t: THEMES[d.theme] ? d.theme : "technique", n: Math.min(3, Math.max(1, parseInt(d.difficulte)||2)),
+      titre: court(d.titre, 70), brief: court(d.brief, 500), astuce: court(d.astuce, 300), pourquoi: court(d.pourquoi, 200),
+      reg: (Array.isArray(d.reglages) ? d.reglages : []).slice(0,5).map(r=>court(r,40)).filter(Boolean),
+      obj: ["grand","normal","portrait","tele","lumineux","macro"].includes(d.objectif) ? d.objectif : undefined};
+    currentBonus = BONUS[Math.floor(Math.random()*BONUS.length)];
+    render();
+  }catch(e){ err.textContent = e.message; err.hidden = false; }
+  btn.disabled = false; btn.textContent = "✨ Défi IA";
+}
+document.getElementById("iaBtn").onclick = defiIA;
+document.getElementById("iaSave").onclick = iaTester;
+document.getElementById("iaModel").onchange = e=>{ ia.modele = e.target.value; iaSave(); iaStatus(`Modèle ${ia.modele.replace("models/","")} choisi.`, "ok"); };
+document.getElementById("iaClear").onclick = ()=>{
+  if(!confirm("Effacer ta clé API Gemini de ce navigateur ?")) return;
+  ia = {cle:"", modele:""}; try{ localStorage.removeItem(IA_KEY); }catch(e){}
+  document.getElementById("iaModelRow").hidden = true; iaStatus("Clé effacée."); iaRender();
+};
+iaRender();
 document.getElementById("done").onclick = ()=>{
   if(!current) return;
   state.history.push({id:current.id, titre:current.titre, date:dayKey()});
