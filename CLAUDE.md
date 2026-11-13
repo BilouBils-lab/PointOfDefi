@@ -46,10 +46,11 @@ Tout tient dans `index.html` : HTML, CSS et JavaScript inline, sans build ni dé
 
 ## Défis IA (Gemini)
 
-- Clé API saisie par le propriétaire dans l'app, stockée uniquement dans `localStorage` (clé `defis-photo-gemini` : `{cle, modele}`). Jamais de clé dans le dépôt ni dans le code.
+- Clé API saisie par le propriétaire dans l'app, stockée uniquement dans `localStorage` (clé `defis-photo-gemini` : `{cle, modele, modeles}`). Jamais de clé dans le dépôt ni dans le code.
 - Appels directs depuis le navigateur à `generativelanguage.googleapis.com/v1beta/` (en-tête `x-goog-api-key`) via `geminiFetch()` (messages d'erreur en français : clé refusée, quota, modèle indisponible, réseau).
 - `iaTester()` liste les modèles et `classeModeles()` choisit un « flash » stable récent (pas de nom de modèle figé) ; modifiable dans `#iaModel`.
 - `defiIA()` : consigne + `iaContexte()` (date, créneau, lieu sans coordonnées, météo, lumière, appareil, objectifs, thèmes, difficultés, 15 derniers défis), réponse JSON imposée par `IA_SCHEMA`, validée et tronquée, puis affichée comme un défi (`ia:true`, champ `pourquoi`).
+- `genererAvecSecours()` : sur une surcharge (5xx, délai dépassé), un nouvel essai après 2 s puis jusqu'à 2 autres modèles de `ia.modeles` (liste enregistrée au test de la clé, ou récupérée si absente) ; sur 429 ou 404, modèle suivant directement ; clé refusée ou réseau : arrêt.
 - Le texte venant de l'IA est **toujours échappé** au rendu (`E = esc` dans `render()`), comme les titres de l'historique.
 
 ## Conventions
