@@ -30,6 +30,14 @@ Le défi écarté ne revient pas tout de suite (aujourd'hui pour le lieu et la m
 
 Chaque défi indique un brief, une astuce, des réglages conseillés (ouverture, vitesse, ISO…) et une note adaptée à l'appareil choisi.
 
+## Près de chez moi
+
+Le défi, c'est aussi de réussir une belle image **là où tu es** : ta rue, le canal tout proche, ton quartier, ta maison.
+
+- Thème **« Près de chez moi »** : ma rue comme un touriste, le canal en lignes, reflets du canal, le canal la nuit, les passants du canal, mon quartier en 10 minutes, les fenêtres de ma rue, la nature qui s'invite, depuis le pont.
+- Dans **« Mes passions »** : minifigurine Lego en voyage, scène de film en Lego, briques en macro, figurine manga en action, figurines dans le monde réel, case de manga, la pile de mangas.
+- **Rayon de déplacement** (Réglages → « Jusqu'où aller pour un défi ? ») : à pied (1,5 km, par défaut), vélo (5 km) ou voiture (15 km). Les défis liés à un lieu de Nancy (place Stanislas, Pépinière, Craffe…) ne sont proposés que s'ils sont dans ce rayon, avec la distance et le temps de marche. Il faut pour cela autoriser la position (« Utiliser ma position ») : elle reste sur le téléphone et ne sert qu'à calculer les distances.
+
 ## Couleurs & objets
 
 Un thème de défis **qui changent à chaque tirage** : la couleur, l'objet, la forme ou la lettre est tirée au sort. « Chasse au rouge », « Une touche de jaune », « Ton sur ton », « La chaise sous tous les angles », « Collection de vélos », « Le portrait d'une horloge », « Formes : les spirales », « Lettre trouvée : Y », couleurs complémentaires, arc-en-ciel… et, par ciel bleu, « Ombres d'objets » ou « Ciel bleu, aplat graphique ».
@@ -113,7 +121,7 @@ Toutes tes données (historique et notes, matériel, planning) sont enregistrée
 
 ## Réglages
 
-- **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Couleurs & objets, Mes passions, Technique pure.
+- **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Couleurs & objets, Près de chez moi, Mes passions, Technique pure.
 - **Difficulté** : Facile, Moyen, Costaud.
 - **Appareil du jour** : choisis l'appareil que tu emportes parmi ceux de ton matériel.
 
