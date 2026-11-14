@@ -380,6 +380,7 @@ a{color:var(--accent-ink); text-underline-offset:2px}
     <section class="sec" id="chgQ" hidden>
       <h3>3 questions rapides <span style="text-transform:none; letter-spacing:0; font-weight:500">(pré-remplies, corrige si besoin)</span></h3>
       <div id="chgQBody"></div>
+      <label class="check"><input type="checkbox" id="chgActu"> <span id="chgActuTxt">📅 Tenir compte de l’actualité près de chez moi</span></label>
     </section>
     <p class="hint" id="chgCost"></p>
     <p class="ia-status err" id="chgErr" aria-live="polite" hidden></p>
@@ -411,8 +412,10 @@ a{color:var(--accent-ink); text-underline-offset:2px}
         <button class="btn" id="iaSave">Enregistrer et tester</button>
       </div>
       <div class="ia-key" id="iaModelRow" hidden><select id="iaModel" aria-label="Modèle Gemini"></select></div>
+      <label class="f" style="margin:.6rem 0 .2rem">Ce que j’aime photographier, ce que j’ai sous la main
+        <textarea id="interets" rows="3" maxlength="300" style="font:inherit; font-size:1rem; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:.55rem .65rem; resize:vertical"></textarea></label>
       <p class="ia-status" id="iaStatus" aria-live="polite"></p>
-      <p class="hint" style="font-size:.8125rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom. <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
+      <p class="hint" style="font-size:.8125rem">Ta clé reste enregistrée dans ce navigateur uniquement : elle n’est jamais publiée ni envoyée ailleurs qu’à Google. Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Avec l’offre gratuite, Google peut utiliser les échanges pour améliorer ses services : l’app n’envoie ni ta position précise ni ton nom (pour l’actualité, seulement le nom de ta commune). <button class="linkbtn" id="iaClear">Effacer ma clé</button></p>
     </section>
     <section class="sec" id="instSec">
       <h3>Installer l’app</h3>
@@ -433,14 +436,14 @@ a{color:var(--accent-ink); text-underline-offset:2px}
     </section>
     <section class="sec">
       <h3>À propos</h3>
-      <p class="hint">Ta position reste sur ton appareil : seules des coordonnées arrondies (à environ 1 km) sont envoyées au service météo gratuit Open-Meteo.</p>
+      <p class="hint">Ta position exacte reste sur ton appareil : elle ne sert qu’à calculer les distances. Seules des coordonnées arrondies (à environ 1 km) sont envoyées au service météo gratuit Open-Meteo et à OpenStreetMap pour connaître le nom de ta commune.</p>
       <p class="hint">Pour les photos au travail ou de passants, demande toujours l’accord des personnes reconnaissables.</p>
     </section>
   </div>
 </dialog>
 
 <script>
-const VERSION = "22"; // à augmenter à chaque PR fusionnée (numéro seul)
+const VERSION = "23"; // à augmenter à chaque PR fusionnée (numéro seul)
 const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", couleurs:"Couleurs & objets", proche:"Près de chez moi", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
@@ -627,6 +630,8 @@ if(!state.planning) state.planning = planningDepuisRythme(state.rythme);
 if(!state.themesMaison){ if(!state.themes.includes("maison")) state.themes.push("maison"); state.themesMaison = true; }
 if(!state.themesProche){ if(!state.themes.includes("proche")) state.themes.push("proche"); state.themesProche = true; }
 if(!state.distance) state.distance = "pied";
+if(typeof state.interets !== "string") state.interets = "Mes Lego, mes figurines manga, mes mangas, ma rue, le canal près de chez moi, les objets du quotidien";
+if(typeof state.actu !== "boolean") state.actu = true;
 if(!state.themesCouleurs){ if(!state.themes.includes("couleurs")) state.themes.push("couleurs"); state.themesCouleurs = true; }
 for(let d=0; d<7; d++) if(!Array.isArray(state.planning[d])) state.planning[d] = [];
 state.gear.lenses = (Array.isArray(state.gear.lenses) ? state.gear.lenses : []).filter(l=>l && l.id).map(l=>({...l, cams:Array.isArray(l.cams) ? l.cams : []}));
@@ -969,6 +974,23 @@ async function loadContext(pos){
   if(current?.lieu && !fait && !lieuOk(current)){ renderCtx(); pickRandom(); return; } // défi choisi avant de connaître la position : trop loin, remplacé sans coût
   renderCtx(); render();
 }
+// Commune et quartier : demandés à OpenStreetMap (Nominatim) avec la position arrondie à ~1 km, gardés 30 jours
+let commune = null;
+try{ commune = JSON.parse(localStorage.getItem("defis-photo-commune")); }catch(e){}
+async function trouverCommune(lat, lon){
+  lat = Math.round(lat*100)/100; lon = Math.round(lon*100)/100;
+  if(commune && commune.lat===lat && commune.lon===lon && Date.now()-commune.t < 30*86400000) return;
+  try{
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1&accept-language=fr`);
+    if(!r.ok) return;
+    const a = (await r.json()).address || {};
+    const nom = a.city || a.town || a.village || a.municipality;
+    if(!nom) return;
+    commune = {lat, lon, t:Date.now(), nom:String(nom).slice(0,60), quartier:String(a.suburb || a.neighbourhood || a.quarter || "").slice(0,60)};
+    try{ localStorage.setItem("defis-photo-commune", JSON.stringify(commune)); }catch(e){}
+    renderCtx();
+  }catch(e){}
+}
 // Position exacte : jamais enregistrée ni envoyée, seulement pour calculer les distances sur le téléphone
 let posPrecise = null;
 const DISTANCES = {pied:{label:"À pied · 1,5 km", km:1.5}, velo:{label:"Vélo · 5 km", km:5}, voiture:{label:"Voiture · 15 km", km:15}};
@@ -985,7 +1007,7 @@ function locate(){
   if(!navigator.geolocation){ ctxSource="defaut"; loadContext(NANCY); return; }
   ctxStatus = "chargement"; renderCtx();
   navigator.geolocation.getCurrentPosition(
-    p=>{ state.geo="oui"; save(); ctxSource="gps"; posPrecise = {lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy}; loadContext({lat:p.coords.latitude, lon:p.coords.longitude}); },
+    p=>{ state.geo="oui"; save(); ctxSource="gps"; posPrecise = {lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy}; trouverCommune(p.coords.latitude, p.coords.longitude); loadContext({lat:p.coords.latitude, lon:p.coords.longitude}); },
     ()=>{ state.geo="non"; save(); ctxSource="refus"; loadContext(NANCY); },
     {maximumAge:15*60000, timeout:10000}
   );
@@ -1004,9 +1026,9 @@ function renderCtx(){
   const loc = ctxSource==="gps" ? "" : `<button class="pill ghost" id="locate">Utiliser ma position</button>`;
   if(ctxStatus==="chargement"){ el.innerHTML = mom + `<span class="pill">Météo…</span>`; bindLocate(); return; }
   if(ctxStatus==="erreur"){ el.innerHTML = mom + `<span class="pill">Météo indisponible</span><button class="pill ghost" id="locate">Réessayer</button>`; bindLocate(); return; }
-  const lieu = ctxSource==="gps" ? (posPrecise ? "📍 Ta position" : ctx.nancy ? "Nancy" : "Ta position") : "Nancy";
+  const lieu = ctxSource==="gps" ? (posPrecise ? `📍 ${commune?.nom ? esc(commune.nom) : "Ta position"}` : ctx.nancy ? "Nancy" : "Ta position") : "Nancy";
   const h = sunHint();
-  const pills = [`<b>${lieu}</b>`, `${ctx.temp}° · ${CTX_LABEL[ctx.cat]}${ctx.vent ? " · vent" : ""}`, CTX_LABEL[ctx.light] + (h ? ` · ${h}` : "")];
+  const pills = [`<b>${lieu}</b>`, `${ctx.temp}° · ${CTX_LABEL[ctx.cat]}${ctx.vent ? " · vent" : ""}`, h && h.startsWith(CTX_LABEL[ctx.light]) ? h : CTX_LABEL[ctx.light] + (h ? ` · ${h}` : "")];
   el.innerHTML = mom + pills.map(p=>`<span class="pill">${p}</span>`).join("") + loc;
   bindLocate();
 }
@@ -1214,6 +1236,7 @@ function render(){
     ${whyHtml}
     <dl class="facts">
       ${c.lieu ? `<div><dt>Lieu</dt><dd>${lieuTexte(c)}</dd></div>` : ""}
+      ${c.ia && c.evenement ? `<div><dt>Actualité</dt><dd>📅 ${esc(c.evenement)}${c.source && /^https:\/\//.test(c.source.url||"") ? ` · <a href="${esc(c.source.url)}" target="_blank" rel="noopener noreferrer">source</a>` : ""}</dd></div>` : ""}
       <div><dt>Astuce</dt><dd>${E(c.astuce)}</dd></div>
       <div><dt>Matériel</dt><dd><b>${gear.titre}</b> · ${gear.texte}</dd></div>
       <div><dt>Bonus, si tu veux corser</dt><dd>${currentBonus}</dd></div>
@@ -1450,8 +1473,29 @@ function iaContexte(extra={}){
   ];
   for(let i = lignes.length - 1; i >= 0; i--) if(!lignes[i]) lignes.splice(i, 1);
   if(extra.q) lignes.push(`Réponses du photographe : lumière ${Q.lumiere.ia[extra.q.lumiere]} ; temps disponible ${Q.temps.ia[extra.q.temps]} ; envie ${Q.envie.ia[extra.q.envie]}.`);
+  if(state.interets?.trim()) lignes.push(`Ce que le photographe aime photographier ou a sous la main : ${state.interets.trim().slice(0,300)}.`);
+  if(commune?.nom) lignes.push(`Commune : ${commune.nom}${commune.quartier ? ` (quartier ${commune.quartier})` : ""}.`);
+  if(extra.actu?.texte) lignes.push(`Actualité locale du jour, trouvée par une recherche Google (si un événement est faisable dans le rayon et le créneau, construis le défi autour en le nommant dans le champ evenement ; sinon ignore-la) :\n${extra.actu.texte}`);
   if(extra.raison && extra.precedent) lignes.push(`Le défi précédent « ${extra.precedent} » a été écarté : ${RAISONS[extra.raison].ia}.`);
   return lignes.join("\n");
+}
+// Événements du jour près de chez soi : recherche Google intégrée à Gemini (texte libre, pas de JSON avec les outils)
+async function actualiteLocale(){
+  const lieu = commune?.nom || "Nancy", km = (DISTANCES[state.distance]||DISTANCES.pied).km;
+  try{ const c = JSON.parse(localStorage.getItem("defis-photo-actu")); if(c && c.date===dayKey() && c.lieu===lieu && Date.now()-c.t < 3*3600000) return c; }catch(e){}
+  const now = new Date();
+  const question = `Nous sommes le ${now.toLocaleDateString("fr-FR",{weekday:"long", day:"numeric", month:"long", year:"numeric"})}, il est ${hhmm(now)}.
+Recherche les événements publics et photogéniques qui ont lieu aujourd’hui ou ce soir à ${lieu} (Meurthe-et-Moselle) ou à moins de ${Math.max(3, km)} km : fêtes, défilés, illuminations, lanternes, marchés de Noël, brocantes, expositions en plein air, spectacles de rue.
+Ne retiens que des événements confirmés pour cette date précise. Réponds en français, au plus 4 lignes au format « Nom — lieu — horaire ». Si tu ne trouves rien de fiable, réponds exactement AUCUN.`;
+  const data = await geminiFetch(`${ia.modele || "models/gemini-2.5-flash"}:generateContent`, {method:"POST", delai:40000,
+    body:JSON.stringify({contents:[{role:"user", parts:[{text:question}]}], tools:[{google_search:{}}], generationConfig:{temperature:.2}})});
+  const cand = data.candidates?.[0] || {};
+  let texte = (cand.content?.parts||[]).map(p=>p.text||"").join("").trim().slice(0, 800);
+  if(/^\s*AUCUN/i.test(texte)) texte = "";
+  const web = (cand.groundingMetadata?.groundingChunks||[]).map(g=>g.web).filter(w=>w && /^https:\/\//.test(w.uri||""));
+  const res = {date:dayKey(), lieu, t:Date.now(), texte, source: web[0] ? {url:web[0].uri, titre:String(web[0].title||"source").slice(0,80)} : null};
+  try{ localStorage.setItem("defis-photo-actu", JSON.stringify(res)); }catch(e){}
+  return res;
 }
 const IA_SCHEMA = {type:"OBJECT", properties:{
   titre:{type:"STRING", description:"Titre court et accrocheur, 2 à 6 mots"},
@@ -1461,7 +1505,8 @@ const IA_SCHEMA = {type:"OBJECT", properties:{
   astuce:{type:"STRING", description:"Une astuce technique ou de composition, 1 à 2 phrases"},
   reglages:{type:"ARRAY", items:{type:"STRING"}, description:"2 à 4 réglages courts, ex. f/2.8, 1/250 s, ISO auto"},
   objectif:{type:"STRING", enum:["grand","normal","portrait","tele","lumineux","macro"]},
-  pourquoi:{type:"STRING", description:"Pourquoi ce défi colle au moment présent, une phrase courte"}
+  pourquoi:{type:"STRING", description:"Pourquoi ce défi colle au moment présent, une phrase courte"},
+  evenement:{type:"STRING", description:"Nom de l’événement de l’actualité locale utilisé pour le défi, ou chaîne vide"}
 }, required:["titre","theme","difficulte","brief","astuce","reglages","objectif","pourquoi"]};
 // Surcharge (5xx) : un nouvel essai sur le même modèle, puis d'autres modèles de la clé.
 // Quota (429) ou modèle disparu (404) : modèle suivant directement. Clé refusée ou réseau : on s'arrête.
@@ -1497,6 +1542,7 @@ async function defiIA(btn, extra={}){
   const consigne = `Tu es un coach photo bienveillant. Invente UN défi photo original pour un photographe amateur, en français, en le tutoyant.
 Il doit être concret, faisable tout de suite dans la situation décrite, et différent des défis classiques et des défis récents.
 Respecte les thèmes et difficultés autorisés. Donne des réglages adaptés à l’appareil, au capteur et à la lumière.
+Privilégie l’environnement immédiat du photographe (sa rue, son quartier, sa maison) et ses centres d’intérêt plutôt que les monuments.
 Respecte strictement les réponses du photographe : sans « soleil direct », ne base jamais le défi sur le soleil, l’heure dorée, les rayons ou les ombres marquées. Adapte l’ampleur du défi au temps disponible.
 Personnes reconnaissables : seulement avec leur accord ; pour l’enfant, privilégie des images où son visage n’est pas reconnaissable.
 Typographie française (apostrophe ’, guillemets « »).
@@ -1513,7 +1559,8 @@ ${iaContexte(extra)}`;
       t: THEMES[d.theme] ? d.theme : "technique", n: Math.min(3, Math.max(1, parseInt(d.difficulte)||2)),
       titre: court(d.titre, 70), brief: court(d.brief, 500), astuce: court(d.astuce, 300), pourquoi: court(d.pourquoi, 200),
       reg: (Array.isArray(d.reglages) ? d.reglages : []).slice(0,5).map(r=>court(r,40)).filter(Boolean),
-      obj: ["grand","normal","portrait","tele","lumineux","macro"].includes(d.objectif) ? d.objectif : undefined},
+      obj: ["grand","normal","portrait","tele","lumineux","macro"].includes(d.objectif) ? d.objectif : undefined,
+      ...(court(d.evenement,1) && extra.actu?.texte ? {evenement: court(d.evenement, 100), source: extra.actu.source} : {})},
       BONUS[Math.floor(Math.random()*BONUS.length)]);
   }
 }
@@ -1833,7 +1880,7 @@ function questionsParDefaut(){
 }
 let chg = {};
 function openChange(libre){
-  chg = {libre:!!libre, raison:null, src:"liste", q:questionsParDefaut()};
+  chg = {libre:!!libre, raison:null, src:"liste", q:questionsParDefaut(), actuEchec:null};
   renderChange(); openSheet(document.getElementById("chgDlg"));
 }
 function renderChange(){
@@ -1850,6 +1897,8 @@ function renderChange(){
     : `<button class="chip" aria-pressed="true">Défi de la liste</button>`;
   document.getElementById("chgNoKey").hidden = !!ia.cle;
   document.getElementById("chgQ").hidden = chg.src!=="ia";
+  document.getElementById("chgActu").checked = state.actu;
+  document.getElementById("chgActuTxt").textContent = `📅 Tenir compte de l’actualité à ${commune?.nom || "Nancy"} et autour (recherche Google)`;
   document.getElementById("chgQBody").innerHTML = Object.entries(Q).map(([k,q])=>`<div class="qgroup"><span>${q.titre}</span>${seg(k, q.choix, chg.q[k])}</div>`).join("");
   const cout = chg.raison ? coutChange(chg.raison) : null, g = gratuitsRestants(), j = jokersRestants();
   document.getElementById("chgCost").textContent = libre ? "Défi réalisé : le suivant est offert."
@@ -1871,8 +1920,14 @@ async function changerDefi(){
   }
   try{
     if(chg.src==="ia" && ia.cle){
-      go.disabled = true; go.textContent = "L’IA invente ton défi…"; err.hidden = true;
-      await defiIA(go, {q:chg.q, raison: libre ? null : raison, precedent: ancien?.titre});
+      go.disabled = true; err.hidden = true;
+      let actu = null;
+      if(state.actu){
+        go.textContent = "Recherche de l’actualité…";
+        try{ actu = await actualiteLocale(); }catch(e){ actu = null; chg.actuEchec = e.message; } // sans actualité, on continue
+      }
+      go.textContent = "L’IA invente ton défi…";
+      await defiIA(go, {q:chg.q, raison: libre ? null : raison, precedent: ancien?.titre, actu});
     } else pickRandom({facile: raison==="difficile"});
   }catch(e){
     if(!libre && ancien && !ancien.ia) delete state.exclus[ancien.id]; // échec : rien n'est consommé
@@ -1884,6 +1939,7 @@ async function changerDefi(){
     state.changes = liste;
   }
   save(); render();
+  if(chg.actuEchec) document.getElementById("quota").textContent = "Actualité indisponible pour le moment : défi créé sans elle.";
   document.getElementById("chgDlg").close();
 }
 document.getElementById("change").onclick = ()=>openChange(false);
@@ -1893,6 +1949,9 @@ document.getElementById("chgDlg").addEventListener("click", e=>{
   if(sg){ if(sg.dataset.seg==="src") chg.src = sg.dataset.val; else chg.q[sg.dataset.seg] = sg.dataset.val; renderChange(); }
 });
 document.getElementById("chgGo").onclick = changerDefi;
+document.getElementById("chgActu").onchange = e=>{ state.actu = e.target.checked; save(); };
+document.getElementById("interets").value = state.interets;
+document.getElementById("interets").addEventListener("input", e=>{ state.interets = e.target.value.slice(0,300); save(); });
 document.getElementById("chgIci").onclick = ()=>{ document.getElementById("chgDlg").close(); openIci(); };
 
 /* ---------- Tiroir « Là, maintenant, je suis… » ---------- */
@@ -1930,7 +1989,8 @@ renderChips(); renderMeta(); renderTodayPlan();
 {
   const e = state.encours, txt = v => String(v ?? "");
   const c = e && e.date===dayKey() ? (e.ia && typeof e.ia==="object"
-    ? {...e.ia, ia:true, t: THEMES[e.ia.t] ? e.ia.t : "technique", n: Math.min(3, Math.max(1, parseInt(e.ia.n)||2)), titre:txt(e.ia.titre), brief:txt(e.ia.brief), astuce:txt(e.ia.astuce), pourquoi:txt(e.ia.pourquoi), reg: Array.isArray(e.ia.reg) ? e.ia.reg.map(txt) : []}
+    ? {...e.ia, ia:true, t: THEMES[e.ia.t] ? e.ia.t : "technique", n: Math.min(3, Math.max(1, parseInt(e.ia.n)||2)), titre:txt(e.ia.titre), brief:txt(e.ia.brief), astuce:txt(e.ia.astuce), pourquoi:txt(e.ia.pourquoi), reg: Array.isArray(e.ia.reg) ? e.ia.reg.map(txt) : [], evenement: e.ia.evenement ? txt(e.ia.evenement).slice(0,100) : undefined,
+      source: e.ia.source && /^https:\/\//.test(e.ia.source.url||"") ? {url:txt(e.ia.source.url), titre:txt(e.ia.source.titre)} : undefined}
     : (()=>{ const d = D.find(x=>x.id===e.id); return d && d.tpl ? instancier(d, e.var || {}) : d; })()) : null;
   if(c && c.titre){ current = c; currentBonus = e.bonus || BONUS[0]; render(); } else pickToday();
 }

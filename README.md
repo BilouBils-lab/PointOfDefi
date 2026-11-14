@@ -94,6 +94,12 @@ L'**iPhone 13 Pro** fait partie du matériel, avec ses trois objectifs : ×0,5 (
 - les défis inventés par l'IA tiennent compte du smartphone ;
 - le coach ne compare pas l'ouverture (fixe sur un téléphone) et affiche la focale équivalente.
 
+## Des défis IA personnels et d'actualité
+
+- **Ce que tu aimes photographier** (Réglages → Défis inventés par l'IA) : par exemple « mes Lego, mes figurines manga, le canal, ma rue ». L'IA s'en sert pour des défis à ta mesure, près de chez toi plutôt qu'au pied des monuments.
+- **L'actualité près de chez toi** : quand tu fais inventer un défi, l'IA peut d'abord faire une **recherche Google** sur les événements du jour dans ta commune et autour (fête des lanternes, marché de Noël, brocante…), puis construire le défi autour. La carte affiche alors l'événement et un lien vers la source. La case « Tenir compte de l'actualité » permet de le désactiver.
+- La commune vient d'OpenStreetMap (position arrondie à environ 1 km) ; Google ne reçoit que son nom.
+
 ## Coach photo
 
 Avec la clé Gemini, sous la carte du défi, **📷 Prendre la photo** (l'appareil photo s'ouvre directement) ou **🖼️ Galerie** envoie ta photo à un coach IA, pour progresser :
