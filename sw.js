@@ -1,5 +1,5 @@
 /* Service worker de Défis photo : l'app fonctionne hors connexion et charge toujours la dernière version quand il y a du réseau. */
-const CACHE = "defis-photo-22"; // à changer à chaque version (comme VERSION dans index.html)
+const CACHE = "defis-photo-23"; // à changer à chaque version (comme VERSION dans index.html)
 const COEUR = ["./", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e=>{
