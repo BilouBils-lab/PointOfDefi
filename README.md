@@ -23,12 +23,16 @@ Le défi écarté ne revient pas tout de suite (aujourd'hui pour le lieu et la m
 
 ## Ce que fait l'app
 
-- **Défi du jour** : le même défi pour toute la journée, choisi automatiquement selon la date.
+- **Défi du jour** : le même défi pour toute la journée, choisi selon la date parmi tes thèmes, en tenant compte de la météo (pas de défi de nuages par ciel bleu).
 - **Changer de défi / Défi suivant** : choisit un défi adapté à l'endroit où tu es, à la météo et à la lumière du moment, en évitant ceux faits récemment.
 - **Je l'ai fait** : enregistre le défi dans ton historique et fait avancer ta série de jours d'affilée.
 - **Contrainte bonus** : une règle en plus (format vertical, noir et blanc, mise au point manuelle…) pour corser le défi.
 
 Chaque défi indique un brief, une astuce, des réglages conseillés (ouverture, vitesse, ISO…) et une note adaptée à l'appareil choisi.
+
+## Couleurs & objets
+
+Un thème de défis **qui changent à chaque tirage** : la couleur, l'objet, la forme ou la lettre est tirée au sort. « Chasse au rouge », « Une touche de jaune », « Ton sur ton », « La chaise sous tous les angles », « Collection de vélos », « Le portrait d'une horloge », « Formes : les spirales », « Lettre trouvée : Y », couleurs complémentaires, arc-en-ciel… et, par ciel bleu, « Ombres d'objets » ou « Ciel bleu, aplat graphique ».
 
 ## Défis selon le lieu, la météo et la lumière
 
@@ -109,7 +113,7 @@ Toutes tes données (historique et notes, matériel, planning) sont enregistrée
 
 ## Réglages
 
-- **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Mes passions, Technique pure.
+- **Thèmes** : Nancy, Boulot, Avec mon fils, À la maison, Couleurs & objets, Mes passions, Technique pure.
 - **Difficulté** : Facile, Moyen, Costaud.
 - **Appareil du jour** : choisis l'appareil que tu emportes parmi ceux de ton matériel.
 
