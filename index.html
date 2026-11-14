@@ -438,8 +438,8 @@ a{color:var(--accent-ink); text-underline-offset:2px}
 </dialog>
 
 <script>
-const VERSION = "20"; // à augmenter à chaque PR fusionnée (numéro seul)
-const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", loisirs:"Mes passions", technique:"Technique pure"};
+const VERSION = "21"; // à augmenter à chaque PR fusionnée (numéro seul)
+const THEMES = {nancy:"Nancy", boulot:"Boulot", famille:"Avec mon fils", maison:"À la maison", couleurs:"Couleurs & objets", loisirs:"Mes passions", technique:"Technique pure"};
 const LEVELS = {1:"Facile", 2:"Moyen", 3:"Costaud"};
 const CAPTEURS = {ff:{label:"Plein format", crop:1}, apsc:{label:"APS-C Canon ×1,6", crop:1.6},
   apsc15:{label:"APS-C ×1,5 (Nikon, Sony, Fuji)", crop:1.5}, m43:{label:"Micro 4/3 ×2", crop:2}, phone:{label:"Smartphone (focales équivalentes)", crop:1}, autre:{label:"Autre", crop:1}};
@@ -548,7 +548,7 @@ const D = [
 
  {id:"m1",quand:["travail","pause","perso","libre","tele","pausemaison"],obj:"lumineux",t:"technique",ou:"in",pref:["pluie"],req:["pluie"],n:1,titre:"Gouttes sur la vitre",brief:"Il pleut : colle-toi à une fenêtre et fais la mise au point sur les gouttes, avec les lumières de la rue floues derrière.",astuce:"Mise au point manuelle sur la vitre, objectif presque contre le verre pour éviter les reflets.",reg:["f/2","MF","Au plus près"]},
  {id:"m2",quand:["pause","libre","pausemaison"],obj:"normal",t:"technique",ou:"out",pref:["pluie"],req:["pluie"],n:2,titre:"Sous les parapluies",brief:"Depuis un porche ou un abri, photographie la rue sous la pluie : parapluies colorés, reflets sur les pavés, silhouettes pressées.",astuce:"Reste à l’abri pour déclencher et protège l’appareil avec le pare-soleil.",reg:["1/250 s","f/2.8","ISO auto"]},
- {id:"m3",quand:["pause","perso","libre","pausemaison"],obj:"grand",t:"technique",ou:"out",pref:["pluie","nuageux"],n:1,titre:"Le monde dans une flaque",brief:"Après la pluie, trouve une flaque et photographie le ciel, un arbre ou un bâtiment qui s’y reflète, appareil presque posé au sol.",astuce:"Plus tu es bas, plus la flaque devient un miroir. Essaie ensuite de retourner l’image.",reg:["f/8","Au ras du sol"]},
+ {id:"m3",quand:["pause","perso","libre","pausemaison"],obj:"grand",t:"technique",ou:"out",pref:["pluie","nuageux"],req:["humide"],n:1,titre:"Le monde dans une flaque",brief:"Après la pluie, trouve une flaque et photographie le ciel, un arbre ou un bâtiment qui s’y reflète, appareil presque posé au sol.",astuce:"Plus tu es bas, plus la flaque devient un miroir. Essaie ensuite de retourner l’image.",reg:["f/8","Au ras du sol"]},
  {id:"m4",quand:["pause","libre","pausemaison"],obj:"normal",t:"technique",ou:"out",pref:["neige"],req:["neige"],mois:[11,12,1,2,3],n:2,titre:"Blanc sur blanc",brief:"Il neige : une image presque entièrement blanche, avec un seul élément sombre (un arbre, un passant, un banc).",astuce:"Le posemètre rend la neige grise : corrige de +1 à +1 2/3 IL.",reg:["Correction +1 IL","f/8"]},
  {id:"m5",quand:["pause","libre","pausemaison"],obj:"normal",t:"technique",ou:"out",pref:["vent"],req:["vent"],n:2,titre:"Le vent se voit",brief:"Montre le vent : un feuillage qui bouge en pose lente pendant que le tronc reste net, ou des cheveux et vêtements qui s’envolent.",astuce:"Appui stable et 1/4 s à 1 s : seul ce qui bouge devient flou.",reg:["Priorité vitesse","1/4 s","f/11","Appui stable"]},
  {id:"m6",quand:["perso","libre"],obj:"portrait",t:"technique",ou:"out",pref:["doree"],n:1,titre:"Lumière dorée",brief:"Profite de l’heure dorée : un sujet (visage, façade, herbes hautes) éclairé par la lumière rasante et chaude du soleil bas.",astuce:"Place le soleil derrière ou sur le côté du sujet pour obtenir un liseré lumineux.",reg:["f/2.8","Balance des blancs Lumière du jour"]},
@@ -562,7 +562,21 @@ const D = [
  {id:"h8",quand:["perso","libre"],obj:"lumineux",t:"maison",ou:"in",pref:["nuit"],n:2,titre:"Plante en clair-obscur",brief:"Une plante de la maison éclairée par une seule lampe sur le côté, sur un fond noir.",astuce:"Éloigne la plante du mur pour que le fond tombe dans le noir.",reg:["f/2.8","Une seule source","Correction −1 IL"]},
  {id:"h9",quand:["tele","pausemaison","perso","libre"],obj:"normal",t:"maison",ou:"in",pref:["clair","doree"],req:["soleil"],n:2,titre:"Ombres de store",brief:"Quand le soleil traverse un store ou un rideau, joue avec les bandes d’ombre et de lumière sur un objet, un mur ou ta main.",astuce:"Expose pour les parties éclairées : les ombres doivent rester bien noires.",reg:["Correction −1 IL","f/5.6"]},
  {id:"h10",quand:["pausemaison","perso"],obj:"normal",t:"maison",ou:"out",n:1,titre:"Le tour du pâté de maisons",brief:"En 15 minutes, fais le tour de ton pâté de maisons et ramène trois photos d’un même détail qui se répète : boîtes aux lettres, portes, plaques de rue.",astuce:"Choisis le détail dès les premiers mètres et n’en change plus.",reg:["Série de 3","15 minutes"]},
- {id:"m7",quand:["pause","perso","libre","pausemaison"],obj:"grand",t:"technique",ou:"out",pref:["nuageux"],n:2,titre:"Ciel dramatique",brief:"Gros nuages menaçants : fais du ciel le sujet principal, avec juste une ligne de toits ou d’arbres en bas de l’image.",astuce:"Sous-expose d’un tiers de diaphragme pour garder le relief des nuages.",reg:["Correction −1/3 IL","f/8","Horizon bas"]}
+ {id:"c1",tpl:1,vars:["couleur"],quand:["pause","pausemaison","libre","fils"],obj:"normal",t:"couleurs",ou:"any",n:1,titre:"Chasse {au_couleur}",brief:"Ramène 5 photos où {le_couleur} domine ou ressort nettement, sur des sujets et dans des lieux différents.",astuce:"La couleur ressort mieux sur un fond neutre (gris, blanc, noir) : cherche le contraste.",reg:["Série de 5","Libre"]},
+ {id:"c2",tpl:1,vars:["couleur"],quand:["pause","pausemaison","libre","perso","fils"],obj:"normal",t:"couleurs",ou:"any",n:2,titre:"Une touche de {couleur}",brief:"Une image presque sans couleur (béton, mur, ciel blanc, gris) où un seul élément {couleur} attire l’œil.",astuce:"Place l’élément coloré sur un tiers et laisse beaucoup d’espace neutre autour.",reg:["Composition minimale"]},
+ {id:"c3",tpl:1,vars:["objet"],quand:["tele","pause","pausemaison","perso","libre","fils"],obj:"normal",t:"couleurs",ou:"any",n:1,titre:"{Le_objet} sous tous les angles",brief:"Choisis {un_objet} et fais-en 5 photos radicalement différentes : de très près, d’en dessous, en contre-jour, en reflet, dans son environnement.",astuce:"Tourne autour avant de déclencher : le premier angle est rarement le meilleur.",reg:["Série de 5"]},
+ {id:"c4",tpl:1,vars:["objet"],quand:["pause","pausemaison","libre","fils"],obj:"normal",t:"couleurs",ou:"any",n:2,titre:"Collection de {objets}",brief:"Photographie 6 {objets} {differents} croisé{es} aujourd’hui, toujours cadré{es} de la même façon, pour une planche façon typologie.",astuce:"Même distance, même angle, même orientation : c’est la répétition qui fait la série.",reg:["Série de 6","Même cadrage"]},
+ {id:"c5",tpl:1,vars:["forme"],quand:["pause","pausemaison","libre","perso","fils"],obj:"normal",t:"couleurs",ou:"any",n:1,titre:"Formes : {les_formes}",brief:"Trouve des {formes} dans la ville ou la maison et fais-en le sujet principal de 3 images : architecture, objets, ombres, reflets…",astuce:"Plus la forme est isolée et nette, plus l’image est forte : simplifie le cadre.",reg:["Série de 3"]},
+ {id:"c6",tpl:1,vars:["lettre"],quand:["pause","pausemaison","libre","perso","fils"],obj:"normal",t:"couleurs",ou:"any",n:2,titre:"Lettre trouvée : {lettre}",brief:"Trouve la lettre {lettre} dessinée par l’architecture, un objet ou une ombre, sans photographier une vraie lettre écrite.",astuce:"Cherche dans les grilles, les branches, les poignées, les pieds de chaise, les câbles…",reg:["Libre"]},
+ {id:"c7",tpl:1,vars:["paire"],quand:["pause","pausemaison","libre","perso","fils"],obj:"normal",t:"couleurs",ou:"any",n:2,titre:"Couleurs complémentaires",brief:"Une image construite sur {paire}, deux couleurs opposées sur le cercle chromatique.",astuce:"Garde les deux couleurs en grandes masses simples : elles se renforcent l’une l’autre.",reg:["Libre"]},
+ {id:"c8",tpl:1,vars:["couleur"],quand:["tele","pausemaison","perso","libre","fils","pause"],obj:"normal",t:"couleurs",ou:"any",n:2,titre:"Ton sur ton",brief:"Un sujet {couleur} sur un fond {couleur} : une image monochrome par la couleur, pas par le noir et blanc.",astuce:"Joue sur les nuances et les matières pour que le sujet se détache quand même.",reg:["Libre"]},
+ {id:"c9",quand:["tele","pause","pausemaison","perso","libre"],obj:"grand",t:"couleurs",ou:"any",n:1,titre:"Un objet, beaucoup de vide",brief:"Un seul petit objet perdu dans un grand espace vide : un mur, le ciel, le sol, une table.",astuce:"L’objet occupe moins d’un dixième de l’image : c’est le vide qui raconte.",reg:["Composition minimale"]},
+ {id:"c10",tpl:1,vars:["objet"],quand:["tele","pause","pausemaison","perso","libre","fils"],obj:"portrait",t:"couleurs",ou:"any",n:2,titre:"Le portrait {d_objet}",brief:"Fais le portrait {d_objet} comme s’il s’agissait d’une personne : un angle, une lumière, un caractère.",astuce:"Approche-toi, isole-le de son décor et cherche son « visage ».",reg:["f/2.8","Arrière-plan flou"]},
+ {id:"c11",quand:["libre"],obj:"normal",t:"couleurs",ou:"any",n:3,titre:"Arc-en-ciel",brief:"Une série de 7 photos, une par couleur de l’arc-en-ciel (rouge, orange, jaune, vert, bleu, indigo, violet), à assembler en dégradé.",astuce:"Garde le même type de sujet (portes, fleurs, voitures…) pour une série encore plus forte.",reg:["Série de 7"]},
+ {id:"c12",quand:["pause","pausemaison","libre","fils"],obj:"normal",t:"couleurs",ou:"out",pref:["clair","doree"],req:["soleil"],n:2,titre:"Ombres d’objets",brief:"Profite du soleil : photographie l’ombre d’un objet plutôt que l’objet lui-même (chaise, vélo, grille, plante).",astuce:"Soleil bas = ombres longues et étirées. Expose pour les zones éclairées.",reg:["Correction −2/3 IL","f/8"]},
+ {id:"c13",quand:["tele","pausemaison","perso","libre","fils"],obj:"lumineux",t:"couleurs",ou:"any",pref:["clair"],n:2,titre:"Transparence",brief:"Verre, eau, plastique : photographie un objet transparent traversé par la lumière.",astuce:"Place la lumière derrière l’objet ; un fond sombre fait briller ses contours.",reg:["f/2.8","Contre-jour"]},
+ {id:"c14",quand:["pause","pausemaison","libre","fils"],obj:"grand",t:"couleurs",ou:"out",pref:["clair"],req:["soleil"],n:1,titre:"Ciel bleu, aplat graphique",brief:"Le ciel est tout bleu : sers-t’en comme d’un fond de studio pour détacher un seul élément (lampadaire, branche, toit, grue, drapeau).",astuce:"Contre-plongée pour n’avoir que du ciel derrière ; sous-expose d’un tiers pour saturer le bleu.",reg:["Correction −1/3 IL","Contre-plongée"]},
+ {id:"m7",quand:["pause","perso","libre","pausemaison"],obj:"grand",t:"technique",ou:"out",pref:["nuageux"],req:["nuageux"],n:2,titre:"Ciel dramatique",brief:"Gros nuages menaçants : fais du ciel le sujet principal, avec juste une ligne de toits ou d’arbres en bas de l’image.",astuce:"Sous-expose d’un tiers de diaphragme pour garder le relief des nuages.",reg:["Correction −1/3 IL","f/8","Horizon bas"]}
 ];
 
 const BONUS = ["Format vertical 4:5 pour Instagram","Mise au point manuelle uniquement","Dix photos maximum","Aucun visage reconnaissable","Uniquement en noir et blanc","Avant 9 h ou après 17 h","Une seule couleur dominante","Au moins une photo en contre-plongée"];
@@ -593,6 +607,7 @@ function planningDepuisRythme(r){
 if(!state.planning) state.planning = planningDepuisRythme(state.rythme);
 // Nouveau thème « À la maison » : activé une fois pour les réglages enregistrés avant son ajout
 if(!state.themesMaison){ if(!state.themes.includes("maison")) state.themes.push("maison"); state.themesMaison = true; }
+if(!state.themesCouleurs){ if(!state.themes.includes("couleurs")) state.themes.push("couleurs"); state.themesCouleurs = true; }
 for(let d=0; d<7; d++) if(!Array.isArray(state.planning[d])) state.planning[d] = [];
 state.gear.lenses = (Array.isArray(state.gear.lenses) ? state.gear.lenses : []).filter(l=>l && l.id).map(l=>({...l, cams:Array.isArray(l.cams) ? l.cams : []}));
 if(!Array.isArray(state.history)) state.history = [];
@@ -907,7 +922,7 @@ async function fetchMeteo(lat, lon){
   try{ const c = JSON.parse(localStorage.getItem(METEO_KEY));
     if(c && c.lat===lat && c.lon===lon && Date.now()-c.t < 30*60000) return c.data; }catch(e){}
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
-    `&current=temperature_2m,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=auto&forecast_days=1`;
+    `&current=temperature_2m,weather_code,wind_speed_10m&daily=sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=1&past_days=1`;
   const ac = new AbortController(); const timer = setTimeout(()=>ac.abort(), 8000);
   try{
     const r = await fetch(url,{signal:ac.signal}); if(!r.ok) throw new Error(r.status);
@@ -921,11 +936,15 @@ async function loadContext(pos){
   ctxStatus = "chargement"; renderCtx();
   try{
     const d = await fetchMeteo(lat, lon);
-    const sr = new Date(d.daily.sunrise[0]).getTime(), ss = new Date(d.daily.sunset[0]).getTime();
+    const k = d.daily.sunrise.length - 1; // aujourd'hui (la veille est en premier avec past_days=1)
+    const sr = new Date(d.daily.sunrise[k]).getTime(), ss = new Date(d.daily.sunset[k]).getTime();
+    const pluieRecente = (d.daily.precipitation_sum||[]).reduce((a,b)=>a+(+b||0), 0) >= 1;
     ctx = {lat, lon, nancy: km({lat,lon}, NANCY) < 10, temp: Math.round(d.current.temperature_2m),
-      cat: weatherCat(d.current.weather_code), vent: d.current.wind_speed_10m >= 30, sr, ss, light: lightPhase(sr, ss)};
+      cat: weatherCat(d.current.weather_code), vent: d.current.wind_speed_10m >= 30, sr, ss, light: lightPhase(sr, ss), humide: pluieRecente};
     ctxStatus = "ok";
   }catch(e){ ctx = null; ctxStatus = "erreur"; }
+  const e = state.encours, fait = current && state.history.some(h=>h.id===current.id && h.date===dayKey());
+  if(ctx && e?.auto && !e.meteo && e.date===dayKey() && !fait){ renderCtx(); pickToday(); return; } // défi du jour tiré sans la météo : on le refait avec
   renderCtx(); render();
 }
 function locate(){
@@ -1030,6 +1049,7 @@ for(let d=0; d<7; d++) state.planning[d] = state.planning[d].filter(x=>x && TYPE
 // Plus une condition est rare, plus un défi qui en profite est favorisé.
 const POIDS = {brouillard:10, neige:10, pluie:6, vent:6, doree:6, bleue:8, nuit:4, clair:2, nuageux:2, jour:1};
 function ctxTags(){ if(!ctx) return []; const t=[ctx.cat, ctx.light]; if(ctx.vent) t.push("vent");
+  if(ctx.humide || ctx.cat==="pluie") t.push("humide"); // pluie maintenant ou dans les dernières 24-48 h
   if(ctx.cat==="clair" && (ctx.light==="jour" || ctx.light==="doree")) t.push("soleil"); // soleil visible
   return t; }
 function score(c, avecRythme=true){
@@ -1069,10 +1089,39 @@ function reasons(c){
 function pool(){
   return D.filter(c => inSeason(c) && state.themes.includes(c.t) && state.levels.includes(String(c.n)));
 }
+/* ---------- Défis à variantes (« Couleurs & objets ») : couleur, objet, forme, lettre tirés à chaque fois ---------- */
+const COULEURS = [["rouge","au rouge","le rouge"],["jaune","au jaune","le jaune"],["bleu","au bleu","le bleu"],["vert","au vert","le vert"],["orange","à l’orange","l’orange"],
+  ["violet","au violet","le violet"],["rose","au rose","le rose"],["blanc","au blanc","le blanc"],["noir","au noir","le noir"],["doré","au doré","le doré"]];
+const OBJETS = [["chaise","chaises","f"],["porte","portes","f"],["vélo","vélos","m"],["escalier","escaliers","m"],["fenêtre","fenêtres","f"],["clé","clés","f"],["tasse","tasses","f"],
+  ["chaussure","chaussures","f"],["horloge","horloges","f"],["boîte aux lettres","boîtes aux lettres","f"],["banc","bancs","m"],["lampe","lampes","f"],["arbre","arbres","m"],["poignée","poignées","f"],["voiture","voitures","f"]];
+const FORMES = [["cercle","cercles"],["triangle","triangles"],["carré","carrés"],["diagonale","diagonales"],["spirale","spirales"],["courbe","courbes"]];
+const LETTRES = ["A","H","L","O","T","V","X","Y","Z","E","K","M"];
+const PAIRES = ["le bleu et l’orange","le rouge et le vert","le jaune et le violet"];
+const voyelle = m => /^[aeiouyhéèêâîô]/i.test(m);
+// Tire les variantes d'un modèle (rnd : fonction 0–1, au hasard ou selon la date pour le défi du jour)
+function tirerVariantes(c, rnd){
+  const v = {}, pick = a => a[Math.floor(rnd()*a.length) % a.length];
+  for(const k of c.vars||[]) v[k] = k==="couleur" ? pick(COULEURS.map((_,i)=>i)) : k==="objet" ? pick(OBJETS.map((_,i)=>i)) : k==="forme" ? pick(FORMES.map((_,i)=>i)) : k==="lettre" ? pick(LETTRES) : pick(PAIRES.map((_,i)=>i));
+  return v;
+}
+function instancier(c, v){
+  if(!c.tpl) return c;
+  const m = {};
+  const co = COULEURS[v.couleur] || COULEURS[0], ob = OBJETS[v.objet] || OBJETS[0], fo = FORMES[v.forme] || FORMES[0];
+  Object.assign(m, {couleur:co[0], au_couleur:co[1], le_couleur:co[2]});
+  const f = ob[2]==="f", le = voyelle(ob[0]) ? "l’"+ob[0] : (f ? "la " : "le ")+ob[0];
+  Object.assign(m, {objet:ob[0], objets:ob[1], un_objet:(f?"une ":"un ")+ob[0], le_objet:le, Le_objet:le[0].toUpperCase()+le.slice(1), d_objet:(f?"d’une ":"d’un ")+ob[0],
+    differents: f ? "différentes" : "différents", es: f ? "es" : "s"});
+  Object.assign(m, {formes:fo[1], les_formes:"les "+fo[1], lettre:LETTRES.includes(v.lettre) ? v.lettre : "A", paire:PAIRES[v.paire] || PAIRES[0]});
+  const fill = t => String(t).replace(/\{(\w+)\}/g, (_, k)=>m[k] ?? "");
+  return {...c, titre:fill(c.titre), brief:fill(c.brief), astuce:fill(c.astuce), var:v};
+}
+
 /* ---------- Défi en cours : conservé jusqu'à ce qu'il soit réalisé ou changé ---------- */
-function poser(c, bonus){
+function poser(c, bonus, opts={}){
+  if(c && c.tpl && !c.var) c = instancier(c, tirerVariantes(c, opts.rnd || Math.random));
   current = c; currentBonus = bonus;
-  state.encours = c ? {date:dayKey(), bonus, ...(c.ia ? {ia:c} : {id:c.id})} : null;
+  state.encours = c ? {date:dayKey(), bonus, ...(c.ia ? {ia:c} : {id:c.id}), ...(c.var ? {var:c.var} : {}), ...(opts.auto ? {auto:true, meteo:!!ctx} : {})} : null;
   save(); render();
 }
 // Défis écartés (« Changer de défi ») : matériel = jusqu'à un changement de matériel ; lieu, météo = aujourd'hui ; autres = 7 jours
@@ -1080,10 +1129,14 @@ const exclu = c => { const e = state.exclus?.[c.id]; return !!e && (e.raison==="
 function pickToday(){
   // Défi du jour : faisable à un moment de la journée (créneaux du jour + temps perso)
   const auj = new Date(), jour = new Set(["perso", ...slotsDu(auj).map(x=>typeEffectif(x, auj))]);
-  let p = D.filter(c => inSeason(c) && !c.req && faisable(c, jour) && !(PHONE[c.id]==="non" && estPhone(curCam())));
+  const meteoOk = c => !c.req || (ctx && c.req.every(r=>ctxTags().includes(r)));
+  const base = pool().filter(c => !exclu(c) && !(PHONE[c.id]==="non" && estPhone(curCam())));
+  let p = base.filter(c => meteoOk(c) && faisable(c, jour));
+  if(!p.length) p = base.filter(meteoOk);
   if(!p.length) p = D.filter(c => inSeason(c) && !c.req);
-  const h = hash(dayKey());
-  poser(p[h % p.length], BONUS[h % BONUS.length]);
+  const h = hash(dayKey() + (ctx ? ctx.cat : ""));
+  let graine = h; const rnd = () => (graine = hash(String(graine)), graine / 4294967296);
+  poser(p[h % p.length], BONUS[h % BONUS.length], {auto:true, rnd});
 }
 function pickRandom(opts={}){
   let p = pool().filter(c=>!exclu(c));
@@ -1839,7 +1892,7 @@ renderChips(); renderMeta(); renderTodayPlan();
   const e = state.encours, txt = v => String(v ?? "");
   const c = e && e.date===dayKey() ? (e.ia && typeof e.ia==="object"
     ? {...e.ia, ia:true, t: THEMES[e.ia.t] ? e.ia.t : "technique", n: Math.min(3, Math.max(1, parseInt(e.ia.n)||2)), titre:txt(e.ia.titre), brief:txt(e.ia.brief), astuce:txt(e.ia.astuce), pourquoi:txt(e.ia.pourquoi), reg: Array.isArray(e.ia.reg) ? e.ia.reg.map(txt) : []}
-    : D.find(x=>x.id===e.id)) : null;
+    : (()=>{ const d = D.find(x=>x.id===e.id); return d && d.tpl ? instancier(d, e.var || {}) : d; })()) : null;
   if(c && c.titre){ current = c; currentBonus = e.bonus || BONUS[0]; render(); } else pickToday();
 }
 if(state.geo==="oui") locate(); else { ctxSource = state.geo==="non" ? "refus" : "defaut"; loadContext(NANCY); }
